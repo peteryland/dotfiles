@@ -1,0 +1,86 @@
+:unset +s +t
+:set +m -v0 -package directory -package pretty-show -package hscolour -package goa
+:seti -w -XOverloadedStrings
+
+:set editor vim
+
+-- brew install pcre # Mac
+-- sudo apt install libpcre3-dev # Debian
+-- haskell deps: pretty-show hscolour hlint hoogle lambdabot goa
+
+-- Set a nice prompt
+import System.Environment(getEnv)
+import System.Directory(getCurrentDirectory)
+:{
+dotGHCI_myPrompt promptString ms _ = do
+  pwd <- getpwd
+  let main_module = head' [ m' | (m:m') <- ms, m == '*' ]
+-- http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#256-colors
+  return $ concat [ "\STX\ESC[33m", pwd, main_module, "\ESC[37m", promptString, " \ESC[0m\STX" ]
+  where
+    head' (x:_) = " \ESC[38;5;227m" ++ x
+    head' _     = ""
+    getpwd = getpwd' <$> (getEnv "HOME") <*> getCurrentDirectory
+    getpwd' home pwd = if zipWith const pwd home == home
+                         then '~':drop (length home) pwd
+                         else pwd
+:}
+:m -System.Environment
+:m -System.Directory
+:set prompt-function dotGHCI_myPrompt "\ESC[38;5;129m\xe61f"
+:set prompt-cont-function dotGHCI_myPrompt "∷"
+
+-- Colourise ghci output (use :nopretty to disable)
+import qualified Language.Haskell.HsColour as HSC
+import qualified Language.Haskell.HsColour.Colourise as HSC
+:{
+dotGHCI_myPrint :: (Show a) => a -> IO ()
+dotGHCI_myPrint a = putStrLn $ HSC.hscolour HSC.TTY myColourPrefs False False "" False $ Text.Show.Pretty.ppShow a
+  where
+    myColourPrefs = HSC.defaultColourPrefs -- { HSC.conop    = [HSC.Foreground HSC.Yellow]
+                                           -- , HSC.conid    = [HSC.Foreground HSC.Yellow, HSC.Bold]
+                                           -- , HSC.string   = [HSC.Foreground $ HSC.Rgb 29 193 57]
+                                           -- , HSC.char     = [HSC.Foreground HSC.Cyan]
+                                           -- , HSC.number   = [HSC.Foreground $ HSC.Rgb 202 170 236]
+                                           -- , HSC.keyglyph = [HSC.Foreground HSC.Yellow]
+                                           -- }
+:}
+:seti -interactive-print dotGHCI_myPrint
+:def! pretty \_ -> return ":set -interactive-print dotGHCI_myPrint"
+:def! nopretty \_ -> return ":set -interactive-print System.IO.print"
+:m -Language.Haskell.HsColour
+:m -Language.Haskell.HsColour.Colourise
+
+-- :hoogle, :ls and :hlint commands
+:def! hoogle \s -> return $ ":!hoogle --count=25 \"" ++ s ++ "\""
+:def! ls \s -> return $ ":!ls " ++ s
+:def! hlint \s -> return $ ":!hlint " ++ if null s then "." else s
+
+-- Add lots more useful functions from lambdabot/GOA
+import GOA
+import System.Environment
+dotGHCI_envhome <- getEnv "HOME"
+setLambdabotHome $ dotGHCI_envhome ++ "/.cabal/bin"
+:def! bs        lambdabot "botsnack"
+:def! pl        lambdabot "pl"
+:def! unpl      lambdabot "unpl"
+:def! redo      lambdabot "redo"
+:def! undo      lambdabot "undo"
+:def! index     lambdabot "index"
+:def! docs      lambdabot "docs"
+:def! instances lambdabot "instances"
+:def! hoogle    lambdabot "hoogle"
+:def! source    lambdabot "fptools"
+:def! where     lambdabot "where"
+:def! version   lambdabot "version"
+:def! src       lambdabot "src"
+:m -GOA
+:m -System.Environment
+
+-- Add show instance for functions, set +t will then show the signature if possible
+instance Show (a -> b) where show _ = ""
+
+-- Source this file again
+:def! rr \_ -> return ":nopretty\n:script ~/.ghci"
+
+:set +t

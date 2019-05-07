@@ -1,0 +1,13 @@
+templates:
+  params:
+    author-name: Pete Ryland
+    author-email: pdr@pdr.cx
+    category: Tools
+    copyright: (c) 2019 Pete Ryland
+    github-username: peteryland
+ghc-options:
+  $locals: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
+  $targets: -Werror
+  $everything: -O2
+build:
+  interleaved-output: false

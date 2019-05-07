@@ -1,0 +1,18 @@
+#!/bin/sh
+
+case "$1" in
+  *.csv)
+    csv "$1"
+    ;;
+  *.hs)
+    HsColour "$1"
+    ;;
+  *.json)
+    jq -C . "$1"
+    ;;
+  *)
+    /usr/local/bin/lesspipe.sh "$1"
+    exit $?
+esac
+
+exit 0

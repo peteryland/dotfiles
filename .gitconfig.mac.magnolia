@@ -1,0 +1,4 @@
+[include]
+  path = .gitconfig.common.inc
+  path = .gitconfig.magnolia.inc
+  path = .gitconfig.mac.inc

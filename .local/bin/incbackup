@@ -1,0 +1,42 @@
+#!/bin/bash
+
+function backup() {
+  source="$(readlink -m "$1")"
+
+  if [ -d "$source" -a -w "$source" ]; then
+    timestamp=$(date +%Y%m%d-%H%M)
+    target="$source/.incbackup/$timestamp"
+    current="$source"/.incbackup/current
+
+    mkdir -p -- "$source"/.incbackup
+
+    if [ -d "$target" ]; then
+      echo "$0: $(date +%F\ %T) INFO target '$target' already exists, returning" >&2
+      return 0
+    fi
+
+    if [ -L "$current" ]; then
+      linkdest="--link-dest=$current"
+    else
+      # no-op
+      linkdest=-q
+    fi
+
+    rsync -aqzP --delete --delete-excluded --exclude=.incbackup \
+      "$linkdest" --chmod=a-w -- "$source"/ "$target".partial && \
+    if ! ([ -L "$current" ] && diff -rx .fcpcache -- "$current"/ "$target".partial > /dev/null); then
+      mv -- "$target".partial "$target" && \
+      ln -nfs -- "$timestamp" "$current"
+    else
+      rm -rf "$target".partial
+    fi
+  fi
+}
+
+if [ "$1" ]; then
+  for dir in "$@"; do
+    backup "$dir"
+  done
+else
+  backup .
+fi

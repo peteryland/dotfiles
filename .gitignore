@@ -1,0 +1,17 @@
+.*.swp
+[a-zA-Z0-9]*
+.*history
+.*hst
+.CFUserTextEncoding
+.DS_Store
+.Trash
+.Xauthority
+.bash_sessions
+.cache
+.rnd
+.serverauth.*
+.nix*
+.viminfo
+.vim
+.bashrc_local*
+.gitconfig

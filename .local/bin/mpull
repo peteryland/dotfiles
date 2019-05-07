@@ -1,0 +1,26 @@
+#!/bin/bash
+
+ref=master
+
+user="${1:-root}"
+if [ "$USER" != "$user" ]; then
+  exec sudo -u "$user" "$0" "$@"
+fi
+
+if [[ $0 == */ipull ]]; then
+  interactive=1
+fi
+
+shift; dir="${1:-.}"
+while [ "$dir" -a -d "$dir" -a -d "$dir"/.git ]; do
+  oldrev="$(/usr/bin/git --work-tree="$dir" --git-dir="$dir"/.git rev-parse HEAD)"
+  [[ $interactive ]] && echo "Updating '$dir'"
+  /usr/bin/git --work-tree="$dir" --git-dir="$dir"/.git fetch -q
+  /usr/bin/git --work-tree="$dir" --git-dir="$dir"/.git reset --hard -q origin/"$ref"
+  [[ $interactive ]] && /usr/bin/git --work-tree="$dir" --git-dir="$dir"/.git diff "$oldrev"
+
+  [ -r "$dir"/.Makefile ] && make -f "$dir"/.Makefile -s -C "$dir"
+  [ -r "$dir"/Makefile ] && make -s -C "$dir"
+
+  shift; dir="$1"
+done
