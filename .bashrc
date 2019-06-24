@@ -151,7 +151,7 @@ alias np='netstat -plant'
 alias ng='np | grep'
 alias ll='ls -al'
 alias lt='ls -altr'
-alias ghci='ghci -v0'
+alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
 
 bashrc_path_add() {
   local dir
@@ -195,6 +195,7 @@ if ! shopt -oq posix; then
 fi
 
 [[ -r "$HOME/.nix-profile/etc/profile.d/nix.sh" ]] && . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+[[ -r "$HOME/.mylocale" ]] && . "$HOME/.mylocale"
 
 # The following is for Go development
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!

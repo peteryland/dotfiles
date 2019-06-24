@@ -1,0 +1,4 @@
+editMode: Vi
+maxHistorySize: Nothing
+historyDuplicates: IgnoreConsecutive
+completionPromptLimit: Just 250

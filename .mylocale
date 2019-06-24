@@ -1,0 +1,23 @@
+mylocale_lang=en_AU.UTF-8
+mylocale_place=de_CH.UTF-8
+
+ensure_locale_exists() {
+  if ! locale -a | grep -q "^$1 "; then
+    [[ -r /etc/locale.gen ]] && echo "$1 UTF-8" | sudo tee -a /etc/locale.gen > /dev/null && sudo locale-gen
+  fi
+}
+
+export LANG="$mylocale_lang"
+export LANGUAGE="$mylocale_lang"
+export LC_CTYPE="$mylocale_lang"
+export LC_NUMERIC="$mylocale_lang"
+export LC_TIME="$mylocale_lang"
+export LC_COLLATE="$mylocale_lang"
+export LC_MONETARY="$mylocale_place"
+export LC_MESSAGES="$mylocale_lang"
+export LC_PAPER="$mylocale_place"
+export LC_NAME="$mylocale_lang"
+export LC_ADDRESS="$mylocale_place"
+export LC_TELEPHONE="$mylocale_place"
+export LC_MEASUREMENT="$mylocale_place"
+export LC_IDENTIFICATION="$mylocale_lang"

@@ -1,0 +1,91 @@
+:unset +s +t
+:set +m -v0 -package directory -package pretty-show -package hscolour -package ghc-paths
+:seti -w -XOverloadedStrings
+:set editor vim
+
+-- # Debian
+-- sudo apt install hoogle hlint lambdabot happy
+-- cabal install pretty-show hscolour ghc-paths
+-- # Other
+-- cabal install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths
+
+-- Set a nice prompt
+:{
+dotGHCI_myPrompt promptString ms _ = do
+  pwd <- getpwd
+  let main_module = head' [ m' | (m:m') <- ms, m == '*' ]
+-- http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#256-colors
+  return $ concat [ "\STX\ESC[33m", pwd, main_module, "\ESC[37m", promptString, " \ESC[0m\STX" ]
+  where
+    head' (x:_) = " \ESC[38;5;227m" ++ x
+    head' _     = ""
+    getpwd = getpwd' <$> System.Environment.getEnv "HOME" <*> System.Directory.getCurrentDirectory
+    getpwd' home pwd = if zipWith const pwd home == home
+                         then '~':drop (length home) pwd
+                         else pwd
+:}
+:set prompt-function dotGHCI_myPrompt "\ESC[38;5;129m\xe61f"
+:set prompt-cont-function dotGHCI_myPrompt "∷"
+
+-- Colourise ghci output (use :nopretty to disable)
+import qualified Language.Haskell.HsColour as HSC
+import qualified Language.Haskell.HsColour.Colourise as HSC
+:{
+dotGHCI_myPrint :: (Show a) => a -> IO ()
+dotGHCI_myPrint a = putStrLn $ HSC.hscolour HSC.TTY myColourPrefs False False "" False $ Text.Show.Pretty.ppShow a
+  where
+    myColourPrefs = HSC.defaultColourPrefs -- { HSC.conop    = [HSC.Foreground HSC.Yellow]
+                                           -- , HSC.conid    = [HSC.Foreground HSC.Yellow, HSC.Bold]
+                                           -- , HSC.string   = [HSC.Foreground $ HSC.Rgb 29 193 57]
+                                           -- , HSC.char     = [HSC.Foreground HSC.Cyan]
+                                           -- , HSC.number   = [HSC.Foreground $ HSC.Rgb 202 170 236]
+                                           -- , HSC.keyglyph = [HSC.Foreground HSC.Yellow]
+                                           -- }
+:}
+:seti -interactive-print dotGHCI_myPrint
+:def! pretty \_ -> return ":set -interactive-print dotGHCI_myPrint"
+:def! nopretty \_ -> return ":set -interactive-print System.IO.print"
+:m -Language.Haskell.HsColour
+:m -Language.Haskell.HsColour.Colourise
+
+-- :hoogle, :ls and :hlint commands
+:def! ls \s -> return $ ":!ls " ++ s
+dotGHCI_escapeShellArg arg = "'" ++ concatMap (\c -> if c == '\'' then "'\\''" else [c]) arg ++ "'"
+:def! hoogle return . (":!hoogle -q --count=15 --color " ++) . dotGHCI_escapeShellArg
+:def! search return . (":!hoogle -q --count=3 --color " ++) . dotGHCI_escapeShellArg
+:def! doc return . (":!hoogle -q --color --info " ++) . dotGHCI_escapeShellArg
+:def! hlint \s -> return $ ":!hlint " ++ if null s then "." else s
+
+-- Add lots more useful functions from lambdabot
+lb s1 s2 = return $ ":!lambdabot -n -e " ++ dotGHCI_escapeShellArg s1 ++ "\\ " ++ dotGHCI_escapeShellArg s2
+:def! lb lb ""
+:def! pl lb "pl"
+:def! unpl lb "unpl"
+:def! do lb "do"
+:def! undo lb "undo"
+:def! index lb "index"
+:def! instances lb "instances"
+:def! src lb "src"
+:def! oeis lb "oeis"
+
+import GHC.Paths
+:{
+dotGHCI_escapeShellHTMLArg arg = "'" ++ concatMap (\c -> case c of
+                                                         '\'' -> "'\\''"
+                                                         '>' -> "&gt;"
+                                                         '<' -> "&lt;"
+                                                         '&' -> "&amp;"
+                                                         _    -> [c]) arg ++ "'"
+:}
+:def! ghc_pkg (\s -> return $ ":!" ++ GHC.Paths.ghc_pkg ++ " " ++ s)
+docs s = return $ ":!echo file://" ++ GHC.Paths.docdir ++ "/../$(tr \\< \\\\n < " ++ GHC.Paths.docdir ++ "/../doc-index-All.html | grep -A100 -F \\>" ++ dotGHCI_escapeShellHTMLArg s ++ " | grep href | head -1 | cut -d\\\" -f2)"
+:def! docs docs
+:m -GHC.Paths
+
+-- Add show instance for functions, set +t will then show the signature if possible
+instance Show (a -> b) where show _ = ""
+
+-- Source this file again
+:def! rr \_ -> return ":nopretty\n:script ~/.ghci"
+
+:set +t

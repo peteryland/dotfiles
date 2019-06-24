@@ -4,6 +4,9 @@ set encoding=utf8
 " Source the vimrc file after saving it
 autocmd! bufwritepost ~/.vimrc source $MYVIMRC
 
+" .ghci* are haskell syntax files
+au BufReadPost .ghci* set syntax=haskell
+
 " turn on syntax highlighting, with slate colorscheme
 syntax enable
 colorscheme slate
@@ -28,10 +31,14 @@ set ruler
 set showmode
 set tw=80
 set lazyredraw
+
+" Turn on folding
 set foldmethod=syntax
 set foldlevelstart=1
+
 " Don't wrap lines when editing
 set formatoptions-=t
+
 if v:version > 703
   " remove comment leader when joining comment lines
   set formatoptions+=j
@@ -90,6 +97,11 @@ nnoremap Q <nop>
 nnoremap <Space> :w<CR>
 " return to run q macro
 nnoremap <CR> @q
+" open, up, down, next file in quickfix
+map <C-h> :cw<CR>
+map <C-j> :cn<CR>
+map <C-k> :cp<CR>
+map <C-l> :cnf<CR>
 
 " number of lines to keep below cursor when scolling
 set so=15
@@ -100,21 +112,23 @@ if &listchars ==# 'eol:$'
   set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
 endif
 
-" add/remove a comment in various file formats
+" add/remove a line comment in various file formats
 au BufNewFile,BufRead,BufEnter .vimrc map <silent> - @='I" <C-V><Esc>0j'<CR>
 au BufNewFile,BufRead,BufEnter .vimrc map <silent> _ :s/^\( *\)" \?/\1/e<Enter>:noh<Enter>0j
 au BufNewFile,BufRead,BufEnter *.js map <silent> - @='I// <C-V><Esc>0j'<CR>
 au BufNewFile,BufRead,BufEnter *.js map <silent> _ :s/^\( *\)\/\/ \?/\1/e<Enter>:noh<Enter>0j
 au BufNewFile,BufRead,BufEnter *.py map <silent> - @='I# <C-V><Esc>0j'<CR>
 au BufNewFile,BufRead,BufEnter *.py map <silent> _ :s/^\( *\)# \?/\1/e<Enter>:noh<Enter>0j
-au BufNewFile,BufRead,BufEnter *.hs map <silent> - @='I-- <C-V><Esc>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.hs map <silent> _ :s/^\( *\)-- \?/\1/e<Enter>:noh<Enter>0j
+au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> - @='I-- <C-V><Esc>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> _ :s/^\( *\)-- \?/\1/e<Enter>:noh<Enter>0j
 au BufNewFile,BufRead,BufEnter *.html map <silent> - @='I<!-- <C-V><Esc>A --><C-V><Esc>0j'<CR>
 au BufNewFile,BufRead,BufEnter *.html map <silent> _ /--><CR>?<!--<CR>:s/^\( *\)\%(\(<\)!-- \?\(\/\?[^<]\+>\)\\|<!-- \?\)/\1\2\3/e<CR>/--><CR>:s/\(<\/\?[a-zA-Z]\+\) \?--\(>\)\\| \?-->/\1\2/e<CR>:noh<CR>0j
 au BufNewFile,BufRead,BufEnter *.html vmap <buffer> - <C-C>`>a --<C-V>><Esc>`<i<!-- <Esc>
 
-" formatting for haskell
-au BufNewFile,BufRead,BufEnter *.hs setlocal formatprg=hindent
+" haskell
+au BufNewFile,BufRead,BufEnter *.hs,.ghci setlocal formatprg=hindent
+au BufNewFile,BufRead,BufEnter *.hs,.ghci setlocal makeprg=stack
+au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> gl :cex system('hlint .')<CR>
 
 " https://github.com/mpickering/hlint-refactor-vim
 function! ApplyOneSuggestion()
@@ -135,5 +149,5 @@ function! ApplyAllSuggestions()
   call cursor(l, c)
 endfunction
 
-au BufNewFile,BufRead,BufEnter *.hs map <silent> to :call ApplyOneSuggestion()<CR>
-au BufNewFile,BufRead,BufEnter *.hs map <silent> ta :call ApplyAllSuggestions()<CR>
+au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> to :call ApplyOneSuggestion()<CR>
+au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> ta :call ApplyAllSuggestions()<CR>

@@ -1,26 +1,38 @@
 ## Mac specific:
+if [ "$OSTYPE" = darwin18 ]; then
+  # install iTerm2 https://www.iterm2.com/downloads.html
+  # install brew https://brew.sh/
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  read -p "Press Enter to continue"
+  # install xcode
+  xcode-select --install
+  read -p "Press Enter to continue"
+  # install haskell for mac
+  open 'https://geo.itunes.apple.com/us/app/haskell/id841285201?mt=12'
+  read -p "Press Enter to continue"
+  # install nerd fonts https://github.com/ryanoasis/nerd-fonts
+  brew tap caskroom/fonts
+  brew cask install font-hack-nerd-font
+  # install other useful things from brew
+  brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python
+  # ghci setup
+  cabal update
+  cabal install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
+  # stack update
+  # stack install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
+  ln -s .gitconfig.mac.pdr .gitconfig
+fi
 
-# install iTerm2
+## Debian
+if [ "$OSTYPE" = linux-gnu ]; then
+  sudo apt install haskell-stack hoogle hlint lambdabot happy hindent bc
+  cabal install pretty-show hscolour ghc-paths
+  ln -s .gitconfig.linux.pdr .gitconfig
+fi
 
-# install brew?
-
-# install xcode
-
-# install haskell for mac
-
-# install nerd fonts (Mac) https://github.com/ryanoasis/nerd-fonts
-brew tap caskroom/fonts
-brew cask install font-hack-nerd-font
-
-# for ghci setup
-brew install pcre # Mac
-sudo apt install libpcre3-dev # Debian
-cabal update
-cabal install pretty-show hscolour hlint hoogle hindent lambdabot goa
-stack update
-stack install pretty-show hscolour hlint hoogle hindent lambdabot goa
+## Common
 # install nix
-curl https://nixos.org/nix/install | sh
+#curl https://nixos.org/nix/install | sh
 #?? nix-env -i cabal-install hlint goa lambdabot
 #?? ~/.nix-profile/bin/cabal new-update
 #?? ~/.nix-profile/bin/cabal new-install pretty-show hscolour hoogle hindent
