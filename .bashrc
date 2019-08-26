@@ -63,24 +63,12 @@ blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5-6 <<< "$rgb") / 4"))
 rgb="$red$green$blue"
 unset red green blue
 
-bashrc_git_status() {
-  local git_branch=
-  local git_status
-  if [[ "$bashrc_git_branch" ]]; then
-    if [[ $bashrc_git_branch != master ]]; then
-      git_branch="$bashrc_git_branch"
-    fi
-    git_status="${git_branch:+\e[34m${git_branch}}${bashrc_git_ahead:+\e[32m↑${bashrc_git_ahead}}${bashrc_git_behind:+\e[31m↓${bashrc_git_behind}}${bashrc_git_extrastatus:+\e[33m${bashrc_git_extrastatus}}"
-    printf "${git_status:+[$git_status\e[m]}"
-  fi
-}
-
 if [ "$UID" -eq 0 ]; then
   usercol=1
 else
   usercol=6
 fi
-export PS1='${debian_chroot:+(\[\e[31m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]$(bashrc_git_status)\$ '
+export PS1='${debian_chroot:+(\[\e[31m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
 
 bashrc_term_title() {
@@ -131,10 +119,14 @@ bashrc_check_repo() {
     status="$(git status --porcelain=1 -b)"
     status1="$(head -1 <<< "$status")"
     bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
+    if [[ $bashrc_git_branch == master ]]; then
+      bashrc_git_branch=
+    fi
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
     bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
     bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && echo -n S; grep -q ^.M <<< "$status" && echo -n M) #; grep -q ^\?\? <<< "$status" && echo -n U)
   fi
+  bashrc_git_status="$git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
 }
 
 bashrc_prompt() {
