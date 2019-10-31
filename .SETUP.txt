@@ -25,10 +25,15 @@ fi
 
 ## Debian
 if [ "$OSTYPE" = linux-gnu ]; then
-  sudo apt install haskell-stack hoogle hlint lambdabot happy hindent bc
-  cabal install pretty-show hscolour ghc-paths
+  sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install
+  cabal update
+  cabal install pretty-show hscolour ghc-paths hindent
   ln -s .gitconfig.linux.pdr .gitconfig
 fi
+
+## Raspberry Pi (Raspbian)
+# Add "xserver-command=X -s 0 dpms" into /etc/lightdm/lightdm.conf to disable screen sleeping
+sudo apt install kodi
 
 ## Common
 # install nix

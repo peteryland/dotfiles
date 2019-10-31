@@ -78,7 +78,13 @@ bashrc_term_title() {
   printf "\e]2;$(id -un)@$(hostname -s):${PWD/$HOME/~}\a"
 }
 
-case "$TERM_PROGRAM" in
+if [ "$TERM_PROGRAM" ]; then
+  termprog="$TERM_PROGRAM"
+else
+  termprog="$TERM"
+fi
+
+case "$termprog" in
   xterm-color|*-256color|iTerm*)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
@@ -93,10 +99,10 @@ case "$TERM_PROGRAM" in
     unset rgb
     ;;
   *)
-    export PS1="${debian_chroot:+($debian_chroot) }\u@\h:\w$(bashrc_git_status)\$ "
     bashrc_term_title_and_colours() { return 0; }
     ;;
 esac
+unset termprog
 
 bashrc_check_repo() {
   local repo status status1
