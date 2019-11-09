@@ -4,7 +4,9 @@ case $- in
   *) return;;
 esac
 
-# don't put duplicate lines or lines starting with space in the history.
+# Hide recommendation to switch to zsh in MacOS Catalina.
+export BASH_SILENCE_DEPRECATION_WARNING=1
+# Don't put duplicate lines or lines starting with space in the history.
 HISTCONTROL=ignoreboth
 shopt -s histappend
 HISTSIZE=10000
