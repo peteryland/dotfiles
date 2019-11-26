@@ -7,7 +7,7 @@ templates:
     github-username: peteryland
 ghc-options:
   $locals: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
-  $targets: -Werror
+#   $targets: -Werror
   $everything: -O2
 build:
   interleaved-output: false
