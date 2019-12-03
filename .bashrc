@@ -39,6 +39,7 @@ case "$OSTYPE" in
     alias ls='ls -Gh'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
+    stty discard undef # Give me my ctrl-o back!
     ;;
   linux*)
     if [ -x /usr/bin/dircolors ]; then
