@@ -34,7 +34,7 @@ set lazyredraw
 
 " Turn on folding
 set foldmethod=syntax
-set foldlevelstart=1
+set foldlevelstart=4
 
 " Don't wrap lines when editing
 set formatoptions-=t

@@ -25,11 +25,11 @@ if [[ -x /usr/local/bin/lesspipe.sh ]]; then
   export LESSQUIET=1
 fi
 
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+if [ -z "${debian_chroot:-}" ] && [[ -r /etc/debian_chroot ]]; then
   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-if [ -r "$HOME/.bash_aliases" ]; then
+if [[ -r "$HOME/.bash_aliases" ]]; then
   . "$HOME/.bash_aliases"
 fi
 
@@ -37,12 +37,13 @@ case "$OSTYPE" in
   darwin*)
     export LSCOLORS=ExFxBxDxCxegedabagacad
     alias ls='ls -Gh'
+    alias dfh='df -h /'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
     stty discard undef # Give me my ctrl-o back!
     ;;
   linux*)
-    if [ -x /usr/bin/dircolors ]; then
+    if [[ -x /usr/bin/dircolors ]]; then
       test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
       alias ls='ls --color=auto'
       alias dir='dir --color=auto'
@@ -52,6 +53,7 @@ case "$OSTYPE" in
       alias fgrep='fgrep --color=auto'
       alias egrep='egrep --color=auto'
     fi
+    alias dfh='df -lh -x tmpfs -x devtmpfs'
     md5s() { md5sum "$@"; }
     statm() { stat --printf %Y "$@"; }
     ;;
@@ -178,23 +180,78 @@ if [[ -r ~/.inputrc ]]; then
   export INPUTRC=~/.inputrc
 fi
 
-. "$HOME"/.local/bin/color-dark
+if [[ -r "$HOME"/.local/bin/color-dark ]]; then
+  . "$HOME"/.local/bin/color-dark
+fi
 
 if [[ -r .bashrc_local ]]; then
   . .bashrc_local
 fi
 
 if ! shopt -oq posix; then
-  if [ -f /etc/bash_completion ]; then
+  if [[ -f /etc/bash_completion ]]; then
     . /etc/bash_completion
-  elif [ -f /usr/share/bash-completion/bash_completion ]; then
+  elif [[ -f /usr/share/bash-completion/bash_completion ]]; then
     . /usr/share/bash-completion/bash_completion
+  else
+    for i in /usr/local/etc/bash_completion.d/*; do
+      if [[ -r "$i" ]]; then
+        . "$i"
+      fi
+    done
+
+    if [[ ! -r /usr/local/etc/bash_completion.d/git-completion.bash && -r /Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash ]]; then
+      . /Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash
+    fi
+
+    if [[ -r ~/.bash_completion ]]; then
+      . ~/.bash_completion
+    fi
   fi
+
   if type -p stack > /dev/null; then
     eval "$(stack --bash-completion-script stack)"
   fi
 fi
 
+spf() {
+  while [ "$1" ]; do
+    host -t TXT "$1" | cut -d\" -f2 | grep '^v=spf'
+    shift
+  done
+}
+
+j() {
+  if [ "$1" = "-v" ]; then
+    verbose=1
+    shift
+  fi
+
+  if [[ ! -x /usr/libexec/java_home ]]; then
+    if [ "$verbose" ]; then
+      echo "No Java installed."
+    fi
+    return
+  fi
+
+  ver="$1"
+  if [ -z "$ver" ]; then
+    echo JAVA_HOME="$JAVA_HOME"
+    /usr/libexec/java_home -V
+  else
+    if [ "$ver" = latest ]; then
+      ver="$(/usr/libexec/java_home -V 2>&1 | grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
+    fi
+    export JAVA_HOME=$(/usr/libexec/java_home -v "$ver")
+    if [ "$verbose" ]; then
+      echo JAVA_HOME="$JAVA_HOME"
+    fi
+  fi
+}
+
+j latest
+
+# The following is for working with NixOS
 [[ -r "$HOME/.nix-profile/etc/profile.d/nix.sh" ]] && . "$HOME/.nix-profile/etc/profile.d/nix.sh"
 [[ -r "$HOME/.mylocale" ]] && . "$HOME/.mylocale"
 
