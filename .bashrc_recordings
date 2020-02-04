@@ -2,6 +2,6 @@ if [ -r "$HOME/.bashrc" ]; then
   . "$HOME/.bashrc"
 fi
 
-export PS1='\[\e[33m\]\w\[\e[m\]$(bashrc_git_status)\$ '
+export PS1='\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 export PROMPT_COMMAND='bashrc_check_repo; printf "\e]0;${PWD/$HOME/~}\a"'
 export RECORDING=true

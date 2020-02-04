@@ -113,6 +113,8 @@ bashrc_check_repo() {
   local repo status status1
   unset bashrc_git_branch bashrc_git_ahead bashrc_git_behind
 
+  bashrc_git_status=
+
   if ! type -p git > /dev/null; then
     return
   fi
