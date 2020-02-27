@@ -38,6 +38,7 @@ case "$OSTYPE" in
     export LSCOLORS=ExFxBxDxCxegedabagacad
     alias ls='ls -Gh'
     alias dfh='df -h /'
+    alias pps='ps -ef'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
     stty discard undef # Give me my ctrl-o back!
@@ -54,6 +55,9 @@ case "$OSTYPE" in
       alias egrep='egrep --color=auto'
     fi
     alias dfh='df -lh -x tmpfs -x devtmpfs'
+    alias st='systemctl status'
+    alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
+    alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
     md5s() { md5sum "$@"; }
     statm() { stat --printf %Y "$@"; }
     ;;
