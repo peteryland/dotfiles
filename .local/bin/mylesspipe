@@ -4,15 +4,24 @@ case "$1" in
   *.csv)
     csv "$1"
     ;;
-  *.hs)
+  *.lhs|*.hs)
     HsColour "$1"
     ;;
   *.json)
     jq -C . "$1"
     ;;
   *)
-    /usr/local/bin/lesspipe.sh "$1"
-    exit $?
+    # We don't handle this format.
+
+    if [ -x /usr/local/bin/lesspipe.sh ]; then
+      # for Mac, chain to /usr/local
+      /usr/local/bin/lesspipe.sh "$1"
+      exit $?
+    else
+      # for Linux, just return 1
+      exit 1
+    fi
 esac
 
+# No further processing by lesspipe necessary
 exit 0

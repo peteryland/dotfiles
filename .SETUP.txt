@@ -17,23 +17,23 @@ if [ "$OSTYPE" = darwin18 ]; then
   brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git
   # ghci setup
   cabal update
-  cabal install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
+  cabal new-install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
   # stack update
   # stack install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
   ln -s .gitconfig.mac.pdr .gitconfig
 fi
 
 ## Debian
-if [ "$OSTYPE" = linux-gnu ]; then
+if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
   cabal update
-  cabal install pretty-show hscolour ghc-paths hindent
+  cabal new-install pretty-show hscolour ghc-paths hindent
   ln -s .gitconfig.linux.pdr .gitconfig
 fi
 
 ## Raspberry Pi (Raspbian)
 # Add "xserver-command=X -s 0 dpms" into /etc/lightdm/lightdm.conf to disable screen sleeping
-sudo apt install kodi
+# sudo apt install kodi
 
 ## Common
 # install nix
