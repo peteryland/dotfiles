@@ -151,3 +151,10 @@ endfunction
 
 au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> to :call ApplyOneSuggestion()<CR>
 au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> ta :call ApplyAllSuggestions()<CR>
+
+" fix yank on Max
+if system('uname -s') == "Darwin\n"
+  set clipboard=unnamed "OSX
+else
+  set clipboard=unnamedplus "Linux
+endif
