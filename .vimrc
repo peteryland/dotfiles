@@ -4,9 +4,6 @@ set fileencoding=utf-8
 " source the vimrc file after saving it
 autocmd! bufwritepost ~/.vimrc source $MYVIMRC
 
-" .ghci* are haskell syntax files
-au BufReadPost .ghci* set syntax=haskell
-
 " turn on syntax highlighting, with slate colorscheme
 syntax enable
 colorscheme slate
@@ -50,6 +47,7 @@ set ruler
 set showmode
 set tw=80
 set lazyredraw
+set notimeout ttimeout timeoutlen=100
 nnoremap j gj
 nnoremap gj j
 nnoremap k gk
@@ -101,6 +99,9 @@ hi Search ctermfg=white ctermbg=173 cterm=none guifg=#ffffff guibg=#e5786d gui=n
 " tab to turn off search highlighting and show status
 nnoremap <Tab> :noh<CR><C-g>
 
+" backspace to quit all, if possible
+nnoremap <silent> <BS> :qa<CR>
+
 set mouse=
 nnoremap <silent> zma :set mouse=a<cr>
 nnoremap <silent> zmo :set mouse=<cr>
@@ -125,8 +126,15 @@ set wildmenu
 " disable ex mode
 nnoremap Q <nop>
 
-" space to save
-nnoremap <Space> :w<CR>
+" space to save, ctrl-space to save and switch to next window
+nnoremap <SPACE> :w<CR>
+nnoremap <C-@> :w<CR><C-w>w
+nnoremap <C-SPACE> :w<CR><C-w>w
+tnoremap <F1> <C-w>N
+tnoremap <C-@> <C-w>w
+tnoremap <C-SPACE> <C-w>w
+tnoremap <C-v> <C-w>""
+
 " return to run q macro
 nnoremap <CR> @q
 
@@ -152,6 +160,10 @@ nnoremap <S-UP> :resize +2<CR>
 nnoremap <S-DOWN> :resize -2<CR>
 nnoremap <S-LEFT> :vertical resize +2<CR>
 nnoremap <S-RIGHT> :vertical resize -2<CR>
+tnoremap <S-UP> <C-w>:resize +2<CR>
+tnoremap <S-DOWN> <C-w>:resize -2<CR>
+tnoremap <S-LEFT> <C-w>:vertical resize +2<CR>
+tnoremap <S-RIGHT> <C-w>:vertical resize -2<CR>
 
 nnoremap zh <C-W>h
 nnoremap zj <C-W>j
@@ -172,17 +184,19 @@ if &listchars ==# 'eol:$'
 endif
 
 " add/remove a line comment in various file formats
-au BufNewFile,BufRead,BufEnter .vimrc map <silent> - @='gI" <C-V><Esc>0j'<CR>
-au BufNewFile,BufRead,BufEnter .vimrc map <silent> _ :s/^\( *\)" \?/\1/e<Enter>:noh<Enter>0j
-au BufNewFile,BufRead,BufEnter *.js map <silent> - @='gI// <C-V><Esc>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.js map <silent> _ :s/^\( *\)\/\/ \?/\1/e<Enter>:noh<Enter>0j
-au BufNewFile,BufRead,BufEnter *.py map <silent> - @='gI# <C-V><Esc>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.py map <silent> _ :s/^\( *\)# \?/\1/e<Enter>:noh<Enter>0j
+map <silent> - @='gI# <C-V><Esc>0j'<CR>
+map <silent> _ :s/^\( *\)# \?/\1/e<Enter>:noh<Enter>0j
+au BufNewFile,BufRead,BufEnter .vimrc,*.vim map <silent> - @='gI" <C-V><Esc>0j'<CR>
+au BufNewFile,BufRead,BufEnter .vimrc,*.vim map <silent> _ :s/^\( *\)" \?/\1/e<Enter>:noh<Enter>0j
+au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> - @='gI// <C-V><Esc>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> _ :s/^\( *\)\/\/ \?/\1/e<Enter>:noh<Enter>0j
 au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> - @='gI-- <C-V><Esc>0j'<CR>
 au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> _ :s/^\( *\)-- \?/\1/e<Enter>:noh<Enter>0j
-au BufNewFile,BufRead,BufEnter *.html map <silent> - @='gI<!-- <C-V><Esc>A --><C-V><Esc>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.html map <silent> _ /--><CR>?<!--<CR>:s/^\( *\)\%(\(<\)!-- \?\(\/\?[^<]\+>\)\\|<!-- \?\)/\1\2\3/e<CR>/--><CR>:s/\(<\/\?[a-zA-Z]\+\) \?--\(>\)\\| \?-->/\1\2/e<CR>:noh<CR>0j
-au BufNewFile,BufRead,BufEnter *.html vmap <buffer> - <C-C>`>a --<C-V>><Esc>`<i<!-- <Esc>
+au BufNewFile,BufRead,BufEnter *.lhs map <silent> - :s/^> /> -- /e<Enter>:noh<Enter>0j
+au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :s/^> -- /> /e<Enter>:noh<Enter>0j
+au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> - @='gI<!-- <C-V><Esc>A --><C-V><Esc>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> _ /--><CR>?<!--<CR>:s/^\( *\)\%(\(<\)!-- \?\(\/\?[^<]\+>\)\\|<!-- \?\)/\1\2\3/e<CR>/--><CR>:s/\(<\/\?[a-zA-Z]\+\) \?--\(>\)\\| \?-->/\1\2/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter *.html,*.st vmap <buffer> - <C-C>`>a --<C-V>><Esc>`<i<!-- <Esc>
 
 runtime ftplugin/man.vim
 set keywordprg=:Man
@@ -194,6 +208,13 @@ au BufNewFile,BufRead,BufEnter *.hs,.ghci setlocal keywordprg=hoogle\ --info
 au BufNewFile,BufRead,BufEnter *.hs,.ghci map <silent> gl :cex system('hlint .')<CR>
 au BufNewFile,BufRead,BufEnter *.hs,.ghci runtime ftplugin/haskell.vim
 au BufNewFile,BufRead,BufEnter *.hs,.ghci runtime ext/haskell.vim
+au BufNewFile,BufRead,BufEnter *.hs,.ghci nnoremap <silent> <F1> :terminal ++close ++rows=10 ghci %<CR>
+au BufReadPost .ghci* set syntax=haskell
+
+" switch directly to ghci terminal or run one if doesn't exist (incomplete)
+" function! FindGHCI()
+"   let terms = filter(range(1, bufnr('$')), 'bufexists(v:val) && getbufvar(v:val, "ghci_term", 0)')
+" endfunction
 
 " https://github.com/mpickering/hlint-refactor-vim
 function! ApplyOneSuggestion()

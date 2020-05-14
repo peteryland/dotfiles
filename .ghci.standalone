@@ -15,16 +15,16 @@ dotGHCI_myPrompt promptString ms _ = do
   pwd <- getpwd
   let main_module = head' [ m' | (m:m') <- ms, m == '*' ]
 -- http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#256-colors
-  return $ concat [ "\STX\ESC[33m", pwd, main_module, "\ESC[37m", promptString, " \ESC[0m\STX" ]
+  return $ concat [ "\ESC[33m\STX", pwd, main_module, "\ESC[37m\STX", promptString, " \ESC[0m\STX" ]
   where
-    head' (x:_) = " \ESC[38;5;227m" ++ x
+    head' (x:_) = " \ESC[38;5;227m\STX" ++ x
     head' _     = ""
     getpwd = getpwd' <$> System.Environment.getEnv "HOME" <*> System.Directory.getCurrentDirectory
     getpwd' home pwd = if zipWith const pwd home == home
                          then '~':drop (length home) pwd
                          else pwd
 :}
-:set prompt-function dotGHCI_myPrompt "\ESC[38;5;129m\xe61f"
+:set prompt-function dotGHCI_myPrompt "\ESC[38;5;129m\STX\xe61f"
 :set prompt-cont-function dotGHCI_myPrompt "∷"
 
 -- Colourise ghci output (use :nopretty to disable)

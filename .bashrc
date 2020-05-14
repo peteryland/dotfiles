@@ -77,7 +77,7 @@ if [ "$UID" -eq 0 ]; then
 else
   usercol=6
 fi
-export PS1='${debian_chroot:+(\[\e[31m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
+export PS1='${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\em\]}\[\e[m\]${debian_chroot:+(\[\e[31m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
 
 bashrc_term_title() {
@@ -97,15 +97,22 @@ case "$termprog" in
   xterm-color|*-256color|iTerm*)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
-      bashrc_term_title
-      # set background colour
-      printf "\e]Ph$rgb\e\\"
+      if [ -z "$VIM_TERMINAL" ]; then
+        bashrc_term_title
+        # set background colour
+        printf "\e]Ph$rgb\e\\"
+      fi
     }
     ;;
   Apple_Terminal)
     export CLICOLOR=1
-    bashrc_term_title_and_colours() { bashrc_term_title; }
-    unset rgb
+    bashrc_term_title_and_colours() {
+      if [ -z "$VIM_TERMINAL" ]; then
+        bashrc_term_title
+        # set background colour
+        printf "\e]11;#$rgb\e\\"
+      fi
+    }
     ;;
   *)
     bashrc_term_title_and_colours() { return 0; }
@@ -147,6 +154,8 @@ bashrc_check_repo() {
 }
 
 bashrc_prompt() {
+  bashrc_exit_status=${?#0}
+  # tput sc; tput home; printf "%*s" $COLUMNS "$(date)"; tput rc
   bashrc_check_repo
   bashrc_term_title_and_colours
 }
