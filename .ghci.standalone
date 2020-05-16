@@ -1,7 +1,16 @@
 :unset +s +t
-:set +m -v0 -package directory -package pretty-show -package hscolour -package ghc-paths
-:seti -w -XOverloadedStrings
+:set +m -v0 -package directory -package pretty-show -package hscolour -package ghc-paths -package unix -package process -package text -package vector -package unordered-containers
+:seti -w -XOverloadedStrings -XNumericUnderscores -XTupleSections -XPartialTypeSignatures -XScopedTypeVariables -XFlexibleContexts -XDataKinds -XTypeApplications
 :set editor vim
+
+import Data.Text (Text)
+import qualified Data.Text   as T
+import Data.Vector (Vector)
+import qualified Data.Vector as V
+import Data.HashSet (HashSet)
+import qualified Data.HashSet as HS
+import Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as HM
 
 -- # Debian
 -- sudo apt install hoogle hlint lambdabot happy
