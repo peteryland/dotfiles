@@ -1,0 +1,10 @@
+#!/bin/bash
+
+hoogle --info "$@"
+src="$(lambdabot -ne "src $@" | grep -v Source\ not\ found)"
+
+if [[ $src ]]; then
+  echo -e "Source:\n$src"
+fi
+
+exit 0

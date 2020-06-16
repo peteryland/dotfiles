@@ -1,6 +1,6 @@
 :unset +s +t
 :set +m -v0 -package directory -package pretty-show -package hscolour -package ghc-paths -package unix -package process -package text -package vector -package unordered-containers
-:seti -w -XOverloadedStrings -XNumericUnderscores -XTupleSections -XPartialTypeSignatures -XScopedTypeVariables -XFlexibleContexts -XDataKinds -XTypeApplications
+:seti -w -XAllowAmbiguousTypes -XConstraintKinds -XDataKinds -XFlexibleContexts -XFlexibleInstances -XGADTs -XInstanceSigs -XMultiParamTypeClasses -XNumericUnderscores -XOverloadedStrings -XPartialTypeSignatures -XPolyKinds -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XUndecidableInstances -XUndecidableSuperClasses
 :set editor vim
 
 import Data.Text (Text)
@@ -11,6 +11,7 @@ import Data.HashSet (HashSet)
 import qualified Data.HashSet as HS
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HM
+import Control.Monad.IO.Class (MonadIO(..))
 
 -- # Debian
 -- sudo apt install hoogle hlint lambdabot happy
@@ -24,7 +25,7 @@ dotGHCI_myPrompt promptString ms _ = do
   pwd <- getpwd
   let main_module = head' [ m' | (m:m') <- ms, m == '*' ]
 -- http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#256-colors
-  return $ concat [ "\ESC[33m\STX", pwd, main_module, "\ESC[37m\STX", promptString, " \ESC[0m\STX" ]
+  return $ concat [ "\ESC[38;5;222m\STX", pwd, main_module, "\ESC[37m\STX", promptString, "\ESC[0m\STX " ]
   where
     head' (x:_) = " \ESC[38;5;227m\STX" ++ x
     head' _     = ""
@@ -34,7 +35,7 @@ dotGHCI_myPrompt promptString ms _ = do
                          else pwd
 :}
 :set prompt-function dotGHCI_myPrompt "\ESC[38;5;129m\STX\xe61f"
-:set prompt-cont-function dotGHCI_myPrompt "∷"
+:set prompt-cont-function dotGHCI_myPrompt "\ESC[38;5;135m\STX∷"
 
 -- Colourise ghci output (use :nopretty to disable)
 import qualified Language.Haskell.HsColour as HSC
@@ -92,7 +93,19 @@ docs s = return $ ":!echo file://" ++ GHC.Paths.docdir ++ "/../$(tr \\< \\\\n < 
 :m -GHC.Paths
 
 -- Add show instance for functions, set +t will then show the signature if possible
-instance Show (a -> b) where show _ = ""
+instance {-# OVERLAPPABLE #-} Show (a -> b) where show _ = ""
+-- Now set up some default types to use for common type classes
+instance {-# INCOHERENT #-} t ~ [] => Foldable t where foldMap = foldMap
+instance {-# INCOHERENT #-} t ~ IO => MonadIO t where liftIO = liftIO
+-- instance {-# INCOHERENT #-} t ~ Int => Num t where (+) = (+); (*) = (*); abs = abs; signum = signum; fromInteger = fromInteger; negate = negate
+-- instance {-# INCOHERENT #-} t ~ Double => Num t where (+) = (+); (*) = (*); abs = abs; signum = signum; fromInteger = fromInteger; negate = negate
+data M x
+instance {-# INCOHERENT #-} t ~ M => Functor t where fmap = undefined
+instance {-# INCOHERENT #-} t ~ M => Applicative t where (<*>) = undefined
+instance {-# INCOHERENT #-} t ~ M => Monad t where return = undefined
+data G
+instance {-# INCOHERENT #-} t ~ G => Semigroup t where (<>) = undefined
+instance {-# INCOHERENT #-} t ~ G => Monoid t where mempty = undefined
 
 -- Source this file again
 :def! rr \_ -> return ":nopretty\n:script ~/.ghci"

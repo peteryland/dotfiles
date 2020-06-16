@@ -182,7 +182,8 @@ bashrc_path_add() {
   done
 }
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-bashrc_path_add "/usr/local/go/bin" "$HOME/Library/Haskell/bin"
+bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
+bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
 bashrc_path_add "$HOME/.cabal/bin" "$HOME/.cabal/sbin"
 bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"
 bashrc_path_add "$HOME/local/bin" "$HOME/local/sbin"
@@ -261,6 +262,36 @@ j() {
     if [ "$verbose" ]; then
       echo JAVA_HOME="$JAVA_HOME"
     fi
+  fi
+}
+
+scr() {
+  mkdir -p ~/src/scratch
+  d="$(mktemp -q -d ~/src/scratch/tmpXXX)"
+  cd "$d"
+  git init
+  if [[ $1 ]]; then
+    if [[ -r ~/.templates/$1 ]]; then
+      cp ~/.templates/"$1" t."$1"
+    else
+      touch t."$1"
+    fi
+    vi +\$ t."$1"
+  fi
+}
+
+l() {
+  local dir="${1#*/}"
+  if [[ $1 ]]; then
+    if [[ -d ~/src/looking/$dir ]]; then
+      cd ~/src/looking/"$dir"
+    else
+      cd ~/src/looking
+      git clone https://github.com/"$1"
+      cd "$dir"
+    fi
+  else
+    cd ~/src/looking
   fi
 }
 

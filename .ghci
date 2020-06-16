@@ -1,6 +1,6 @@
 :unset +s +t
 :set +m -v0 -package unix -package process -package text -package vector -package unordered-containers
-:seti -w -XOverloadedStrings -XNumericUnderscores -XTupleSections -XPartialTypeSignatures -XScopedTypeVariables -XFlexibleContexts -XDataKinds -XTypeApplications
+:seti -w -XAllowAmbiguousTypes -XConstraintKinds -XDataKinds -XFlexibleContexts -XFlexibleInstances -XGADTs -XInstanceSigs -XMultiParamTypeClasses -XNumericUnderscores -XOverloadedStrings -XPartialTypeSignatures -XPolyKinds -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XUndecidableInstances -XUndecidableSuperClasses
 :set editor vim
 
 import Data.Text (Text)
@@ -18,7 +18,7 @@ dotGHCI_myPrompt promptString ms _ = do
   pwd <- getpwd
   let main_module = head' [ m' | (m:m') <- ms, m == '*' ]
 -- http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#256-colors
-  return $ concat [ "\ESC[33m\STX", pwd, main_module, "\ESC[37m\STX", promptString, " \ESC[0m\STX" ]
+  return $ concat [ "\ESC[38;5;222m\STX", pwd, main_module, "\ESC[37m\STX", promptString, "\ESC[0m\STX " ]
   where
     head' (x:_) = " \ESC[38;5;227m\STX" ++ x
     head' _     = ""
@@ -28,7 +28,7 @@ dotGHCI_myPrompt promptString ms _ = do
                          else pwd
 :}
 :set prompt-function dotGHCI_myPrompt "\ESC[38;5;129m\STX\xe61f"
-:set prompt-cont-function dotGHCI_myPrompt "∷"
+:set prompt-cont-function dotGHCI_myPrompt "\ESC[38;5;135m\STX∷"
 
 -- Colourise ghci output (use :nopretty to disable)
 :{
