@@ -15,13 +15,8 @@ HISTFILESIZE=20000
 shopt -s checkwinsize
 
 export LESS=-R
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-if [[ -x /usr/local/bin/lesspipe.sh ]]; then
-  if [[ -x /Users/pdr/.local/bin/mylesspipe ]]; then
-    export LESSOPEN="|mylesspipe %s"
-  else
-    export LESSOPEN="|lesspipe.sh %s"
-  fi
+if [[ -x ~/.lessfilter ]]; then
+  export LESSOPEN="|~/.lessfilter %s"
   export LESSQUIET=1
 fi
 
@@ -37,7 +32,7 @@ case "$OSTYPE" in
   darwin*)
     export LSCOLORS=ExFxBxDxCxegedabagacad
     alias ls='ls -Gh'
-    alias dfh='df -h /'
+    alias dfh='df -h /System/Volumes/Data'
     alias pps='ps -ef'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
