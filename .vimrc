@@ -257,7 +257,10 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F1> :term ++
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs nnoremap <silent> <C-@> :w<CR>:call term_sendkeys('ghci ', ":r\n")<CR><C-w>j
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs nnoremap <silent> <C-SPACE> :w<CR>:call term_sendkeys('ghci ', ":r\n")<CR><C-w>j
 " au BufWritePost *.lhs,*.hs silent call term_sendkeys('ghci ', ":r\n")
+" au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* let ghcidprg = "ghci"
+" au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F2> :vertical :term ++close ++cols=75 ++kill=int ghcid -c <C-R>=ghcidprg<CR> %<CR><C-w>p
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F2> :vertical :term ++close ++cols=75 ++kill=int ghcid %<CR><C-w>p
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F3> :vertical :term ++close ++cols=75 ++kill=int watch make test<CR><C-w>p
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]><C-]> <SPACE>-><SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>[ <SPACE><-<SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>] <SPACE>=><SPACE>
@@ -270,6 +273,11 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab IMI (Int -> Maybe Int)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LI [Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LII [Int -> Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab ILI (Int -> [Int])
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DL import Data.List
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DC import Data.Char
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SE import System.Environment
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SI import System.IO
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab TPP import Text.ParserCombinators.Parsec
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <buffer> <silent> gs 0yiWO<ESC>pA<SPACE>::<SPACE>
 au BufReadPost .ghci* set syntax=haskell
 
