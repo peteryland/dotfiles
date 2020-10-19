@@ -58,10 +58,8 @@ set foldmethod=syntax foldlevelstart=4
 " don't wrap lines when editing
 set formatoptions-=t
 
-if v:version > 703
-  " remove comment leader when joining comment lines
-  set formatoptions+=j
-endif
+" remove comment leader when joining comment lines
+set formatoptions+=j
 
 " turn off bells
 set noerrorbells vb t_vb=
@@ -87,7 +85,10 @@ hi Search ctermfg=white ctermbg=173 cterm=none guifg=#ffffff guibg=#e5786d gui=n
 
 " backspace q to quit, bs bs to quit all, if possible
 nnoremap <silent> <BS><BS> :qa<CR>
+nnoremap <silent> <BS><SPACE> ZZ
 nnoremap <silent> <BS>q :q<CR>
+nnoremap <silent> <BS>Q :q!<CR>
+nnoremap <silent> <BS>! :q!<CR>
 
 set mouse=
 nnoremap <silent> zma :set mouse=a<CR>
