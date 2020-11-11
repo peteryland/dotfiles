@@ -1,8 +1,9 @@
 :unset +s +t
-:set +m -v0 -package directory -package pretty-show -package hscolour -package ghc-paths -package unix -package process -package text -package vector -package unordered-containers
+:set +m -v0 -package directory -package pretty-show -package hscolour -package ghc-paths -package unix -package process -package text -package vector -package unordered-containers -XNoImplicitPrelude
 :seti -w -XAllowAmbiguousTypes -XConstraintKinds -XDataKinds -XFlexibleContexts -XFlexibleInstances -XGADTs -XInstanceSigs -XMultiParamTypeClasses -XNumericUnderscores -XOverloadedStrings -XPartialTypeSignatures -XPolyKinds -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XUndecidableInstances -XUndecidableSuperClasses
 :set editor vim
 
+import Prelude hiding((.))
 import Data.Text (Text)
 import qualified Data.Text   as T
 import Data.Vector (Vector)
@@ -18,6 +19,8 @@ import Control.Monad.IO.Class (MonadIO(..))
 -- cabal install pretty-show hscolour ghc-paths
 -- # Other
 -- cabal install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths
+
+(.) :: Functor f => (a -> b) -> f a -> f b; (.) = fmap; infixr 9 .
 
 -- Set a nice prompt
 :{

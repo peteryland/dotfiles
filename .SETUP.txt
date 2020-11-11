@@ -1,33 +1,46 @@
 ## Mac specific:
 if [ "$OSTYPE" = darwin18 ]; then
+
   # install iTerm2 https://www.iterm2.com/downloads.html
+
   # install brew https://brew.sh/
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   read -p "Press Enter to continue"
+
   # install xcode
   xcode-select --install
   read -p "Press Enter to continue"
+
   # install haskell for mac
   open 'https://geo.itunes.apple.com/us/app/haskell/id841285201?mt=12'
   read -p "Press Enter to continue"
+
   # install nerd fonts https://github.com/ryanoasis/nerd-fonts
   brew tap caskroom/fonts
   brew cask install font-hack-nerd-font
+
   # install other useful things from brew
   brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git
+
   # ghci setup
   cabal update
-  cabal new-install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
+  cabal install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
+
   # stack update
   # stack install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
+
+  # install haskell-language-server https://github.com/haskell/haskell-language-server
+
   ln -s .gitconfig.mac.pdr .gitconfig
 fi
 
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
+  sudo apt install libicu-dev libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
   cabal update
-  cabal new-install pretty-show hscolour ghc-paths hindent
+  cabal install pretty-show hscolour ghc-paths hindent
+
   ln -s .gitconfig.linux.pdr .gitconfig
 fi
 
@@ -36,8 +49,14 @@ fi
 # sudo apt install kodi
 
 ## Common
+
+# install vim-plug (already copied into this repo)
+# curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+# install haskell-language-server https://github.com/haskell/haskell-language-server
+
 # install nix
 #curl https://nixos.org/nix/install | sh
 #?? nix-env -i cabal-install hlint goa lambdabot
-#?? ~/.nix-profile/bin/cabal new-update
-#?? ~/.nix-profile/bin/cabal new-install pretty-show hscolour hoogle hindent
+#?? ~/.nix-profile/bin/cabal update
+#?? ~/.nix-profile/bin/cabal install pretty-show hscolour hoogle hindent

@@ -278,15 +278,44 @@ scr() {
 l() {
   local dir="${1#*/}"
   if [[ $1 ]]; then
-    if [[ -d ~/src/looking/$dir ]]; then
+    if [[ $1 = 's-al' ]]; then
+      shift
+      echo "ls -al $@" >&2
+      ls -al "$@"
+    elif [[ -n $dir && -d ~/src/looking/$dir ]]; then
       cd ~/src/looking/"$dir"
-    else
+    elif [[ $1 == ?*/?* ]]; then
       cd ~/src/looking
       git clone https://github.com/"$1"
       cd "$dir"
+    else
+      echo "l: Error parsing arguments." >&2
+      return 1
     fi
   else
     cd ~/src/looking
+  fi
+}
+
+n() {
+  local f n
+  if [ -x "$HOME"/src/games/coding/adventofcode/get_input ]; then
+    "$HOME"/src/games/coding/adventofcode/get_input
+  fi
+  if [[ $PWD == */adventofcode/* ]]; then
+    for ((n=1; n<=25; n++)); do
+      if [ -r "$n"a.hs -o -r "$n"a.c ]; then
+        if [ -r "$n"b.hs -o -r "$n"b.c ]; then
+          continue
+        else
+          vi +$ "$(mkaoc "$n" b)"
+          return
+        fi
+      else
+        vi +$ "$(mkaoc "$n" a)"
+        return
+      fi
+    done
   fi
 }
 

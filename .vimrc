@@ -97,14 +97,65 @@ nnoremap <silent> zmo :set mouse=<CR>
 set history=1000
 set backspace=indent,eol,start
 set splitbelow splitright
+
+augroup gitstatusline
+  autocmd!
+  autocmd BufEnter,FocusGained,BufWrite,BufWritePost <buffer> let b:git_status=system("git_status " . expand("%:p"))
+augroup end
+
+" status line
 set laststatus=2
+function MyStatusLine()
+  let l:sl="%n "
+  let l:sl.="%<%f"
+  let l:sl.=" %h%m%r"
+  let l:sl.="%=%1.20("
+  let l:sl.=getbufvar(winbufnr(g:statusline_winid), "git_status")
+  let l:sl.="%)  %-8.(%l,%c%V%) %P "
+  return l:sl
+endfunction
+set statusline=%!MyStatusLine()
+function! ModifiedColor()
+  if &mod == 1
+    hi StatusLine ctermfg=58 ctermbg=8
+    hi GitGreen ctermfg=040 ctermbg=58
+    hi GitBlue ctermfg=004 ctermbg=58
+    hi GitRed ctermfg=400 ctermbg=58
+    hi GitYellow cterm=bold ctermfg=440 ctermbg=58
+  else
+    if &ro == 1
+      hi StatusLine ctermfg=23 ctermbg=8
+      hi GitGreen ctermfg=040 ctermbg=23
+      hi GitBlue ctermfg=004 ctermbg=23
+      hi GitRed ctermfg=400 ctermbg=23
+      hi GitYellow cterm=bold ctermfg=440 ctermbg=23
+    else
+      hi StatusLine ctermfg=24 ctermbg=8
+      hi GitGreen ctermfg=040 ctermbg=24
+      hi GitBlue ctermfg=004 ctermbg=24
+      hi GitRed ctermfg=400 ctermbg=24
+      hi GitYellow cterm=bold ctermfg=440 ctermbg=24
+    endif
+  endif
+endfunction
+au BufEnter,BufLeave,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
+hi StatusLine ctermfg=24 ctermbg=8
+hi StatusLineNC ctermfg=237 ctermbg=8
+hi StatusLineTerm cterm=bold,reverse ctermfg=22 ctermbg=8
+hi StatusLineTermNC cterm=bold,reverse ctermfg=237 ctermbg=8
+hi GitGreen ctermfg=040 ctermbg=8
+hi GitBlue ctermfg=004 ctermbg=8
+hi GitRed ctermfg=400 ctermbg=8
+hi GitYellow cterm=bold ctermfg=440 ctermbg=8
+
 nnoremap <silent> <F12> :set invnumber invrelativenumber mouse=<CR>
 nnoremap <silent> <F10> :term git -P lola<CR>
 nnoremap <silent> gr :term ++close git rebase -i <cword><CR>
 nnoremap <silent> gs :term ++close ++kill=term git show <cword><CR>
+nnoremap <silent> gA :silent call system("git -C " . expand ("%:h") . " add -f " . expand("%:t"))<CR>:let b:git_status=system("git_status " . expand("%:p"))<CR>
 
 if system('uname -s') == "Darwin\n"
-  set clipboard=unnamed,autoselect "OSX
+"   set clipboard=unnamed,autoselect "OSX
   let &t_ZH="\e[3m"
   let &t_ZR="\e[23m"
 else
@@ -139,7 +190,7 @@ nnoremap <silent> M mm
 map <silent> <C-h> :cw<CR>
 map <silent> <C-j> :cn<CR>
 map <silent> <C-k> :cp<CR>
-map <silent> <C-l> :cnf<CR>
+map <silent> <C-S-j> :cnf<CR>
 
 " turn on spell checker
 set spell spelllang=en_au
@@ -216,9 +267,9 @@ au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> - @='gI// 
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> _ :s/^\( *\)\/\/ \?/\1/e<CR>:noh<CR>0j
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js vmap <buffer> - <C-C>`>a */<ESC>`<i/* <ESC>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp setlocal makeprg=make
-au BufNewFile,BufRead,BufEnter *.hs,.ghci* map <silent> - @='gI-- <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.hs,.ghci* map <silent> _ :s/^\( *\)-- \?/\1/e<CR>:noh<CR>0j
-au BufNewFile,BufRead,BufEnter *.hs,.ghci* vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
+au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal map <silent> - @='gI-- <C-V><ESC>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal map <silent> _ :s/^\( *\)-- \?/\1/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> - :s/^> /> -- /e<CR>:noh<CR>0j
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :s/^> -- /> /e<CR>:noh<CR>0j
 au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> - @='gI<!-- <C-V><ESC>A --><C-V><ESC>0j'<CR>
@@ -259,9 +310,9 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs nnoremap <silent> <C-@> :w<CR>:call te
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs nnoremap <silent> <C-SPACE> :w<CR>:call term_sendkeys('ghci ', ":r\n")<CR><C-w>j
 " au BufWritePost *.lhs,*.hs silent call term_sendkeys('ghci ', ":r\n")
 " au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* let ghcidprg = "ghci"
-" au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F2> :vertical :term ++close ++cols=75 ++kill=int ghcid -c <C-R>=ghcidprg<CR> %<CR><C-w>p
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F2> :vertical :term ++close ++cols=75 ++kill=int ghcid %<CR><C-w>p
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F3> :vertical :term ++close ++cols=75 ++kill=int watch make test<CR><C-w>p
+" au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F3> :vertical :term ++close ++cols=75 ++kill=int ghcid -c <C-R>=ghcidprg<CR> %<CR><C-w>p
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F3> :vertical :term ++close ++cols=75 ++kill=int ghcid %<CR><C-w>p
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> <F4> :vertical :term ++close ++cols=75 ++kill=int watch make test<CR><C-w>p
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]><C-]> <SPACE>-><SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>[ <SPACE><-<SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>] <SPACE>=><SPACE>
@@ -274,11 +325,20 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab IMI (Int -> Maybe Int)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LI [Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LII [Int -> Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab ILI (Int -> [Int])
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab I Int
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab S String
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LS [String]
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab MS Maybe String
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DL import Data.List
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DC import Data.Char
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SE import System.Environment
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SI import System.IO
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab PP import PP<CR><CR>main = interact
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DM import qualified Data.Map as M
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DIM import qualified Data.IntMap as IM
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DS import qualified Data.Set as S
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab TPP import Text.ParserCombinators.Parsec
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab TP import Text.Parsec
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <buffer> <silent> gs 0yiWO<ESC>pA<SPACE>::<SPACE>
 au BufReadPost .ghci* set syntax=haskell
 
@@ -325,20 +385,78 @@ au BufNewFile,BufRead,BufEnter *.hs,.ghci* map <silent> ta :call ApplyAllSuggest
 " " Show list of last-committed files
 " nnoremap <silent> <leader>g? :call CommittedFiles()<CR>:copen<CR>
 
-" status line
-function! ModifiedColor()
-  if &mod == 1
-    hi StatusLine ctermfg=58 ctermbg=8
-  else
-    if &ro == 1
-      hi StatusLine ctermfg=23 ctermbg=8
-    else
-      hi StatusLine ctermfg=24 ctermbg=8
-    endif
-  endif
+" Plugins
+
+call plug#begin('~/.vim/plugged')
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'mattn/vim-lsp-settings'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'thomasfaingnaert/vim-lsp-snippets'
+Plug 'thomasfaingnaert/vim-lsp-ultisnips'
+call plug#end()
+
+let g:UltiSnipsExpandTrigger="<TAB>"
+let g:UltiSnipsJumpForwardTrigger="<TAB>"
+let g:UltiSnipsJumpBackwardTrigger="<S-TAB>"
+
+" vim-lsp
+
+if executable('pyls')
+    " pip install python-language-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pyls',
+        \ 'cmd': {server_info->['pyls']},
+        \ 'allowlist': ['python'],
+        \ })
+endif
+
+if executable('hls')
+  au User lsp_setup call lsp#register_server({
+      \ 'name': 'hls',
+      \ 'cmd': {server_info->['hls', '--lsp']},
+      \ 'whitelist': ['haskell'],
+      \ })
+endif
+
+function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    setlocal signcolumn=yes
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+    nmap <buffer> gd <plug>(lsp-definition)
+    nmap <buffer> gr <plug>(lsp-references)
+    nmap <buffer> gf <plug>(lsp-code-action)
+    nmap <buffer> gi <plug>(lsp-implementation)
+    nmap <buffer> gt <plug>(lsp-type-definition)
+    nmap <buffer> <F2> <plug>(lsp-rename)
+    nmap <buffer> [g <Plug>(lsp-previous-diagnostic)
+    nmap <buffer> ]g <Plug>(lsp-next-diagnostic)
+    nmap <buffer> gG :LspDocumentDiagnostics<CR>
+    nmap <buffer> <S-C-k> <plug>(lsp-hover)
+"     nmap <buffer> f <plug>(lsp-document-range-format)
+    nmap <buffer> <F5> <plug>(lsp-code-lens)
+
+    " refer to doc to add more commands
+    " set foldmethod=expr
+    "   \ foldexpr=lsp#ui#vim#folding#foldexpr()
+    "   \ foldtext=lsp#ui#vim#folding#foldtext()
 endfunction
-au BufEnter,BufLeave,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
-hi StatusLine ctermfg=24 ctermbg=8
-hi StatusLineNC ctermfg=237 ctermbg=8
-hi StatusLineTerm cterm=bold,reverse ctermfg=22 ctermbg=8
-hi StatusLineTermNC cterm=bold,reverse ctermfg=237 ctermbg=8
+
+augroup lsp_install
+    au!
+    " call s:on_lsp_buffer_enabled only for languages that has the server registered.
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+
+    let g:lsp_hover_conceal = 0
+
+    let g:lsp_signs_error = {'text': '✗'}
+    let g:lsp_signs_warning = {'text': '‼'}
+    let g:lsp_signs_information = {'text': '-'}
+    let g:lsp_signs_hint = {'text': '!'}
+
+    let g:lsp_highlight_references_enabled = 1
+    highlight lspReference term=italic,bold ctermbg=238 gui=italic,bold
+    highlight lspErrorText term=italic,bold ctermbg=238 gui=italic,bold
+augroup END
