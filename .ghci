@@ -55,7 +55,7 @@ dotGHCI_escapeShellArg arg = "'" ++ concatMap (\c -> if c == '\'' then "'\\''" e
 :def! hlint \s -> return $ ":!hlint " ++ if null s then "." else s
 
 -- Add lots more useful functions from lambdabot
-lb s1 s2 = return $ ":!lambdabot -n -e " ++ dotGHCI_escapeShellArg s1 ++ "\\ " ++ dotGHCI_escapeShellArg s2
+lb s1 s2 = return $ ":!lambdabot -n -e " ++ dotGHCI_escapeShellArg s1 ++ "\\ " ++ dotGHCI_escapeShellArg s2 ++ " -e more -e more | grep -v '@more lines]'"
 :def! lb lb ""
 :def! pl lb "pl"
 :def! unpl lb "unpl"

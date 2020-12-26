@@ -11,6 +11,7 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 HISTSIZE=10000
 HISTFILESIZE=20000
+export EDITOR=vim
 
 shopt -s checkwinsize
 
@@ -299,20 +300,76 @@ l() {
 
 n() {
   local f n
-  if [ -x "$HOME"/src/games/coding/adventofcode/get_input ]; then
-    "$HOME"/src/games/coding/adventofcode/get_input
-  fi
   if [[ $PWD == */adventofcode/* ]]; then
+    diryear="$(($(basename "$PWD")))"
     for ((n=1; n<=25; n++)); do
       if [ -r "$n"a.hs -o -r "$n"a.c ]; then
         if [ -r "$n"b.hs -o -r "$n"b.c ]; then
           continue
         else
+          # mkaoc for part 1 tries to create a parser for the input file and for part 2 simply copies over part 1
           vi +$ "$(mkaoc "$n" b)"
           return
         fi
       else
+        # Don't fetch anything automatically if we're not solving this year's puzzles
+        if [ "$(date +%Y)" -eq "$diryear" ]; then
+          export TZ=EST
+          while [ "$(date +%d)" -lt "$n" ]; do
+            sleep 1
+          done
+          # Don't hit the server immediately, you need time to read the problem anyway
+          sleep 15
+          if [ -x "$HOME"/src/games/coding/adventofcode/get_input ]; then
+            "$HOME"/src/games/coding/adventofcode/get_input
+          fi
+        fi
         vi +$ "$(mkaoc "$n" a)"
+        return
+      fi
+    done
+  fi
+}
+
+do_submit() {
+  if [ -r "$HOME"/src/games/coding/adventofcode/.cookie ]; then
+    . "$HOME"/src/games/coding/adventofcode/.cookie
+  fi
+  curl -sS -b "$MYCOOKIE" -d level="$3" -d answer="$(cat "$4")" "https://adventofcode.com/$1/day/$2/answer" \
+    | awk '/<main>/ {t=1}; /<\/main>/ {t=0;print}; t==1 {print}' \
+    | tr '\n' ' ' \
+    | sed 's/\<[^>]*>/ /g; s/  */ /g; s/ \([].]\)/\1/g; s/^ *\(.*\) *$/\1\n/'
+}
+
+sub() {
+  local f n
+  if [[ $PWD == */adventofcode/* ]]; then
+    local year="$(basename "$PWD")"
+    for ((n=1; n<=25; n++)); do
+      if [ -r "$n"a.hs -o -r "$n"a.c ]; then
+        if [ -r "$n"b.hs -o -r "$n"b.c ]; then
+          continue
+        else
+          if [ -r "$n"ah.output ]; then
+            do_submit "$year" "$n" 1 "$n"ah.output
+          elif [ -r "$n"ac.output ]; then
+            do_submit "$year" "$n" 1 "$n"ac.output
+          else
+            echo "Couldn't find anything to submit." >&2
+            exit 1
+          fi
+          return
+        fi
+      else
+        ((n--))
+        if [ -r "$n"bh.output ]; then
+          do_submit "$year" "$n" 2 "$n"bh.output
+        elif [ -r "$n"bc.output ]; then
+          do_submit "$year" "$n" 2 "$n"bc.output
+        else
+          echo "Couldn't find anything to submit." >&2
+          exit 1
+        fi
         return
       fi
     done

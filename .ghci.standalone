@@ -1,5 +1,5 @@
 :unset +s +t
-:set +m -v0 -package directory -package pretty-show -package hscolour -package ghc-paths -package unix -package process -package text -package vector -package unordered-containers -XNoImplicitPrelude
+:set +m -v0 -package directory -package ghc-paths -package unix -package process -package text -package vector -package unordered-containers -XNoImplicitPrelude
 :seti -w -XAllowAmbiguousTypes -XConstraintKinds -XDataKinds -XFlexibleContexts -XFlexibleInstances -XGADTs -XInstanceSigs -XMultiParamTypeClasses -XNumericUnderscores -XOverloadedStrings -XPartialTypeSignatures -XPolyKinds -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XUndecidableInstances -XUndecidableSuperClasses
 :set editor vim
 
@@ -43,6 +43,7 @@ dotGHCI_myPrompt promptString ms _ = do
 -- Colourise ghci output (use :nopretty to disable)
 import qualified Language.Haskell.HsColour as HSC
 import qualified Language.Haskell.HsColour.Colourise as HSC
+import Text.Show.Pretty
 :{
 dotGHCI_myPrint :: (Show a) => a -> IO ()
 dotGHCI_myPrint a = putStrLn $ HSC.hscolour HSC.TTY myColourPrefs False False "" False $ Text.Show.Pretty.ppShow a
@@ -58,6 +59,7 @@ dotGHCI_myPrint a = putStrLn $ HSC.hscolour HSC.TTY myColourPrefs False False ""
 :seti -interactive-print dotGHCI_myPrint
 :def! pretty \_ -> return ":set -interactive-print dotGHCI_myPrint"
 :def! nopretty \_ -> return ":set -interactive-print System.IO.print"
+:m -Text.Show.Pretty
 :m -Language.Haskell.HsColour
 :m -Language.Haskell.HsColour.Colourise
 
@@ -70,7 +72,7 @@ dotGHCI_escapeShellArg arg = "'" ++ concatMap (\c -> if c == '\'' then "'\\''" e
 :def! hlint \s -> return $ ":!hlint " ++ if null s then "." else s
 
 -- Add lots more useful functions from lambdabot
-lb s1 s2 = return $ ":!lambdabot -n -e " ++ dotGHCI_escapeShellArg s1 ++ "\\ " ++ dotGHCI_escapeShellArg s2
+lb s1 s2 = return $ ":!lambdabot -n -e " ++ dotGHCI_escapeShellArg s1 ++ "\\ " ++ dotGHCI_escapeShellArg s2 ++ " -e more -e more | grep -v '@more lines]'"
 :def! lb lb ""
 :def! pl lb "pl"
 :def! unpl lb "unpl"

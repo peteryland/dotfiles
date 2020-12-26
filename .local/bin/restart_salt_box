@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+saltbox=192.168.1.1
+cookie_file="$HOME/.restart_salt_box_cookies"
+trap "rm -f '$cookie_file'" EXIT
+
+# super tricky token hidden in inline src of fake spacer img element
+httoken="$(curl -sS "http://$saltbox/login.htm" | grep spacer | cut -d\" -f2 | cut -c79- | base64 -d)"
+# echo "httoken: $httoken"
+
+# log in to acquire a session cookie
+curl -sS -c "$cookie_file" 'http://salt.box/login.cgi' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Referer: http://salt.box/login.htm' \
+  --data-raw 'httoken='"$httoken"'&pws=96d567a17032395eabc86ae16ecf4013272e460e29ef0cf83e6955cfc5e422206b028e29fb6b5826adffb4944348c7c3b5a920cbbf79832e66f6b3bee8893d24&usr=edbd881f1ee2f76ba0bd70fd184f87711be991a0401fd07ccd4b199665f00761afc91731d8d8ba6cbb188b2ed5bfb465b9f3d30231eb0430b9f90fe91d136648'
+# cat "$cookie_file"
+
+httoken2="$(curl -sS -b "$cookie_file" 'http://salt.box/system_r.htm' | grep spacer | cut -d\" -f2 | cut -c79- | base64 -d)"
+# echo "httoken2: $httoken2"
+
+curl -sS -b "$cookie_file" 'http://salt.box/apply_abstract.cgi' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Referer: http://salt.box/system_r.htm' \
+  --data-raw 'action=reboot&httoken='"$httoken2"'&submit_button=index.htm'

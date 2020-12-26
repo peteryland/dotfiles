@@ -15,8 +15,8 @@
   d = diff
   ds = diff --staged
   ca = commit --amend -q --no-edit
-  pf = push -f
-  capf = !git commit --amend -q --no-edit && git push -qf && :
+  pf = push --force-with-lease
+  capf = !git commit --amend -q --no-edit && git push -q --force-with-lease && :
 [rerere]
   auto = true
 [color]

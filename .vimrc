@@ -17,12 +17,10 @@ set completeopt=menu
 
 function! DoTabPre()
   set complete=.,t,d,i,k~/.vim/spell/en.utf-8.add
-  set completeopt=longest,menuone
   return ''
 endfunction
 function! DoTabPost()
   set complete=.,w,b,u,t,d,i,kspell
-  set completeopt=menu
   return ''
 endfunction
 inoremap <expr> <silent> <C-@> pumvisible()? "\<C-p>" : "\<C-p>\<C-n>"
@@ -110,7 +108,13 @@ function MyStatusLine()
   let l:sl.="%<%f"
   let l:sl.=" %h%m%r"
   let l:sl.="%=%1.20("
-  let l:sl.=getbufvar(winbufnr(g:statusline_winid), "git_status")
+  if !exists("g:statusline_winid")
+    " Vim < 8.2 e.g. Debian buster
+    let l:buf=bufnr("%")
+  else
+    let l:buf=winbufnr(g:statusline_winid)
+  endif
+  let l:sl.=getbufvar(l:buf, "git_status")
   let l:sl.="%)  %-8.(%l,%c%V%) %P "
   return l:sl
 endfunction
@@ -300,7 +304,8 @@ endfunction
 
 " haskell
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal formatprg=hindent\ --tab-size\ 2\ -XQuasiQuotes
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=stack\ build
+" au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=stack\ build
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=make
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal keywordprg=hoogle-info
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* map <silent> gl :cex system('hlint .')<CR>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* runtime ftplugin/haskell.vim
@@ -319,26 +324,27 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>] <SPACE
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>: <SPACE>∷<SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>. <SPACE>→<SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>> <SPACE>⇒<SPACE>
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab -] ->
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab [- <-
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab =] =>
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab [= <=
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab MI Maybe Int
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab MII Maybe (Int -> Int)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab IMI (Int -> Maybe Int)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LI [Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LII [Int -> Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab ILI (Int -> [Int])
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab I Int
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab S String
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab Sg String
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LS [String]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab MS Maybe String
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DL import Data.List
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DC import Data.Char
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SE import System.Environment
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SI import System.IO
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab PP import PP<CR><CR>main = interact
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SyE import System.Environment
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SyI import System.IO
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab PPi import PP<CR><CR>main = interact
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DM import qualified Data.Map as M
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DIM import qualified Data.IntMap as IM
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DS import qualified Data.Set as S
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab TPP import Text.ParserCombinators.Parsec
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab TP import Text.Parsec
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab denum deriving (Show, Eq, Read, Ord, Bounded, Enum)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <buffer> <silent> gs 0yiWO<ESC>pA<SPACE>::<SPACE>
 au BufReadPost .ghci* set syntax=haskell
 
