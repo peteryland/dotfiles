@@ -4,7 +4,7 @@
 [push]
   default = simple
 [pretty]
-  l = format:%C(auto)%h%d %Cgreen%an %Cblue%ar%Creset: %s
+  l = format:%C(auto)%h%d %Cgreen%an <%ae> %Cblue%ar%Creset: %s
 [format]
   pretty = l
 [alias]

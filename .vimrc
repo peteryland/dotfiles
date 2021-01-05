@@ -6,7 +6,7 @@ autocmd! bufwritepost ~/.vimrc source $MYVIMRC
 
 " turn on syntax highlighting, with slate colorscheme
 syntax enable
-colorscheme slate
+colorscheme default
 highlight MatchParen ctermbg=darkgray
 filetype plugin indent on
 
@@ -92,6 +92,7 @@ set mouse=
 nnoremap <silent> zma :set mouse=a<CR>
 nnoremap <silent> zmn :set mouse=n<CR>
 nnoremap <silent> zmo :set mouse=<CR>
+nnoremap <RightMouse> "+]p
 set history=1000
 set backspace=indent,eol,start
 set splitbelow splitright
@@ -242,15 +243,19 @@ nnoremap <silent> cN *``cgN
 " add surrounding characters around word or selection
 " nnoremap <silent> <C-e><C-e> 10<C-e>
 nnoremap <silent> <C-e>l Lzz
-nnoremap <silent> <C-e>e ciW(<c-r><c-o>")<ESC>
-nnoremap <silent> <C-e>a ciW<<c-r><c-o>"><ESC>
-nnoremap <silent> <C-e>s ciW[<c-r><c-o>"]<ESC>
-inoremap <silent> <C-e>e <ESC>ciW(<c-r><c-o>")
-inoremap <silent> <C-e>a <ESC>ciW<<c-r><c-o>">
-inoremap <silent> <C-e>s <ESC>ciW[<c-r><c-o>"]
+nnoremap <silent> <C-e>e ciW(<C-r><C-o>")<ESC>
+nnoremap <silent> <C-e>a ciW<<C-r><C-o>"><ESC>
+nnoremap <silent> <C-e>s ciW[<C-r><C-o>"]<ESC>
+inoremap <silent> <C-e>e <ESC>ciW(<C-r><C-o>")
+inoremap <silent> <C-e>a <ESC>ciW<<C-r><C-o>">
+inoremap <silent> <C-e>s <ESC>ciW[<C-r><C-o>"]
 vnoremap <silent> <C-e>e <ESC>`>a)<ESC>`<i(<ESC>
 vnoremap <silent> <C-e>a <ESC>`>a><ESC>`<i<<ESC>
 vnoremap <silent> <C-e>s <ESC>`>a]<ESC>`<is<ESC>
+
+" make tuples from parenthesized expressions or from words
+nnoremap <silent> Mt% ya)pa, (<ESC>%a)<ESC>
+nnoremap <silent> Mtw ciW(<c-r><c-o>", <c-r><c-o>")<ESC>
 
 " make <C-y> and <C-e><C-e> work word by word
 imap <expr> <C-y> matchstr(getline(line('.')-1), '\%' . virtcol('.') . 'v\%(\s*\S\+\)')
@@ -271,9 +276,9 @@ au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> - @='gI// 
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> _ :s/^\( *\)\/\/ \?/\1/e<CR>:noh<CR>0j
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js vmap <buffer> - <C-C>`>a */<ESC>`<i/* <ESC>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp setlocal makeprg=make
-au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal map <silent> - @='gI-- <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal map <silent> _ :s/^\( *\)-- \?/\1/e<CR>:noh<CR>0j
-au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
+au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config map <silent> - @='gI-- <C-V><ESC>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config map <silent> _ :s/^\( *\)-- \?/\1/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> - :s/^> /> -- /e<CR>:noh<CR>0j
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :s/^> -- /> /e<CR>:noh<CR>0j
 au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> - @='gI<!-- <C-V><ESC>A --><C-V><ESC>0j'<CR>
@@ -303,10 +308,12 @@ function! ConcealToggle()
 endfunction
 
 " haskell
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal formatprg=hindent\ --tab-size\ 2\ -XQuasiQuotes
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal formatprg=stylish-haskell
 " au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=stack\ build
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=make
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal keywordprg=hoogle-info
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* noremap <silent> K <Cmd>call ReadMan(expand('<cword>'), "Haskell")<CR>
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal iskeyword+=@-@,',$,<->,\",!,\|,/,~,%,94,*,+,&,_,.
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* map <silent> gl :cex system('hlint .')<CR>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* runtime ftplugin/haskell.vim
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* runtime ext/haskell.vim
@@ -334,18 +341,20 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab IMI (Int -> Maybe Int)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LI [Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LII [Int -> Int]
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab ILI (Int -> [Int])
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab Sg String
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LS [String]
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab MS Maybe String
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SyE import System.Environment
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab SyI import System.IO
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab PPi import PP<CR><CR>main = interact
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DM import qualified Data.Map as M
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DIM import qualified Data.IntMap as IM
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab DS import qualified Data.Set as S
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab TP import Text.Parsec
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab Str String
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab LStr [String]
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab MStr Maybe String
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iDL import Data.List
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iDC import Data.Char
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iSE import System.Environment
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iSI import System.IO
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iPP import PP<CR><CR>main = interact
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iDM import qualified Data.Map as M
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iDIM import qualified Data.IntMap as IM
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iDS import qualified Data.Set as S
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iTP import Text.Parsec
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab denum deriving (Show, Eq, Read, Ord, Bounded, Enum)
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <buffer> <silent> gs 0yiWO<ESC>pA<SPACE>::<SPACE>
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <buffer> <silent> gs ^yiWO<ESC>pA<SPACE>::<SPACE>
 au BufReadPost .ghci* set syntax=haskell
 
 " switch directly to ghci terminal or run one if doesn't exist (incomplete)
@@ -466,3 +475,16 @@ augroup lsp_install
     highlight lspReference term=italic,bold ctermbg=238 gui=italic,bold
     highlight lspErrorText term=italic,bold ctermbg=238 gui=italic,bold
 augroup END
+
+function! ReadMan(word, ft)
+  let prg = &l:keywordprg
+  execute ":wincmd n"
+  execute ":setlocal buftype=nofile"
+  execute ":setlocal bufhidden=hide"
+  execute ":setlocal noswapfile"
+  execute ":setlocal nobuflisted"
+  execute ":r!" . prg . " '" . a:word . "'"
+  execute ":set ft=" . a:ft
+  execute ":goto"
+  execute ":delete"
+endfunction

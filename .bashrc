@@ -61,10 +61,17 @@ case "$OSTYPE" in
     statm() { return 0; }
 esac
 
+# Set prodmachine=1 in .bash_aliases for brighter background colours
+if [[ $prodmachine ]]; then
+  bgfactor=2
+else
+  bgfactor=7
+fi
+
 rgb=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
-red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 1-2 <<< "$rgb") / 4"))
-green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3-4 <<< "$rgb") / 4"))
-blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5-6 <<< "$rgb") / 4"))
+red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$rgb")$(cut -c 2 <<< "$rgb") / $bgfactor"))
+green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$rgb")$(cut -c 4 <<< "$rgb") / $bgfactor"))
+blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$rgb")$(cut -c 1 <<< "$rgb") / $bgfactor"))
 rgb="$red$green$blue"
 unset red green blue
 
@@ -90,7 +97,10 @@ else
 fi
 
 case "$termprog" in
-  xterm-color|*-256color|iTerm*)
+  iTerm*)
+    export CLICOLOR=1
+    ;&
+  xterm-color|*-256color)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
       if [ -z "$VIM_TERMINAL" ]; then
@@ -279,10 +289,11 @@ scr() {
 l() {
   local dir="${1#*/}"
   if [[ $1 ]]; then
-    if [[ $1 = 's-al' ]]; then
+    if [[ $1 = s-* ]]; then
+      opts="${1/s}"
       shift
-      echo "ls -al $@" >&2
-      ls -al "$@"
+      echo "ls $opts $@" >&2
+      ls "$opts" "$@"
     elif [[ -n $dir && -d ~/src/looking/$dir ]]; then
       cd ~/src/looking/"$dir"
     elif [[ $1 == ?*/?* ]]; then
