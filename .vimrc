@@ -192,9 +192,9 @@ nnoremap <silent> M mm
 " match Error /\%'m/
 
 " quickfix open, up, down, next file
-map <silent> <C-h> :cw<CR>
-map <silent> <C-j> :cn<CR>
-map <silent> <C-k> :cp<CR>
+map <silent> <C-h> :cw<CR>z.
+map <silent> <C-j> :cn<CR>z.
+map <silent> <C-k> :cp<CR>z.
 map <silent> <C-S-j> :cnf<CR>
 
 " turn on spell checker

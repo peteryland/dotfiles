@@ -29,6 +29,10 @@ if [[ -r "$HOME/.bash_aliases" ]]; then
   . "$HOME/.bash_aliases"
 fi
 
+if [[ -r "$HOME/.bashrc_local" ]]; then
+  . "$HOME/.bashrc_local"
+fi
+
 case "$OSTYPE" in
   darwin*)
     export LSCOLORS=ExFxBxDxCxegedabagacad
@@ -61,11 +65,11 @@ case "$OSTYPE" in
     statm() { return 0; }
 esac
 
-# Set prodmachine=1 in .bash_aliases for brighter background colours
-if [[ $prodmachine ]]; then
-  bgfactor=2
+# Set devmachine=1 in non-prod .bash_aliases to ensure brighter colours for prod machines
+if [[ $devmachine ]]; then
+  bgfactor=3
 else
-  bgfactor=7
+  bgfactor=2
 fi
 
 rgb=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
@@ -143,19 +147,19 @@ bashrc_check_repo() {
     # do a fetch if we haven't done one for more than a minute
     if [[ ! ( -r "$repo"/.git/FETCH_HEAD ) || ( $(( $(date +%s) - $(statm "$repo"/.git/FETCH_HEAD) )) -gt 60 ) ]]; then
       (
-        git fetch --quiet &> /dev/null & disown -a
+        GIT_TERMINAL_PROMPT=0 git fetch --quiet &> /dev/null & disown -a
       )
     fi
     status="$(git status --porcelain=1 -b)"
     status1="$(head -1 <<< "$status")"
     bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
-    if [[ $bashrc_git_branch == master ]]; then
+    if [[ $bashrc_git_branch =~ master|main ]]; then
       bashrc_git_branch=
     fi
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
     bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
     bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && echo -n S; grep -q ^.M <<< "$status" && echo -n M) #; grep -q ^\?\? <<< "$status" && echo -n U)
-    bashrc_git_status="$git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
+    bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
   fi
 }
 
@@ -204,10 +208,6 @@ fi
 
 if [[ -r "$HOME"/.local/bin/color-dark ]]; then
   . "$HOME"/.local/bin/color-dark
-fi
-
-if [[ -r .bashrc_local ]]; then
-  . .bashrc_local
 fi
 
 if ! shopt -oq posix; then
