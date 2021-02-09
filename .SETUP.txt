@@ -36,10 +36,14 @@ fi
 
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
-  sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
-  sudo apt install libicu-dev libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
+  sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix
+  sudo apt install vim-nox curl
+  sudo apt purge vim-tiny
+
+  # sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
+  sudo apt install libpcre3-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
   cabal update
-  cabal install pretty-show hscolour ghc-paths hindent
+  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot
 
   ln -s .gitconfig.linux.pdr .gitconfig
 fi

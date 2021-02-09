@@ -1,0 +1,22 @@
+#!/bin/bash
+
+ipdir="$HOME"/.ips/
+mkdir -p "$ipdir"
+
+if [ -z "$1" ]; then
+  echo "Usage: $0 name" >&2
+  exit 1
+fi
+
+f="$ipdir$1"
+
+if [ -r "$f" ]; then
+  oldip="$(cat "$f")"
+fi
+
+ip="$(cut -d\  -f1 <<< "$SSH_CLIENT")"
+
+if [ -n "$ip" -a "$ip" != "$oldip" ]; then
+  echo -n "$ip" > "$f".new
+  mv -f -- "$f".new "$f"
+fi

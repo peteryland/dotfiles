@@ -65,19 +65,22 @@ case "$OSTYPE" in
     statm() { return 0; }
 esac
 
-# Set devmachine=1 in non-prod .bash_aliases to ensure brighter colours for prod machines
-if [[ $devmachine ]]; then
-  bgfactor=3
-else
-  bgfactor=2
-fi
+# Set rgb in .bashrc_local for a fixed background colour
+if [[ -z "$rgb" ]]; then
+  # Set devmachine=1 in non-prod .bashrc_local to ensure brighter colours for prod machines
+  if [[ $devmachine ]]; then
+    bgfactor=4
+  else
+    bgfactor=2
+  fi
 
-rgb=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
-red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$rgb")$(cut -c 2 <<< "$rgb") / $bgfactor"))
-green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$rgb")$(cut -c 4 <<< "$rgb") / $bgfactor"))
-blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$rgb")$(cut -c 1 <<< "$rgb") / $bgfactor"))
-rgb="$red$green$blue"
-unset red green blue
+  rgb=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
+  red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$rgb")$(cut -c 2 <<< "$rgb") / $bgfactor"))
+  green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$rgb")$(cut -c 4 <<< "$rgb") / $bgfactor"))
+  blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$rgb")$(cut -c 1 <<< "$rgb") / $bgfactor"))
+  rgb="$red$green$blue"
+  unset red green blue
+fi
 
 if [ "$UID" -eq 0 ]; then
   usercol=1
@@ -111,6 +114,7 @@ case "$termprog" in
         bashrc_term_title
         # set background colour
         printf "\e]Ph$rgb\e\\"
+        printf "\e]11;#$rgb\e\\"
       fi
     }
     ;;
@@ -287,6 +291,7 @@ scr() {
 }
 
 l() {
+  mkdir -p ~/src/looking
   local dir="${1#*/}"
   if [[ $1 ]]; then
     if [[ $1 = s-* ]]; then
@@ -297,11 +302,19 @@ l() {
     elif [[ -n $dir && -d ~/src/looking/$dir ]]; then
       cd ~/src/looking/"$dir"
     elif [[ $1 == ?*/?* ]]; then
-      cd ~/src/looking
-      git clone https://github.com/"$1"
+      if [ "$(curl -Ls -w '%{response_code}' -o/dev/null https://gitlab.com/"$1")" -eq 200 ]; then
+        cd ~/src/looking
+        git clone https://gitlab.com/"$1"
+      elif [ "$(curl -Ls -w '%{response_code}' -o/dev/null https://github.com/"$1")" -eq 200 ]; then
+        cd ~/src/looking
+        git clone https://github.com/"$1"
+      else
+        echo "l: $1 not found" >&2
+        return 1
+      fi
       cd "$dir"
     else
-      echo "l: Error parsing arguments." >&2
+      echo "l: Error parsing arguments" >&2
       return 1
     fi
   else
