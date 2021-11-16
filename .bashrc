@@ -58,6 +58,8 @@ case "$OSTYPE" in
     alias st='systemctl status'
     alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
     alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
+    alias np='sudo netstat -plant'
+    alias ng='np | grep'
     md5s() { md5sum "$@"; }
     statm() { stat --printf %Y "$@"; }
     ;;
@@ -113,8 +115,8 @@ case "$termprog" in
       if [ -z "$VIM_TERMINAL" ]; then
         bashrc_term_title
         # set background colour
-        printf "\e]Ph$rgb\e\\"
-        printf "\e]11;#$rgb\e\\"
+        printf "\e]Ph$rgb\e"\\
+        printf "\e]11;#$rgb\e"\\
       fi
     }
     ;;
@@ -124,7 +126,7 @@ case "$termprog" in
       if [ -z "$VIM_TERMINAL" ]; then
         bashrc_term_title
         # set background colour
-        printf "\e]11;#$rgb\e\\"
+        printf "\e]11;#$rgb\e"\\
       fi
     }
     ;;
@@ -177,10 +179,12 @@ bashrc_prompt() {
 PROMPT_COMMAND=bashrc_prompt
 bashrc_prompt
 
-alias pg='ps -aef | grep'
+if [[ $(type -t pg) = alias ]]; then unalias pg; fi
+pg() {
+  ps -fp $(pgrep -f "$@")
+}
+
 alias pj='pg java'
-alias np='netstat -plant'
-alias ng='np | grep'
 alias ll='ls -al'
 alias lt='ls -altr'
 alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
@@ -198,6 +202,7 @@ bashrc_path_add() {
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
 bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
+bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
 bashrc_path_add "$HOME/.cabal/bin" "$HOME/.cabal/sbin"
 bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"
 bashrc_path_add "$HOME/local/bin" "$HOME/local/sbin"
@@ -275,9 +280,10 @@ j() {
   fi
 }
 
+SCRATCHDIR="$HOME/src/scratch"
 scr() {
-  mkdir -p ~/src/scratch
-  d="$(mktemp -q -d ~/src/scratch/tmpXXX)"
+  mkdir -p "$SCRATCHDIR"
+  d="$(mktemp -q -d "$SCRATCHDIR"/tmpXXX)"
   cd "$d"
   git init
   if [[ $1 ]]; then
@@ -290,8 +296,9 @@ scr() {
   fi
 }
 
+LOOKINGDIR="$HOME/src/looking"
 l() {
-  mkdir -p ~/src/looking
+  mkdir -p "$LOOKINGDIR"
   local dir="${1#*/}"
   if [[ $1 ]]; then
     if [[ $1 = s-* ]]; then
@@ -299,14 +306,14 @@ l() {
       shift
       echo "ls $opts $@" >&2
       ls "$opts" "$@"
-    elif [[ -n $dir && -d ~/src/looking/$dir ]]; then
-      cd ~/src/looking/"$dir"
+    elif [[ -n $dir && -d "$LOOKINGDIR"/$dir ]]; then
+      cd "$LOOKINGDIR"/"$dir"
     elif [[ $1 == ?*/?* ]]; then
       if [ "$(curl -Ls -w '%{response_code}' -o/dev/null https://gitlab.com/"$1")" -eq 200 ]; then
-        cd ~/src/looking
+        cd "$LOOKINGDIR"
         git clone https://gitlab.com/"$1"
       elif [ "$(curl -Ls -w '%{response_code}' -o/dev/null https://github.com/"$1")" -eq 200 ]; then
-        cd ~/src/looking
+        cd "$LOOKINGDIR"
         git clone https://github.com/"$1"
       else
         echo "l: $1 not found" >&2
@@ -318,9 +325,15 @@ l() {
       return 1
     fi
   else
-    cd ~/src/looking
+    cd "$LOOKINGDIR"
   fi
 }
+
+_l() {
+  local compreply=($(compgen -d "$LOOKINGDIR"/ | grep "^$LOOKINGDIR/$2"))
+  COMPREPLY=(${compreply[@]#$LOOKINGDIR/})
+}
+complete -F _l l
 
 n() {
   local f n
@@ -343,7 +356,7 @@ n() {
             sleep 1
           done
           # Don't hit the server immediately, you need time to read the problem anyway
-          sleep 15
+          sleep 2
           if [ -x "$HOME"/src/games/coding/adventofcode/get_input ]; then
             "$HOME"/src/games/coding/adventofcode/get_input
           fi

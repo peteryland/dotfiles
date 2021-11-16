@@ -39,7 +39,7 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
   sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix
   sudo apt install vim-nox curl
-  sudo apt purge vim-tiny
+  sudo apt purge vim-tiny nano
 
   # sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
   sudo apt install libpcre3-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
@@ -53,21 +53,26 @@ fi
 # Add "xserver-command=X -s 0 dpms" into /etc/lightdm/lightdm.conf to disable screen sleeping
 # sudo apt install kodi
 
-## Servers
+## Linux Servers
 # Disable any attempt to suspend with the following:
 # sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
-## Common
+# If we are a router
+# Turn on ip_forwarding in /etc/sysctl.conf
+
+# Install fail2ban if ssh exposed to public
+# sudo apt install fail2ban
+# echo -e "[DEFAULT]\nbantime = -1\nmaxretry = 2\n" | sudo tee /etc/fail2ban/jail.d/defaults.local
+# sudo systemctl restart fail2ban
+
+## Coding
 
 # install vim-plug (already copied into this repo)
 # curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # install haskell-language-server https://github.com/haskell/haskell-language-server
 
-# install nix
-#curl https://nixos.org/nix/install | sh
+# install nix via apt
 #?? nix-env -i cabal-install hlint goa lambdabot
 #?? ~/.nix-profile/bin/cabal update
 #?? ~/.nix-profile/bin/cabal install pretty-show hscolour hoogle hindent
-
-# Turn on ip_forwarding in /etc/sysctl.conf
