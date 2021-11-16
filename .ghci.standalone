@@ -113,6 +113,6 @@ instance {-# INCOHERENT #-} t ~ G => Semigroup t where (<>) = undefined
 instance {-# INCOHERENT #-} t ~ G => Monoid t where mempty = undefined
 
 -- Source this file again
-:def! rr \_ -> return ":nopretty\n:script ~/.ghci"
+:def! rr \_ -> return ":nopretty\n:script ~/.ghci.standalone"
 
 :set +t

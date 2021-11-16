@@ -61,10 +61,10 @@ function! GetHaskellIndent() abort
     return s:indent_bar()
   endif
 
-  " in
-  if line =~# '\v^\s*<in>'
-    return s:indent('\v^\s*<in>', '\v^.*<let>\s*\zs', 0, -1)
-  endif
+"   " in
+"   if line =~# '\v^\s*<in>'
+"     return s:indent('\v^\s*<in>', '\v^.*<let>\s*\zs', 0, -1)
+"   endif
 
   " =
   if line =~# '\v^\s*\='

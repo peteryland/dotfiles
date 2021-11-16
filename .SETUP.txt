@@ -36,6 +36,7 @@ fi
 
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
+  # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
   sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix
   sudo apt install vim-nox curl
   sudo apt purge vim-tiny
@@ -52,6 +53,10 @@ fi
 # Add "xserver-command=X -s 0 dpms" into /etc/lightdm/lightdm.conf to disable screen sleeping
 # sudo apt install kodi
 
+## Servers
+# Disable any attempt to suspend with the following:
+# sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
 ## Common
 
 # install vim-plug (already copied into this repo)
@@ -64,3 +69,5 @@ fi
 #?? nix-env -i cabal-install hlint goa lambdabot
 #?? ~/.nix-profile/bin/cabal update
 #?? ~/.nix-profile/bin/cabal install pretty-show hscolour hoogle hindent
+
+# Turn on ip_forwarding in /etc/sysctl.conf

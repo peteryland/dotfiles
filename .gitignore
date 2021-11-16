@@ -12,8 +12,10 @@
 .DS_Store
 .gitconfig
 .gitit.conf
+.h*
 .inputrc
 .nix*
+.npm
 .nvidia-settings-rc
 .rnd
 .selected_editor
