@@ -65,6 +65,12 @@ fi
 # echo -e "[DEFAULT]\nbantime = -1\nmaxretry = 2\n" | sudo tee /etc/fail2ban/jail.d/defaults.local
 # sudo systemctl restart fail2ban
 
+## Linux Desktops
+# Remap keys: capslock -> escape and shift-capslock -> capslock
+# In /etc/default/keyboard
+# XKBOPTIONS="caps:escape_shifted_capslock"
+# Maybe then need to: sudo dpkg-reconfigure keyboard-configuration
+
 ## Coding
 
 # install vim-plug (already copied into this repo)

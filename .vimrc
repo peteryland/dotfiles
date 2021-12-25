@@ -48,7 +48,9 @@ inoremap <silent> <F9> <ESC>:w<CR>:make<CR>
 " don't run make unless explicitly set by file type
 set makeprg=/usr/bin/true
 " swap last deleted text with visually-highlighted text
-vnoremap <silent> <C-x> <ESC>:undojoin<CR>`.``gv""p``P
+xnoremap <silent> <C-x> <ESC>:undojoin<CR>`.``gv""p``P
+" repeat . over a range
+xnoremap <silent> . :normal .<CR>
 
 " turn on folding
 set foldmethod=syntax foldlevelstart=4
@@ -269,20 +271,20 @@ imap <expr> <C-e><C-e> matchstr(getline(line('.')+1), '\%' . virtcol('.') . 'v\%
 
 " add/remove comments in various file formats
 au BufNewFile,BufRead,BufEnter * map <silent> - @='gI# <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter * map <silent> _ :s/^\( *\)# \?/\1/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter * map <silent> _ :keeppatterns s/^\( *\)# \?/\1/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter .vimrc,*.vim map <silent> - @='gI" <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter .vimrc,*.vim map <silent> _ :s/^\( *\)" \?/\1/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter .vimrc,*.vim map <silent> _ :keeppatterns s/^\( *\)" \?/\1/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> - @='gI// <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> _ :s/^\( *\)\/\/ \?/\1/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> _ :keeppatterns s/^\( *\)\/\/ \?/\1/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js vmap <buffer> - <C-C>`>a */<ESC>`<i/* <ESC>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp setlocal makeprg=make
 au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config map <silent> - @='gI-- <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config map <silent> _ :s/^\( *\)-- \?/\1/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config map <silent> _ :keeppatterns s/^\( *\)-- \?/\1/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
-au BufNewFile,BufRead,BufEnter *.lhs map <silent> - :s/^> /> -- /e<CR>:noh<CR>0j
-au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :s/^> -- /> /e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter *.lhs map <silent> - :keeppatterns s/^> /> -- /e<CR>0j:noh<CR>
+au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :keeppatterns s/^> -- /> /e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> - @='gI<!-- <C-V><ESC>A --><C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> _ /--><CR>?<!--<CR>:s/^\( *\)\%(\(<\)!-- \?\(\/\?[^<]\+>\)\\|<!-- \?\)/\1\2\3/e<CR>/--><CR>:s/\(<\/\?[a-zA-Z]\+\) \?--\(>\)\\| \?-->/\1\2/e<CR>:noh<CR>0j
+au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> _ :keeppatterns /--><CR>:keeppatterns ?<!--<CR>:keeppatterns s/^\( *\)\%(\(<\)!-- \?\(\/\?[^<]\+>\)\\|<!-- \?\)/\1\2\3/e<CR>:keeppatterns /--><CR>:keeppatterns s/\(<\/\?[a-zA-Z]\+\) \?--\(>\)\\| \?-->/\1\2/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.html,*.st vmap <buffer> - <C-C>`>a --<C-V>><ESC>`<i<!-- <ESC>
 
 " other auto commands
@@ -331,6 +333,17 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>] <SPACE
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>: <SPACE>∷<SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>. <SPACE>→<SPACE>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* inoremap <silent> <C-]>> <SPACE>⇒<SPACE>
+" move by "section" (function)
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> [[ ?^[a-z].*=[^>]<CR>:call RestoreSearch()<CR>:noh<CR>
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> ]] /^[a-z].*=[^>]<CR>:call RestoreSearch()<CR>:noh<CR>
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> ][ /^[a-z].*=[^>]<CR>:call RestoreSearch()<CR>:keeppatterns<SPACE>?[a-z]<CR>:noh<CR>
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> [] /^[a-z].*=[^>]<CR>:call RestoreSearch()<CR>:keeppatterns<SPACE>/[a-z]<CR>:noh<CR>
+" move to import section
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> [i :$?^import <CR>:call RestoreSearch()<CR>:noh<CR>
+" move to main definition
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> [m /^main *=<CR>:call RestoreSearch()<CR>:noh<CR>
+" move to = on main
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <silent> M [mf=
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab -] ->
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab [- <-
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab =] =>
@@ -356,6 +369,11 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iTP import Text.Parsec
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab denum deriving (Show, Eq, Read, Ord, Bounded, Enum)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <buffer> <silent> gs ^yiWO<ESC>pA<SPACE>::<SPACE>
 au BufReadPost .ghci* set syntax=haskell
+
+function! RestoreSearch()
+  call histdel("search", -1)
+  let @/ = histget("search", -1)
+endfunction
 
 " switch directly to ghci terminal or run one if doesn't exist (incomplete)
 " function! FindGHCI()
@@ -487,4 +505,251 @@ function! ReadMan(word, ft)
   execute ":set ft=" . a:ft
   execute ":goto"
   execute ":delete"
+endfunction
+
+function! LineUpOnEquals()
+endfunction
+
+" The following is from
+" https://github.com/michaeljsmith/vim-indent-object/blob/master/plugin/indent-object.vim
+" with some patches applied.
+"--------------------------------------------------------------------------------
+"
+"  Copyright (c) 2010 Michael Smith <msmith@msmith.id.au>
+"
+"  http://github.com/michaeljsmith/vim-indent-object
+"
+"  Permission is hereby granted, free of charge, to any person obtaining a copy
+"  of this software and associated documentation files (the "Software"), to
+"  deal in the Software without restriction, including without limitation the
+"  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+"  sell copies of the Software, and to permit persons to whom the Software is
+"  furnished to do so, subject to the following conditions:
+"
+"  The above copyright notice and this permission notice shall be included in
+"  all copies or substantial portions of the Software.
+"
+"  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+"  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+"  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+"  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+"  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+"  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+"  IN THE SOFTWARE.
+"
+"--------------------------------------------------------------------------------
+
+" Mappings excluding line below.
+onoremap <silent>ai :<C-u>cal HandleTextObjectMapping(0, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+onoremap <silent>ii :<C-u>cal HandleTextObjectMapping(1, 0, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent>ai :<C-u>cal HandleTextObjectMapping(0, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+xnoremap <silent>ii :<C-u>cal HandleTextObjectMapping(1, 0, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+
+" Mappings including line below.
+onoremap <silent>aI :<C-u>cal HandleTextObjectMapping(0, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+onoremap <silent>iI :<C-u>cal HandleTextObjectMapping(1, 1, 0, [line("."), line("."), col("."), col(".")])<CR>
+xnoremap <silent>aI :<C-u>cal HandleTextObjectMapping(0, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+xnoremap <silent>iI :<C-u>cal HandleTextObjectMapping(1, 1, 1, [line("'<"), line("'>"), col("'<"), col("'>")])<CR><Esc>gv
+
+let s:l0 = -1
+let s:l1 = -1
+let s:c0 = -1
+let s:c1 = -1
+
+if !exists("g:indent_object_except_first_level")
+  let g:indent_object_except_first_level = 1
+endif
+
+function! TextObject(inner, incbelow, vis, range, count)
+
+  if exists("g:indent_object_include_blanks")
+    let include_blanks = g:indent_object_include_blanks
+  else
+    let include_blanks = 0
+  endif
+
+  " Record the current state of the visual region.
+  let vismode = "V"
+
+  " Detect if this is a completely new visual selction session.
+  let new_vis = 0
+  let new_vis = new_vis || s:l0 != a:range[0]
+  let new_vis = new_vis || s:l1 != a:range[1]
+  let new_vis = new_vis || s:c0 != a:range[2]
+  let new_vis = new_vis || s:c1 != a:range[3]
+
+  let s:l0 = a:range[0]
+  let s:l1 = a:range[1]
+  let s:c0 = a:range[2]
+  let s:c1 = a:range[3]
+
+  " Repeatedly increase the scope of the selection.
+  let itr_cnt = 0
+  let cnt = a:count
+  while cnt > 0
+
+    " Look for the minimum indentation in the current visual region.
+    let l = s:l0
+    let idnt_invalid = 1000
+    let idnt = idnt_invalid
+    while l <= s:l1
+      if !(getline(l) =~ "^\\s*$")
+        let idnt = min([idnt, indent(l)])
+      endif
+      let l += 1
+    endwhile
+
+    " Keep track of where the range should be expanded to.
+    let l_1 = s:l0
+    let l_1o = l_1
+    let l2 = s:l1
+    let l2o = l2
+
+    " If we are highlighting only blank lines, we may not have found a
+    " valid indent. In this case we need to look for the next and previous
+    " non blank lines and check which of those has the largest indent.
+    if idnt == idnt_invalid
+      let idnt = 0
+      let pnb = prevnonblank(s:l0)
+      if pnb
+        let idnt = max([idnt, indent(pnb)])
+        let l_1 = pnb
+      endif
+      let nnb = nextnonblank(s:l0)
+      if nnb
+        let idnt = max([idnt, indent(nnb)])
+      endif
+
+      " If we are in whitespace at the beginning of a block, skip over
+      " it when we are selecting the range. Similarly, if we are in
+      " whitespace at the end, ignore it.
+      if idnt > indent(pnb)
+        let l_1 = nnb
+      endif
+      if idnt > indent(nnb)
+        let l2 = pnb
+      endif
+    endif
+
+    " Search backward for the first line with less indent than the target
+    " indent.
+    let blnk = include_blanks && getline(l_1) =~ "^\\s*$"
+    while l_1 > 0 && (blnk || indent(l_1) >= idnt)
+      if g:indent_object_except_first_level && idnt == 0 && blnk
+        break
+      endif
+      if !blnk || !a:inner
+        let l_1o = l_1
+      endif
+      let l_1 -= 1
+      let blnk = include_blanks && getline(l_1) =~ "^\\s*$"
+    endwhile
+
+    " Search forward for the first line with more indent than the target
+    " indent.
+    let line_cnt = line("$")
+    let blnk = include_blanks && getline(l2) =~ "^\\s*$"
+    while l2 <= line_cnt && (blnk || indent(l2) >= idnt)
+      if g:indent_object_except_first_level && idnt == 0 && blnk
+        break
+      endif
+      if !blnk || !a:inner
+        let l2o = l2
+      endif
+      let l2 += 1
+      let blnk = include_blanks && getline(l2) =~ "^\\s*$"
+    endwhile
+
+    " Determine which of these extensions to include. Include neither if
+    " we are selecting an 'inner' object. Exclude the bottom unless are
+    " told to include it.
+    let idnt2 = max([indent(l_1), indent(l2)])
+    if indent(l_1) < idnt2 || a:inner
+      let l_1 = l_1o
+    endif
+    if indent(l2) < idnt2 || a:inner || !a:incbelow
+      let l2 = l2o
+    endif
+    let l_1 = max([l_1, 1])
+    let l2 = min([l2, line("$")])
+
+    " Extend the columns to the start and end.
+    " If inner is selected, set the final cursor pos to the start
+    " of the text in the line.
+    let c_1 = 1
+    if a:inner
+      let c_1 = match(getline(l_1), "\\c\\S") + 1
+    endif
+    let c2 = len(getline(l2))
+    if !a:inner
+      let c2 += 1
+    endif
+
+    " Make sure there's no change if we haven't really made a
+    " significant change in linewise mode - this makes sure that
+    " we can iteratively increase selection in linewise mode.
+    if itr_cnt == 0 && vismode ==# 'V' && s:l0 == l_1 && s:l1 == l2
+      let c_1 = s:c0
+      let c2 = s:c1
+    endif
+
+    " Check whether the visual region has changed.
+    let chg = 0
+    let chg = chg || s:l0 != l_1
+    let chg = chg || s:l1 != l2
+    let chg = chg || s:c0 != c_1
+    let chg = chg || s:c1 != c2
+
+    if vismode ==# 'V' && new_vis
+      let chg = 1
+    endif
+
+    " Update the vars.
+    let s:l0 = l_1
+    let s:l1 = l2
+    let s:c0 = c_1
+    let s:c1 = c2
+
+    " If there was no change, then don't decrement the count (it didn't
+    " count because it didn't do anything).
+    if chg
+      let cnt = cnt - 1
+    else
+      " Since this didn't work, push the selection back one char. This
+      " will have the effect of getting the enclosing block. Do it at
+      " the beginning rather than the end - the beginning is very likely
+      " to be only one indentation level different.
+      if s:l0 == 0
+        return
+      endif
+      let s:l0 -= 1
+      let s:c0 = len(getline(s:l0))
+    endif
+
+    let itr_cnt += 1
+
+  endwhile
+
+  " Apply the range we have found. Make sure to use the current visual mode.
+  call cursor(s:l0, s:c0)
+  exe "normal! " . vismode
+  call cursor(s:l1, s:c1)
+  normal! o
+
+  " Update these static variables - we need to keep these up-to-date between
+  " invocations because it's the only way we can detect whether it's a new
+  " visual mode. We need to know if it's a new visual mode because otherwise
+  " if there's a single line block in visual line mode and we select it with
+  " "V", we can't tell whether it's already been selected using Vii.
+  exe "normal! \<Esc>"
+  let s:l0 = line("'<")
+  let s:l1 = line("'>")
+  let s:c0 = col("'<")
+  let s:c1 = col("'>")
+  normal! gv0o0
+
+endfunction
+
+function! HandleTextObjectMapping(inner, incbelow, vis, range)
+  call TextObject(a:inner, a:incbelow, a:vis, a:range, v:count1)
 endfunction
