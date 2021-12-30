@@ -102,58 +102,108 @@ set splitbelow splitright
 augroup gitstatusline
   autocmd!
   autocmd BufEnter,FocusGained,BufWrite,BufWritePost <buffer> let b:git_status=system("git_status " . expand("%:p"))
+  autocmd BufEnter,FocusGained <buffer> let b:focus=1
+  autocmd BufLeave,FocusLost <buffer> let b:focus=0
 augroup end
 
 " status line
 set laststatus=2
 function MyStatusLine()
-  let l:sl="%n "
-  let l:sl.="%<%f"
-  let l:sl.=" %h%m%r"
-  let l:sl.="%=%1.20("
   if !exists("g:statusline_winid")
     " Vim < 8.2 e.g. Debian buster
     let l:buf=bufnr("%")
   else
     let l:buf=winbufnr(g:statusline_winid)
   endif
+
+  if getbufvar(l:buf, "focus") == 1
+    if getbufvar(l:buf, "&mod") == 1
+      let l:mystatus="Mod"
+    else
+      if getbufvar(l:buf, "&ro") == 1
+        let l:mystatus="RO"
+      else
+        let l:mystatus="OK"
+      endif
+    endif
+  else
+    let l:mystatus="Inactive"
+  endif
+
+  let l:sl="%n "
+  let l:sl.="%<%f "
+  let l:sl.=getbufvar(l:buf, "&buftype")
+" Filetype-specific glyphs (alternatives: ﬦ)
+  let l:sl.=get({"vim": "%#VimGreen#%* "
+               \,"haskell": "%#HaskellPurple#%* "
+               \,"javascript": "%#JSYellow#%* "
+               \,"make": "%#White#%* "
+               \,"html": "%#HtmlOrange#%* "
+               \,"python": "%#JSYellow#%* "
+               \}, getbufvar(l:buf, "&ft"), "")
+  let l:sl.="%h%m%r"
+  let l:sl.="%=%1.20("
   let l:sl.=getbufvar(l:buf, "git_status")
-  let l:sl.="%)  %-8.(%l,%c%V%) %P "
-  return l:sl
+  let l:sl.="%)"
+  let l:sl.="  %-8.(%l,%c%V%) %P "
+  return substitute(l:sl, '\(%#\a\+\)#', '\1' . l:mystatus . "#", "g")
 endfunction
 set statusline=%!MyStatusLine()
-function! ModifiedColor()
+
+au BufEnter,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
+function ModifiedColor()
   if &mod == 1
     hi StatusLine ctermfg=58 ctermbg=8
-    hi GitGreen ctermfg=040 ctermbg=58
-    hi GitBlue ctermfg=004 ctermbg=58
-    hi GitRed ctermfg=400 ctermbg=58
-    hi GitYellow cterm=bold ctermfg=440 ctermbg=58
   else
     if &ro == 1
       hi StatusLine ctermfg=23 ctermbg=8
-      hi GitGreen ctermfg=040 ctermbg=23
-      hi GitBlue ctermfg=004 ctermbg=23
-      hi GitRed ctermfg=400 ctermbg=23
-      hi GitYellow cterm=bold ctermfg=440 ctermbg=23
     else
       hi StatusLine ctermfg=24 ctermbg=8
-      hi GitGreen ctermfg=040 ctermbg=24
-      hi GitBlue ctermfg=004 ctermbg=24
-      hi GitRed ctermfg=400 ctermbg=24
-      hi GitYellow cterm=bold ctermfg=440 ctermbg=24
     endif
   endif
 endfunction
-au BufEnter,BufLeave,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
+
 hi StatusLine ctermfg=24 ctermbg=8
 hi StatusLineNC ctermfg=237 ctermbg=8
 hi StatusLineTerm cterm=bold,reverse ctermfg=22 ctermbg=8
 hi StatusLineTermNC cterm=bold,reverse ctermfg=237 ctermbg=8
-hi GitGreen ctermfg=040 ctermbg=8
-hi GitBlue ctermfg=004 ctermbg=8
-hi GitRed ctermfg=400 ctermbg=8
-hi GitYellow cterm=bold ctermfg=440 ctermbg=8
+
+hi GitGreenOK ctermfg=040 ctermbg=24
+hi GitGreenMod ctermfg=040 ctermbg=58
+hi GitGreenRO ctermfg=040 ctermbg=23
+hi GitGreenInactive ctermfg=040 ctermbg=237
+hi GitBlueOK ctermfg=004 ctermbg=24
+hi GitBlueMod ctermfg=004 ctermbg=58
+hi GitBlueRO ctermfg=004 ctermbg=23
+hi GitBlueInactive ctermfg=004 ctermbg=237
+hi GitYellowOK cterm=bold ctermfg=440 ctermbg=24
+hi GitYellowMod cterm=bold ctermfg=440 ctermbg=58
+hi GitYellowRO cterm=bold ctermfg=440 ctermbg=23
+hi GitYellowInactive cterm=bold ctermfg=440 ctermbg=237
+hi GitRedOK ctermfg=400 ctermbg=24
+hi GitRedMod ctermfg=400 ctermbg=58
+hi GitRedRO ctermfg=400 ctermbg=23
+hi GitRedInactive ctermfg=400 ctermbg=237
+hi HaskellPurpleOK cterm=bold ctermfg=129 ctermbg=24
+hi HaskellPurpleMod cterm=bold ctermfg=129 ctermbg=58
+hi HaskellPurpleRO cterm=bold ctermfg=129 ctermbg=23
+hi HaskellPurpleInactive cterm=bold ctermfg=129 ctermbg=237
+hi JSYellowOK ctermfg=221 ctermbg=24
+hi JSYellowMod ctermfg=221 ctermbg=58
+hi JSYellowRO ctermfg=221 ctermbg=23
+hi JSYellowInactive ctermfg=221 ctermbg=237
+hi VimGreenOK ctermfg=040 ctermbg=24
+hi VimGreenMod ctermfg=040 ctermbg=58
+hi VimGreenRO ctermfg=040 ctermbg=23
+hi VimGreenInactive ctermfg=040 ctermbg=237
+hi HtmlOrangeOK ctermfg=166 ctermbg=24
+hi HtmlOrangeMod ctermfg=166 ctermbg=58
+hi HtmlOrangeRO ctermfg=166 ctermbg=23
+hi HtmlOrangeInactive ctermfg=166 ctermbg=237
+hi WhiteOK cterm=bold ctermfg=231 ctermbg=24
+hi WhiteMod cterm=bold ctermfg=231 ctermbg=58
+hi WhiteRO cterm=bold ctermfg=231 ctermbg=23
+hi WhiteInactive cterm=bold ctermfg=231 ctermbg=237
 
 nnoremap <silent> <F12> :set invnumber invrelativenumber mouse=<CR>
 nnoremap <silent> <F10> :term git -P lola<CR>

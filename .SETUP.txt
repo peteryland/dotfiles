@@ -24,7 +24,7 @@ if [ "$OSTYPE" = darwin18 ]; then
 
   # ghci setup
   cabal update
-  cabal install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
+  cabal install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent doctest stylish-haskell --overwrite-policy=always
 
   # stack update
   # stack install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
@@ -42,9 +42,9 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   sudo apt purge vim-tiny nano
 
   # sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
-  sudo apt install libpcre3-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
+  sudo apt install libpcre2-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
   cabal update
-  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot
+  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell --overwrite-policy=always
 
   ln -s .gitconfig.linux.pdr .gitconfig
 fi
@@ -67,6 +67,7 @@ fi
 
 ## Linux Desktops
 # Remap keys: capslock -> escape and shift-capslock -> capslock
+# For more options: man 7 xkeyboard-config
 # In /etc/default/keyboard
 # XKBOPTIONS="caps:escape_shifted_capslock"
 # Maybe then need to: sudo dpkg-reconfigure keyboard-configuration
@@ -81,4 +82,4 @@ fi
 # install nix via apt
 #?? nix-env -i cabal-install hlint goa lambdabot
 #?? ~/.nix-profile/bin/cabal update
-#?? ~/.nix-profile/bin/cabal install pretty-show hscolour hoogle hindent
+#?? ~/.nix-profile/bin/cabal install pretty-show hscolour hoogle hindent doctest --overwrite-policy=always

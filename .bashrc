@@ -89,7 +89,7 @@ if [ "$UID" -eq 0 ]; then
 else
   usercol=6
 fi
-export PS1='${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\em\]}\[\e[m\]${debian_chroot:+(\[\e[31m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
+export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\em\]}\[\e[m\]${debian_chroot:+(\[\e[31m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
 
 bashrc_term_title() {
@@ -104,6 +104,28 @@ if [ "$TERM_PROGRAM" ]; then
 else
   termprog="$TERM"
 fi
+
+case "$(uname -s)" in
+  Darwin)
+    ismac=1
+    ;;
+  Linux)
+    islinux=1
+    case "$(lsb_release -s -i)" in
+      Debian|Raspbian)
+        isdeb=1
+        islinux=
+        ;;
+    esac
+    case "$(uname -m)" in
+      armv7l)
+        isrpi=1
+        islinux=
+        isdeb=
+        ;;
+    esac
+    ;;
+esac
 
 case "$termprog" in
   iTerm*)
