@@ -1,26 +1,38 @@
 ## Mac specific:
 if [ "$OSTYPE" = darwin18 ]; then
 
+  # System preferences:
+    # Trackpad:
+      # Tap to click
+      # Tracking speed: fastest
+
   # install iTerm2 https://www.iterm2.com/downloads.html
+
+  # install this repo
+  git clone https://github.com/peteryland/dotfiles
+  mv dotfiles/.[a-zA-Z]* .
+  rmdir dotfiles
 
   # install brew https://brew.sh/
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   read -p "Press Enter to continue"
 
-  # install xcode
-  xcode-select --install
-  read -p "Press Enter to continue"
+  # install xcode (should be already installed with iTerm2)
+  # xcode-select --install
+  # read -p "Press Enter to continue"
 
-  # install haskell for mac
+  # install haskell for mac and any other App Store apps
   open 'https://geo.itunes.apple.com/us/app/haskell/id841285201?mt=12'
   read -p "Press Enter to continue"
 
   # install nerd fonts https://github.com/ryanoasis/nerd-fonts
-  brew tap caskroom/fonts
-  brew cask install font-hack-nerd-font
+  brew tap homebrew/cask-fonts
+  brew install font-hack-nerd-font
 
   # install other useful things from brew
-  brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git
+  brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git fswatch bash qutebrowser brave-browser haskell-language-server vim
+
+  sudo chsh $USER  # set to /opt/homebrew/bin/bash
 
   # ghci setup
   cabal update
@@ -29,22 +41,22 @@ if [ "$OSTYPE" = darwin18 ]; then
   # stack update
   # stack install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
 
-  # install haskell-language-server https://github.com/haskell/haskell-language-server
-
   ln -s .gitconfig.mac.pdr .gitconfig
+
+  # Install XQuartz (xquartz.org)
 fi
 
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
-  sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix
+  sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix fswatch pkg-config
   sudo apt install vim-nox curl
   sudo apt purge vim-tiny nano
 
   # sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
   sudo apt install libpcre2-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
   cabal update
-  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell --overwrite-policy=always
+  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell haskell-language-server --overwrite-policy=always
 
   ln -s .gitconfig.linux.pdr .gitconfig
 fi
@@ -78,6 +90,7 @@ fi
 # curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # install haskell-language-server https://github.com/haskell/haskell-language-server
+ln -s "$(command -v haskell-language-server-wrapper)" ~/.local/bin/hls
 
 # install nix via apt
 #?? nix-env -i cabal-install hlint goa lambdabot

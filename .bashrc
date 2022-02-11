@@ -231,6 +231,8 @@ bashrc_path_add "$HOME/local/bin" "$HOME/local/sbin"
 bashrc_path_add "$HOME/.bin" "$HOME/.sbin"
 bashrc_path_add "$HOME/bin" "$HOME/sbin"
 
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+
 export PATH
 
 if [[ -r ~/.inputrc ]]; then
@@ -241,25 +243,21 @@ if [[ -r "$HOME"/.local/bin/color-dark ]]; then
   . "$HOME"/.local/bin/color-dark
 fi
 
-if ! shopt -oq posix; then
-  if [[ -f /etc/bash_completion ]]; then
+for i in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh; do
+  [[ -r $i ]] && . "$i"
+done
+
+if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
+  if [[ -r ~/.bash_completion ]]; then
+    . ~/.bash_completion
+  elif [[ -r /etc/bash_completion ]]; then
     . /etc/bash_completion
-  elif [[ -f /usr/share/bash-completion/bash_completion ]]; then
+  elif [[ -r /usr/local/etc/bash_completion ]]; then
+    . /usr/local/etc/bash_completion
+  elif [[ -r /usr/local/share/bash-completion/bash_completion ]]; then
+    . /usr/local/share/bash-completion/bash_completion
+  elif [[ -r /usr/share/bash-completion/bash_completion ]]; then
     . /usr/share/bash-completion/bash_completion
-  else
-    for i in /usr/local/etc/bash_completion.d/*; do
-      if [[ -r "$i" ]]; then
-        . "$i"
-      fi
-    done
-
-    if [[ ! -r /usr/local/etc/bash_completion.d/git-completion.bash && -r /Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash ]]; then
-      . /Applications/Xcode.app/Contents/Developer/usr/share/git-core/git-completion.bash
-    fi
-
-    if [[ -r ~/.bash_completion ]]; then
-      . ~/.bash_completion
-    fi
   fi
 
   if type -p stack > /dev/null; then
@@ -280,7 +278,7 @@ j() {
     shift
   fi
 
-  if [[ ! -x /usr/libexec/java_home ]]; then
+  if [[ ! -x /usr/libexec/java_home ]] || ! /usr/libexec/java_home > /dev/null 2>&1; then
     if [ "$verbose" ]; then
       echo "No Java installed."
     fi
