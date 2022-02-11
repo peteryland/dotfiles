@@ -99,7 +99,7 @@ set history=1000
 set backspace=indent,eol,start
 set splitbelow splitright
 
-augroup gitstatusline
+augroup statusline
   autocmd!
   autocmd BufEnter,FocusGained,BufWrite,BufWritePost <buffer> let b:git_status=system("git_status " . expand("%:p"))
   autocmd BufEnter,FocusGained <buffer> let b:focus=1
@@ -116,7 +116,8 @@ function MyStatusLine()
     let l:buf=winbufnr(g:statusline_winid)
   endif
 
-  if getbufvar(l:buf, "focus") == 1
+  let l:focus = getbufvar(l:buf, "focus", v:none)
+  if l:focus == 1 || l:focus == v:none
     if getbufvar(l:buf, "&mod") == 1
       let l:mystatus="Mod"
     else
@@ -150,7 +151,7 @@ function MyStatusLine()
 endfunction
 set statusline=%!MyStatusLine()
 
-au BufEnter,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
+au BufNewFile,BufRead,BufEnter,FocusGained,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
 function ModifiedColor()
   if &mod == 1
     hi StatusLine ctermfg=58 ctermbg=8
@@ -359,13 +360,20 @@ function! ConcealToggle()
   endif
 endfunction
 
+" silence gq
+nnoremap <silent> gq :setlocal opfunc=FormatPrg<cr>g@
+
+function! FormatPrg(...)
+  silent exe "'[,']!".&formatprg
+endfunction
+
 " haskell
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal formatprg=stylish-haskell
 " au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=stack\ build
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=make
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal keywordprg=hoogle-info
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* noremap <silent> K <Cmd>call ReadMan(expand('<cword>'), "Haskell")<CR>
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal iskeyword+=@-@,',$,<->,!,\|,/,~,%,94,*,+,&,_,.
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal iskeyword+=@-@,',$,<->,!,\|,/,~,%,94,*,+,&,_
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* map <silent> gl :cex system('hlint .')<CR>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* runtime ftplugin/haskell.vim
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* runtime ext/haskell.vim
@@ -432,21 +440,19 @@ endfunction
 
 " https://github.com/mpickering/hlint-refactor-vim
 function! ApplyOneSuggestion()
-  let l = line(".")
-  let c = col(".")
-  let l:filter = "%! hlint - --refactor --refactor-options=\"--pos ".l.','.c."\""
-  execute l:filter
-  silent if v:shell_error == 1 | undo | endif
-  call cursor(l, c)
+  let l:l = line(".")
+  let l:c = col(".")
+  let l:filter = "%!hlint - --refactor --refactor-options=\"--pos ".l:l.','.l:c."\""
+  silent execute l:filter
+  call cursor(l:l, l:c)
 endfunction
 
 function! ApplyAllSuggestions()
-  let l = line(".")
-  let c = col(".")
-  let l:filter = "%! hlint - --refactor"
-  execute l:filter
-  silent if v:shell_error == 1 | undo | endif
-  call cursor(l, c)
+  let l:l = line(".")
+  let l:c = col(".")
+  let l:filter = "%!hlint - --refactor"
+  silent execute l:filter
+  call cursor(l:l, l:c)
 endfunction
 
 au BufNewFile,BufRead,BufEnter *.hs,.ghci* map <silent> to :call ApplyOneSuggestion()<CR>
@@ -508,18 +514,18 @@ function! s:on_lsp_buffer_enabled() abort
     setlocal omnifunc=lsp#complete
     setlocal signcolumn=yes
     if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
-    nmap <buffer> gd <plug>(lsp-definition)
-    nmap <buffer> gr <plug>(lsp-references)
-    nmap <buffer> gf <plug>(lsp-code-action)
-    nmap <buffer> gi <plug>(lsp-implementation)
-    nmap <buffer> gt <plug>(lsp-type-definition)
+    nmap <buffer> Ld <plug>(lsp-definition)
+    nmap <buffer> Lr <plug>(lsp-references)
+    nmap <buffer> Lf <plug>(lsp-code-action)
+    nmap <buffer> Li <plug>(lsp-implementation)
+    nmap <buffer> Lt <plug>(lsp-type-definition)
     nmap <buffer> <F2> <plug>(lsp-rename)
-    nmap <buffer> [g <Plug>(lsp-previous-diagnostic)
-    nmap <buffer> ]g <Plug>(lsp-next-diagnostic)
-    nmap <buffer> gG :LspDocumentDiagnostics<CR>
-    nmap <buffer> <S-C-k> <plug>(lsp-hover)
+    nmap <buffer> [g <plug>(lsp-previous-diagnostic)
+    nmap <buffer> ]g <plug>(lsp-next-diagnostic)
+    nmap <buffer> gG <plug>(lsp-document-diagnostics)
+    nmap <buffer> LL <plug>(lsp-hover)
 "     nmap <buffer> f <plug>(lsp-document-range-format)
-    nmap <buffer> <F5> <plug>(lsp-code-lens)
+    nmap <buffer> Ll <plug>(lsp-code-lens)
 
     " refer to doc to add more commands
     " set foldmethod=expr
@@ -534,12 +540,12 @@ augroup lsp_install
 
     let g:lsp_hover_conceal = 0
 
-    let g:lsp_signs_error = {'text': '✗'}
-    let g:lsp_signs_warning = {'text': '‼'}
-    let g:lsp_signs_information = {'text': '-'}
-    let g:lsp_signs_hint = {'text': '!'}
+    let g:lsp_document_code_action_signs_enabled = 0
+    let g:lsp_diagnostics_signs_error = {'text': '✗'}
+    let g:lsp_diagnostics_signs_warning = {'text': '‼'}
+    let g:lsp_diagnostics_signs_information = {'text': '-'}
+    let g:lsp_diagnostics_signs_hint = {'text': '!'}
 
-    let g:lsp_highlight_references_enabled = 1
     highlight lspReference term=italic,bold ctermbg=238 gui=italic,bold
     highlight lspErrorText term=italic,bold ctermbg=238 gui=italic,bold
 augroup END

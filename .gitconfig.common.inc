@@ -30,3 +30,5 @@
   autoStash = true
 [core]
   whitespace = warn
+[init]
+  defaultBranch = main

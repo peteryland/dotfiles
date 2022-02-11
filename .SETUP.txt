@@ -50,7 +50,7 @@ fi
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
   sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix fswatch pkg-config
-  sudo apt install vim-nox curl
+  sudo apt install vim-nox curl tmux mtr htop
   sudo apt purge vim-tiny nano
 
   # sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
@@ -67,7 +67,9 @@ fi
 
 ## Linux Servers
 # Disable any attempt to suspend with the following:
-# sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+# sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+# sudo vi /etc/systemd/sleep.conf
+# gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
 
 # If we are a router
 # Turn on ip_forwarding in /etc/sysctl.conf

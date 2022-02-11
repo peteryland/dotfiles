@@ -11,6 +11,7 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 HISTSIZE=10000
 HISTFILESIZE=20000
+HISTTIMEFORMAT="%F %T "
 export EDITOR=vim
 
 shopt -s checkwinsize
@@ -131,7 +132,7 @@ case "$termprog" in
   iTerm*)
     export CLICOLOR=1
     ;&
-  xterm-color|*-256color)
+  xterm-color|*-256color|xterm-kitty)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
       if [ -z "$VIM_TERMINAL" ]; then
@@ -211,6 +212,35 @@ alias ll='ls -al'
 alias lt='ls -altr'
 alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
 
+mv. () {
+  oldname="$(pwd)"
+  newname="$1"
+  if [[ -z $newname ]]; then
+    echo "Usage: mv. newname" >&2
+    return 1
+  fi
+  cd ..
+  mv "$oldname" "$newname"
+  cd "$newname"
+}
+
+rm. () {
+  flag="$1"
+  dirname="$(pwd)"
+  if [[ $flag != '-f' ]]; then
+    if [[ $flag ]]; then
+      echo "Usage: rm. [-f]" >&2
+      return 1
+    fi
+    read -p "Really remove current directory [yN]? " ans
+    if [[ $ans != 'y' ]]; then
+      return
+    fi
+  fi
+  cd ..
+  rm -r "$dirname"
+}
+
 bashrc_path_add() {
   local dir
   while [[ $1 ]]; do
@@ -224,7 +254,7 @@ bashrc_path_add() {
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
 bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
-bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
+# bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
 bashrc_path_add "$HOME/.cabal/bin" "$HOME/.cabal/sbin"
 bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"
 bashrc_path_add "$HOME/local/bin" "$HOME/local/sbin"
