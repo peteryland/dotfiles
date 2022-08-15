@@ -49,7 +49,7 @@ fi
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
-  sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix fswatch pkg-config
+  sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix fswatch pkg-config jq
   sudo apt install vim-nox curl tmux mtr htop
   sudo apt purge vim-tiny nano
 

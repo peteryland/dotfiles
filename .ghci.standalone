@@ -1,5 +1,5 @@
 :unset +s +t
-:set +m -v0 -package directory -package ghc-paths -package unix -package process -package text -package vector -XNoImplicitPrelude
+:set +m -v0 -package directory -package ghc-paths -package unix -package process -package text -package vector -package unordered-containers -package pretty-show -XNoImplicitPrelude
 :seti -w -XAllowAmbiguousTypes -XConstraintKinds -XDataKinds -XFlexibleContexts -XFlexibleInstances -XGADTs -XInstanceSigs -XMultiParamTypeClasses -XNumericUnderscores -XOverloadedStrings -XPartialTypeSignatures -XPolyKinds -XRankNTypes -XScopedTypeVariables -XTupleSections -XTypeApplications -XTypeFamilies -XTypeOperators -XUndecidableInstances -XUndecidableSuperClasses -XIncoherentInstances
 :set editor vim
 

@@ -141,6 +141,7 @@ function MyStatusLine()
                \,"make": "%#White#%* "
                \,"html": "%#HtmlOrange#%* "
                \,"python": "%#JSYellow#%* "
+               \,"elm": "%#ElmBlue#%* "
                \}, getbufvar(l:buf, "&ft"), "")
   let l:sl.="%h%m%r"
   let l:sl.="%=%1.20("
@@ -154,20 +155,20 @@ set statusline=%!MyStatusLine()
 au BufNewFile,BufRead,BufEnter,FocusGained,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
 function ModifiedColor()
   if &mod == 1
-    hi StatusLine ctermfg=58 ctermbg=8
+    hi StatusLine ctermfg=58 ctermbg=110
   else
     if &ro == 1
-      hi StatusLine ctermfg=23 ctermbg=8
+      hi StatusLine ctermfg=23 ctermbg=110
     else
-      hi StatusLine ctermfg=24 ctermbg=8
+      hi StatusLine ctermfg=24 ctermbg=110
     endif
   endif
 endfunction
 
-hi StatusLine ctermfg=24 ctermbg=8
-hi StatusLineNC ctermfg=237 ctermbg=8
-hi StatusLineTerm cterm=bold,reverse ctermfg=22 ctermbg=8
-hi StatusLineTermNC cterm=bold,reverse ctermfg=237 ctermbg=8
+hi StatusLine ctermfg=24 ctermbg=110
+hi StatusLineNC ctermfg=237 ctermbg=110
+hi StatusLineTerm cterm=bold,reverse ctermfg=22 ctermbg=110
+hi StatusLineTermNC cterm=bold,reverse ctermfg=237 ctermbg=110
 
 hi GitGreenOK ctermfg=040 ctermbg=24
 hi GitGreenMod ctermfg=040 ctermbg=58
@@ -201,6 +202,10 @@ hi HtmlOrangeOK ctermfg=166 ctermbg=24
 hi HtmlOrangeMod ctermfg=166 ctermbg=58
 hi HtmlOrangeRO ctermfg=166 ctermbg=23
 hi HtmlOrangeInactive ctermfg=166 ctermbg=237
+hi ElmBlueOK cterm=bold ctermfg=32 ctermbg=24
+hi ElmBlueMod cterm=bold ctermfg=32 ctermbg=58
+hi ElmBlueRO cterm=bold ctermfg=32 ctermbg=23
+hi ElmBlueInactive cterm=bold ctermfg=32 ctermbg=237
 hi WhiteOK cterm=bold ctermfg=231 ctermbg=24
 hi WhiteMod cterm=bold ctermfg=231 ctermbg=58
 hi WhiteRO cterm=bold ctermfg=231 ctermbg=23
@@ -329,9 +334,9 @@ au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> - @='gI// 
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> _ :keeppatterns s/^\( *\)\/\/ \?/\1/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js vmap <buffer> - <C-C>`>a */<ESC>`<i/* <ESC>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp setlocal makeprg=make
-au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config map <silent> - @='gI-- <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config map <silent> _ :keeppatterns s/^\( *\)-- \?/\1/e<CR>0j:noh<CR>
-au BufNewFile,BufRead,BufEnter *.hs,.ghci*,*.cabal,**/.cabal/config vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
+au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config map <silent> - @='gI-- <C-V><ESC>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config map <silent> _ :keeppatterns s/^\( *\)-- \?/\1/e<CR>0j:noh<CR>
+au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> - :keeppatterns s/^> /> -- /e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :keeppatterns s/^> -- /> /e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> - @='gI<!-- <C-V><ESC>A --><C-V><ESC>0j'<CR>

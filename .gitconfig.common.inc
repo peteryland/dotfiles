@@ -12,8 +12,16 @@
   lola = log --graph --decorate --abbrev-commit --all
   s = status -uno
   su = status
+  f = fetch
+  rn = release-notes
   d = diff
+  dc = diff --cached
   ds = diff --staged
+  c = commit
+  fp = format-patch
+  hist = log HEAD^^^..
+  co = checkout
+  b = branch
   ca = commit --amend -q --no-edit
   pf = push --force-with-lease
   capf = !git commit --amend -q --no-edit && git push -q --force-with-lease && :
@@ -24,11 +32,17 @@
   diff = auto
   interactive = auto
   status = auto
+  ui = auto
 [pull]
   rebase = true
 [rebase]
   autoStash = true
-[core]
-  whitespace = warn
+  autoSquash = true
 [init]
   defaultBranch = main
+[apply]
+  whitespace = fix
+[diff]
+  algorithm = histogram
+  indentHeuristic = true
+  tool = vimdiff

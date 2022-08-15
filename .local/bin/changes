@@ -1,9 +1,10 @@
 #!/bin/bash
 
-if [[ -z "$1" ]]; then
+if [[ -z "$1" || "$1" == "-h" || "$1" == "--help" ]]; then
   echo "Usage: $0 filename" >&2
   echo "  Compares stdin to filename and if there's any difference, outputs" >&2
   echo "  a change summary and updates filename." >&2
+  exit 0
 fi
 
 if [[ ! -w "$(dirname "$1")" ]]; then
@@ -12,9 +13,8 @@ if [[ ! -w "$(dirname "$1")" ]]; then
 fi
 
 if [[ ! -r "$1" ]]; then
-  echo "----- CURRENT -----"
   tee "$1"
-  echo "-------------------"
+  exit 0
 fi
 
 cat - > "$1".new

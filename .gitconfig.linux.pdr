@@ -1,2 +1,8 @@
 [include]
   path = .gitconfig.common.inc
+
+[includeIf "gitdir:~/src/work/"]
+  path = .gitconfig.magnolia.inc
+
+[includeIf "gitdir:~/src/magnolia/"]
+  path = .gitconfig.magnolia.inc
