@@ -4,6 +4,28 @@ case $- in
   *) return;;
 esac
 
+for i in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh; do
+  [[ -r $i ]] && . "$i"
+done
+
+if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
+  if [[ -r ~/.bash_completion ]]; then
+    . ~/.bash_completion
+  elif [[ -r /etc/bash_completion ]]; then
+    . /etc/bash_completion
+  elif [[ -r /usr/local/etc/bash_completion ]]; then
+    . /usr/local/etc/bash_completion
+  elif [[ -r /usr/local/share/bash-completion/bash_completion ]]; then
+    . /usr/local/share/bash-completion/bash_completion
+  elif [[ -r /usr/share/bash-completion/bash_completion ]]; then
+    . /usr/share/bash-completion/bash_completion
+  fi
+
+  if type -p stack > /dev/null; then
+    eval "$(stack --bash-completion-script stack)"
+  fi
+fi
+
 # Hide recommendation to switch to zsh in MacOS Catalina.
 export BASH_SILENCE_DEPRECATION_WARNING=1
 # Don't put duplicate lines or lines starting with space in the history.
@@ -30,12 +52,9 @@ if [[ -r "$HOME/.bash_aliases" ]]; then
   . "$HOME/.bash_aliases"
 fi
 
-if [[ -r "$HOME/.bashrc_local" ]]; then
-  . "$HOME/.bashrc_local"
-fi
-
 case "$OSTYPE" in
   darwin*)
+    export CLICOLOR=1
     export LSCOLORS=ExFxBxDxCxegedabagacad
     alias ls='ls -Gh'
     alias dfh='df -h /System/Volumes/Data'
@@ -68,23 +87,6 @@ case "$OSTYPE" in
     statm() { return 0; }
 esac
 
-# Set rgb in .bashrc_local for a fixed background colour
-if [[ -z "$rgb" ]]; then
-  # Set devmachine=1 in non-prod .bashrc_local to ensure brighter colours for prod machines
-  if [[ $devmachine ]]; then
-    bgfactor=4
-  else
-    bgfactor=2
-  fi
-
-  rgb=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
-  red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$rgb")$(cut -c 2 <<< "$rgb") / $bgfactor"))
-  green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$rgb")$(cut -c 4 <<< "$rgb") / $bgfactor"))
-  blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$rgb")$(cut -c 1 <<< "$rgb") / $bgfactor"))
-  rgb="$red$green$blue"
-  unset red green blue
-fi
-
 if [ "$UID" -eq 0 ]; then
   usercol=1
 else
@@ -92,19 +94,6 @@ else
 fi
 export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\em\]}\[\e[m\]${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
-
-bashrc_term_title() {
-  # set terminal tab title
-  printf "\e]1;$(id -un)@$(hostname -s)\a"
-  # set terminal window title
-  printf "\e]2;$(id -un)@$(hostname -s):${PWD/$HOME/~}\a"
-}
-
-if [ "$TERM_PROGRAM" ]; then
-  termprog="$TERM_PROGRAM"
-else
-  termprog="$TERM"
-fi
 
 case "$(uname -s)" in
   Darwin)
@@ -128,11 +117,23 @@ case "$(uname -s)" in
     ;;
 esac
 
+bashrc_term_title() {
+  # set terminal tab title
+  printf "\e]1;$(id -un)@$(hostname -s)\a"
+  # set terminal window title
+  printf "\e]2;$(id -un)@$(hostname -s):${PWD/$HOME/\~}\a"
+}
+
+if [ "$LC_TERMINAL" ]; then
+  termprog="$LC_TERMINAL"
+elif [ "$TERM_PROGRAM" -a "$TERM_PROGRAM" != tmux ]; then
+  termprog="$TERM_PROGRAM"
+else
+  termprog="$TERM"
+fi
+
 case "$termprog" in
-  iTerm*)
-    export CLICOLOR=1
-    ;&
-  xterm-color|*-256color|xterm-kitty)
+  iTerm*|xterm-color|*-256color|xterm-kitty)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
       if [ -z "$VIM_TERMINAL" ]; then
@@ -144,7 +145,6 @@ case "$termprog" in
     }
     ;;
   Apple_Terminal)
-    export CLICOLOR=1
     bashrc_term_title_and_colours() {
       if [ -z "$VIM_TERMINAL" ]; then
         bashrc_term_title
@@ -191,16 +191,6 @@ bashrc_check_repo() {
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
   fi
 }
-
-bashrc_prompt() {
-  bashrc_exit_status=${?#0}
-  # tput sc; tput home; printf "%*s" $COLUMNS "$(date)"; tput rc
-  bashrc_check_repo
-  bashrc_term_title_and_colours
-}
-
-PROMPT_COMMAND=bashrc_prompt
-bashrc_prompt
 
 if [[ $(type -t pg) = alias ]]; then unalias pg; fi
 pg() {
@@ -281,61 +271,11 @@ if [[ -r "$HOME"/.local/bin/color-dark ]]; then
   . "$HOME"/.local/bin/color-dark
 fi
 
-for i in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh; do
-  [[ -r $i ]] && . "$i"
-done
-
-if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
-  if [[ -r ~/.bash_completion ]]; then
-    . ~/.bash_completion
-  elif [[ -r /etc/bash_completion ]]; then
-    . /etc/bash_completion
-  elif [[ -r /usr/local/etc/bash_completion ]]; then
-    . /usr/local/etc/bash_completion
-  elif [[ -r /usr/local/share/bash-completion/bash_completion ]]; then
-    . /usr/local/share/bash-completion/bash_completion
-  elif [[ -r /usr/share/bash-completion/bash_completion ]]; then
-    . /usr/share/bash-completion/bash_completion
-  fi
-
-  if type -p stack > /dev/null; then
-    eval "$(stack --bash-completion-script stack)"
-  fi
-fi
-
 spf() {
   while [ "$1" ]; do
     host -t TXT "$1" | cut -d\" -f2 | grep '^v=spf'
     shift
   done
-}
-
-j() {
-  if [ "$1" = "-v" ]; then
-    verbose=1
-    shift
-  fi
-
-  if [[ ! -x /usr/libexec/java_home ]] || ! /usr/libexec/java_home > /dev/null 2>&1; then
-    if [ "$verbose" ]; then
-      echo "No Java installed."
-    fi
-    return
-  fi
-
-  ver="$1"
-  if [ -z "$ver" ]; then
-    echo JAVA_HOME="$JAVA_HOME"
-    /usr/libexec/java_home -V
-  else
-    if [ "$ver" = latest ]; then
-      ver="$(/usr/libexec/java_home -V 2>&1 | grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
-    fi
-    export JAVA_HOME=$(/usr/libexec/java_home -v "$ver")
-    if [ "$verbose" ]; then
-      echo JAVA_HOME="$JAVA_HOME"
-    fi
-  fi
 }
 
 SCRATCHDIR="$HOME/src/scratch"
@@ -471,6 +411,45 @@ sub() {
   fi
 }
 
+fcd() {
+  local t
+  for t in ~/src/*/"$1" ~/src/*/*/"$1" ~/src/*/*/*/"$1"; do
+    if [[ -d "$t" ]]; then
+      cd "$t"
+      return
+    fi
+  done
+  cd "$1"
+}
+
+j() {
+  if [ "$1" = "-v" ]; then
+    verbose=1
+    shift
+  fi
+
+  if [[ ! -x /usr/libexec/java_home ]] || ! /usr/libexec/java_home > /dev/null 2>&1; then
+    if [ "$verbose" ]; then
+      echo "No Java installed."
+    fi
+    return
+  fi
+
+  ver="$1"
+  if [ -z "$ver" ]; then
+    echo JAVA_HOME="$JAVA_HOME"
+    /usr/libexec/java_home -V
+  else
+    if [ "$ver" = latest ]; then
+      ver="$(/usr/libexec/java_home -V 2>&1 | grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
+    fi
+    export JAVA_HOME=$(/usr/libexec/java_home -v "$ver")
+    if [ "$verbose" ]; then
+      echo JAVA_HOME="$JAVA_HOME"
+    fi
+  fi
+}
+
 j latest
 
 # The following is for working with NixOS
@@ -480,3 +459,34 @@ j latest
 # The following is for Go development
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
 # [[ -s "$HOME/.gvm/bin/gvm-init.sh" ]] && source "$HOME/.gvm/bin/gvm-init.sh"
+
+if [[ -r "$HOME/.bashrc_local" ]]; then
+  . "$HOME/.bashrc_local"
+fi
+
+# Set rgb in .bashrc_local for a fixed background colour
+if [[ -z "$rgb" ]]; then
+  # Set devmachine=1 in non-prod .bashrc_local to ensure brighter colours for prod machines
+  if [[ $devmachine ]]; then
+    bgfactor=4
+  else
+    bgfactor=2
+  fi
+
+  rgb=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
+  red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$rgb")$(cut -c 2 <<< "$rgb") / $bgfactor"))
+  green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$rgb")$(cut -c 4 <<< "$rgb") / $bgfactor"))
+  blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$rgb")$(cut -c 1 <<< "$rgb") / $bgfactor"))
+  rgb="$red$green$blue"
+  unset red green blue
+fi
+
+bashrc_prompt() {
+  bashrc_exit_status=${?#0}
+  # tput sc; tput home; printf "%*s" $COLUMNS "$(date)"; tput rc
+  bashrc_check_repo
+  bashrc_term_title_and_colours
+}
+
+PROMPT_COMMAND=bashrc_prompt
+bashrc_prompt

@@ -12,12 +12,14 @@
 .DS_Store
 .gitconfig
 .gitit.conf
+.gnupg
 .gnuplot-wxt
 .h*
 .inputrc
 .nix*
 .npm
 .nvidia-settings-rc
+.password-store
 .reportbugrc
 .rnd
 .selected_editor

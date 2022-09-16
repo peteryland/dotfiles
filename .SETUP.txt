@@ -30,7 +30,7 @@ if [ "$OSTYPE" = darwin18 ]; then
   brew install font-hack-nerd-font
 
   # install other useful things from brew
-  brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git fswatch bash qutebrowser brave-browser haskell-language-server vim
+  brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git fswatch bash qutebrowser brave-browser haskell-language-server vim tmux htop
 
   sudo chsh $USER  # set to /opt/homebrew/bin/bash
 
