@@ -66,9 +66,9 @@ case "$OSTYPE" in
   linux*)
     if [[ -x /usr/bin/dircolors ]]; then
       test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-      alias ls='ls --color=auto'
-      alias dir='dir --color=auto'
-      alias vdir='vdir --color=auto'
+      alias ls='ls --color=auto --hyperlink=auto'
+      alias dir='dir --color=auto --hyperlink=auto'
+      alias vdir='vdir --color=auto --hyperlink=auto'
 
       alias grep='grep --color=auto'
       alias fgrep='fgrep --color=auto'
@@ -133,13 +133,25 @@ else
 fi
 
 case "$termprog" in
-  iTerm*|xterm-color|*-256color|xterm-kitty)
+  iTerm*|xterm-color|*-256color)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
       if [ -z "$VIM_TERMINAL" ]; then
         bashrc_term_title
         # set background colour
         printf "\e]Ph$rgb\e"\\
+        printf "\e]11;#$rgb\e"\\
+      fi
+    }
+    ;;
+  xterm-kitty)
+    alias icat="kitty +kitten icat"
+    export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+    export TERM=xterm-256color
+    bashrc_term_title_and_colours() {
+      if [ -z "$VIM_TERMINAL" ]; then
+        bashrc_term_title
+        # set background colour
         printf "\e]11;#$rgb\e"\\
       fi
     }

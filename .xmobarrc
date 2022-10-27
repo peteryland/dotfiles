@@ -1,5 +1,5 @@
-Config { font = "-misc-fixed-*-*-*-*-20-*-*-*-*-*-*-*"
-       , additionalFonts = []
+Config { font = "xft:FiraCode Nerd Font:weight=Regular:pixelsize=18:antialias=true:hinting=true"
+       , additionalFonts = [ "-misc-fixed-*-*-*-*-20-*-*-*-*-*-*-*" ]
        , borderColor = "black"
        , border = TopB
        , bgColor = "black"
@@ -13,18 +13,31 @@ Config { font = "-misc-fixed-*-*-*-*-20-*-*-*-*-*-*-*"
        , iconRoot = "."
        , allDesktops = True
        , overrideRedirect = True
-       , commands = [ Run Weather "LFSB" ["-t","<station>: <tempC>C","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
-                    , Run Network "enp2s0" ["-L","65536","-H","1048576","--normal","green","--high","red"] 10
+       , commands = [ -- Run Weather "LFSB" ["-t","Basel: <tempC>C","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
+                     Run WeatherX "LFSB" [ ("clear", "\xfa98")
+                                          , ("sunny", "\xfa98")
+                                          , ("mostly clear", "\xfa98")
+                                          , ("mostly sunny", "\xfa98")
+                                          , ("partly sunny", "\xe302")
+                                          , ("fair", "\xe302")
+                                          , ("cloudy","\xe302")
+                                          , ("overcast","\xe312")
+                                          , ("partly cloudy", "\xfa94")
+                                          , ("mostly cloudy", "\xe302")
+                                          , ("considerable cloudiness", "\xe312")]
+                                          ["-t","<skyConditionS>  <skyCondition> \xe350<tempC>C° \xe275<rh>% \xe34b <windKmh>km/h","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
+                    , Run Network "enp2s0" ["-t","\xfbf1 <rx>kB|<tx>kB","-L","65536","-H","1048576","--normal","green","--high","red"] 10
                     , Run Network "enp4s0" ["-L","65536","-H","1048576","--normal","green","--high","red"] 10
                     , Run Network "eth0" ["-L","0","-H","32","--normal","green","--high","red"] 10
                     , Run Network "eth1" ["-L","0","-H","32","--normal","green","--high","red"] 10
-                    , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
-                    , Run Memory ["-t","Mem: <usedratio>%"] 10
+                    , Run Cpu ["-t","\xfb19 <total>%","-L","3","-H","50","--normal","green","--high","red"] 10
+                    , Run Memory ["-t","\xf85a <usedratio>%"] 10
                     , Run Swap [] 10
-                    , Run Com "uname" ["-s","-r"] "" 36000
-                    , Run Date "%a %_d %b %Y %H:%M:%S" "date" 10
+                    , Run Com "uname" ["-r"] "" 36000
+                    , Run Date "\xf5ef %a %_d %b %Y %H:%M:%S" "date" 10
+                    , Run UnsafeStdinReader
                     ]
        , sepChar = "%"
        , alignSep = "}{"
-       , template = "%cpu% | %memory% | %enp2s0% } { %date% | %LFSB% | %uname%"
+       , template = " %cpu% | %memory% | %enp2s0% } %UnsafeStdinReader% { %date% | %LFSB% |  %uname% "
        }

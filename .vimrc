@@ -135,13 +135,13 @@ function MyStatusLine()
   let l:sl.="%<%f "
   let l:sl.=getbufvar(l:buf, "&buftype")
 " Filetype-specific glyphs (alternatives: ﬦ)
-  let l:sl.=get({"vim": "%#VimGreen#%* "
-               \,"haskell": "%#HaskellPurple#%* "
-               \,"javascript": "%#JSYellow#%* "
-               \,"make": "%#White#%* "
-               \,"html": "%#HtmlOrange#%* "
-               \,"python": "%#JSYellow#%* "
-               \,"elm": "%#ElmBlue#%* "
+  let l:sl.=get({"vim": "%#VimGreen# %*"
+               \,"haskell": "%#HaskellPurple# %*"
+               \,"javascript": "%#JSYellow# %*"
+               \,"make": "%#White# %*"
+               \,"html": "%#HtmlOrange# %*"
+               \,"python": "%#JSYellow# %*"
+               \,"elm": "%#ElmBlue# %*"
                \}, getbufvar(l:buf, "&ft"), "")
   let l:sl.="%h%m%r"
   let l:sl.="%=%1.20("
@@ -375,7 +375,7 @@ endfunction
 " haskell
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal formatprg=stylish-haskell
 " au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=stack\ build
-au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal makeprg=make
+au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci*,*.elm setlocal makeprg=make
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal keywordprg=hoogle-info
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* noremap <silent> K <Cmd>call ReadMan(expand('<cword>'), "Haskell")<CR>
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal iskeyword+=@-@,',$,<->,!,\|,/,~,%,94,*,+,&,_
@@ -481,16 +481,18 @@ au BufNewFile,BufRead,BufEnter *.hs,.ghci* map <silent> ta :call ApplyAllSuggest
 
 " Plugins
 
-call plug#begin('~/.vim/plugged')
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-Plug 'prabirshrestha/vim-lsp'
-Plug 'mattn/vim-lsp-settings'
-Plug 'prabirshrestha/asyncomplete.vim'
-Plug 'prabirshrestha/asyncomplete-lsp.vim'
-Plug 'thomasfaingnaert/vim-lsp-snippets'
-Plug 'thomasfaingnaert/vim-lsp-ultisnips'
-call plug#end()
+if filereadable(expand('~/.vim/autoload/plug.vim'))
+  call plug#begin('~/.vim/plugged')
+  Plug 'SirVer/ultisnips'
+  Plug 'honza/vim-snippets'
+  Plug 'prabirshrestha/vim-lsp'
+  Plug 'mattn/vim-lsp-settings'
+  Plug 'prabirshrestha/asyncomplete.vim'
+  Plug 'prabirshrestha/asyncomplete-lsp.vim'
+  Plug 'thomasfaingnaert/vim-lsp-snippets'
+  Plug 'thomasfaingnaert/vim-lsp-ultisnips'
+  call plug#end()
+endif
 
 let g:UltiSnipsExpandTrigger="<TAB>"
 let g:UltiSnipsJumpForwardTrigger="<TAB>"
