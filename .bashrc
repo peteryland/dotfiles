@@ -56,23 +56,28 @@ case "$OSTYPE" in
   darwin*)
     export CLICOLOR=1
     export LSCOLORS=ExFxBxDxCxegedabagacad
+    export GREP_COLOR='1;3;34'
     alias ls='ls -Gh'
     alias dfh='df -h /System/Volumes/Data'
     alias pps='ps -ef'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
     stty discard undef # Give me my ctrl-o back!
+    local_locatedb=~/.local/var/locate/locatedb
+    if [[ ! -r "$local_locatedb" ]]; then
+      mkdir -p "$(dirname "$local_locatedb")"
+      # This should be put into cron as well
+      sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$HOME"/.local/var/locate/locatedb
+    fi
+    export LOCATE_PATH=~/.local/var/locate/locatedb
     ;;
   linux*)
     if [[ -x /usr/bin/dircolors ]]; then
       test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+      export GREP_COLORS='mt=1;3;34'
       alias ls='ls --color=auto --hyperlink=auto'
       alias dir='dir --color=auto --hyperlink=auto'
       alias vdir='vdir --color=auto --hyperlink=auto'
-
-      alias grep='grep --color=auto'
-      alias fgrep='fgrep --color=auto'
-      alias egrep='egrep --color=auto'
     fi
     alias dfh='df -lh -x tmpfs -x devtmpfs'
     alias st='systemctl status'
@@ -209,6 +214,11 @@ pg() {
   ps -fp $(pgrep -f "$@")
 }
 
+alias grep='grep --color=auto'
+alias fgrep='grep -F --color=auto'
+alias egrep='grep -E --color=auto'
+alias rgrep='grep -r --color=auto'
+alias glocate='locate -d :'
 alias pj='pg java'
 alias ll='ls -al'
 alias lt='ls -altr'
@@ -262,6 +272,7 @@ bashrc_path_add() {
   done
 }
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+bashrc_path_add "$HOME/.ghcup/bin"
 bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
 bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
 # bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
@@ -285,7 +296,7 @@ fi
 
 spf() {
   while [ "$1" ]; do
-    host -t TXT "$1" | cut -d\" -f2 | grep '^v=spf'
+    host -t TXT "$1" | cut -d\" -f2 | grep --color=never '^v=spf'
     shift
   done
 }
@@ -502,3 +513,7 @@ bashrc_prompt() {
 
 PROMPT_COMMAND=bashrc_prompt
 bashrc_prompt
+
+if [[ -r "$HOME/.bashrc_localafter" ]]; then
+  . "$HOME/.bashrc_localafter"
+fi
