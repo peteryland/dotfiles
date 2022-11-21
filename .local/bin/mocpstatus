@@ -1,0 +1,15 @@
+#!/bin/bash
+
+music='\xef\xb1\x98'
+state="$(mocp -Q %state)"
+
+if [[ $state = PLAY ]]; then
+  state='\\xef\\xa4\\x89' # f8e3 
+elif [[ $state = PAUSE ]]; then
+  state='\\xef\\xa3\\xa3' # f909 契
+elif [[ $state = STOP ]]; then
+  state='\\xef\\xa7\\x9a' # f9da 栗
+  exit 0
+fi
+
+echo -ne "<action=x-terminal-emulator mocp>$music $(mocp -Q "%a: %t </action><action=mocp -G> $state %ct/%tt</action>") | "

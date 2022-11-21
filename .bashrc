@@ -85,6 +85,9 @@ case "$OSTYPE" in
     alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
     alias np='sudo netstat -plant'
     alias ng='np | grep'
+    if [[ -r ~/.xmonad/xmonad.hs ]]; then
+      alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
+    fi
     md5s() { md5sum "$@"; }
     statm() { stat --printf %Y "$@"; }
     ;;

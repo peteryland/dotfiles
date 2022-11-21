@@ -1,11 +1,16 @@
 import qualified Data.Map as M
 import Data.Maybe
 import System.IO
+import System.Environment
+import Graphics.X11.ExtraTypes.XF86
 import XMonad
+import XMonad.Actions.CopyWindow
 import XMonad.Actions.MouseResize
 import XMonad.Config.Gnome
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.Place
+import XMonad.Hooks.StatusBar
 import XMonad.Layout.GridVariants
 import XMonad.Layout.LimitWindows
 import XMonad.Layout.Magnifier
@@ -25,9 +30,10 @@ import XMonad.Layout.ToggleLayouts
 import XMonad.Layout.WindowArranger
 import XMonad.Layout.WindowNavigation
 import qualified XMonad.StackSet as W
--- import XMonad.Util.ClickableWorkspaces
+import XMonad.Util.ClickableWorkspaces
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
+-- import XMonad.Util.NamedActions
 import XMonad.Util.Run
 import XMonad.Util.Replace
 import System.Exit
@@ -126,58 +132,68 @@ color09 = "#5b6268"
 color02 = "#ff6c6b"
 color16 = "#dfdfdf"
 
+okcolor = "#00afd7"
+rocolor = "#0087af"
+incolor = "#5f5f5f"
+-- rocolor = "#d7d700"
+
 myWorkspaces = [" one ", " two ", " three ", " four "]
 myWorkspaceIndices = M.fromList $ zip myWorkspaces [1..]
 
-windowCount :: X (Maybe String)
-windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
+-- windowCount :: X (Maybe String)
+-- windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
 
-clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
-    where i = fromJust $ M.lookup ws myWorkspaceIndices
+-- clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
+--     where i = fromJust $ M.lookup ws myWorkspaceIndices
 
-xmobarLogHook' xmproc = dynamicLogWithPP $ filterOutWsPP [scratchpadWorkspaceTag] $ xmobarPP
-        { ppOutput = hPutStrLn xmproc
-        , ppCurrent = xmobarColor color06 "" . wrap ("<box type=Bottom width=2 mb=2 color=" ++ color06 ++ ">") "</box>"
-          -- Visible but not current workspace
-        , ppVisible = xmobarColor color06 "" . clickable
-          -- Hidden workspace
-        , ppHidden = xmobarColor color05 "" . wrap ("<box type=Top width=2 mt=2 color=" ++ color05 ++ ">") "</box>" . clickable
-          -- Hidden workspaces (no windows)
-        , ppHiddenNoWindows = xmobarColor color05 ""  . clickable
-          -- Title of active window
-        , ppTitle = xmobarColor color16 "" . shorten 60
-          -- Separator character
-        , ppSep =  "<fc=" ++ color09 ++ "> | </fc>"
-          -- Urgent workspace
-        , ppUrgent = xmobarColor color02 "" . wrap "!" "!"
-          -- Adding # of windows on current workspace to the bar
-        , ppExtras  = [windowCount]
-          -- order of things in xmobar
-        , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]
-        }
-
-xmobarLogHook xmproc = dynamicLogWithPP xmobarPP
-  { ppOutput = hPutStrLn xmproc
-  , ppTitle = xmobarColor "green" "" . shorten 50
-  }
+centrePlacement = (placeHook (withGaps (16,0,16,0) (fixed (0.5,0.5))) <>)
+smartCPlacement = (placeHook (withGaps (16,0,16,0) (smart (0.5,0.5))) <>)
 
 main :: IO ()
 main = do
     safeSpawn "xset" ["s", "off"]
     safeSpawn "xset" ["-dpms"]
     safeSpawn "picom" ["-b"]
-    safeSpawn "mocp`" ["-S", "-m", "/media/Audio"]
-    xmproc <- spawnPipe "xmobar"
-    safeSpawnProg "/home/pdr/.xplanet/xplanet.sh"
+    safeSpawn "mocp" ["-S", "-m", "/media/Audio"]
+    homeDir <- getEnv "HOME"
+--     safeSpawnProg $ homeDir ++ "/.local/bin/tray"
+--     safeSpawnProg "volumeicon"
+--     safeSpawn "solaar" ["-w", "hide"]
+--     xmproc <- spawnPipe $ "xmobar " ++ homeDir ++ "/.xmonad/xmobar.config"
+    let sb = statusBarProp ("xmobar " ++ homeDir ++ "/.xmonad/xmobar.config") (clickablePP xmobarPP {
+      ppTitle           = shorten 50 . xmobarStrip
+    , ppCurrent         = xmobarColor okcolor "" . wrap ("<box type=Bottom width=1 mb=4 color=" ++ okcolor ++ ">") "</box>"
+    , ppVisible         = xmobarColor rocolor ""
+    , ppHidden          = xmobarColor rocolor ""
+    , ppHiddenNoWindows = xmobarColor incolor ""
+    , ppLayout          = wrap "<action=xdotool key super+space>" "</action>"
+    , ppSep             = " | "
+    , ppUrgent          = xmobarColor color02 "" . wrap "!" "!"
+    , ppOrder           = \(ws:l:t:ex) -> [ws,l,t] -- ++ex++[t]
+    })
+    safeSpawnProg $ homeDir ++ "/.xplanet/xplanet.sh"
     replace
-    xmonad $ gnomeConfig
+    xmonad . withSB sb $ gnomeConfig
         { terminal = "kitty"
-        , manageHook = manageDocks <+> manageHook def
+        , manageHook = composeAll [
+            manageDocks
+          , className =? "Qalculate" --> centrePlacement doFloat
+          , className =? "Solaar" --> centrePlacement doFloat
+          , manageHook def
+          ]
         , layoutHook = myLayoutHook
-        , logHook = xmobarLogHook xmproc
         , modMask = mod4Mask     -- Rebind Mod to the Windows key
         , normalBorderColor = "#404040"
         , focusedBorderColor = "#208020"
+        , keys = \c@XConfig {modMask = modm} -> M.fromList $ [
+            ((0, xF86XK_AudioMute),        safeSpawn     "amixer" ["set", "Master", "toggle"])
+          , ((0, xF86XK_AudioRaiseVolume), safeSpawn     "amixer" ["-M", "set", "Master", "on", "10%+"])
+          , ((0, xF86XK_AudioLowerVolume), safeSpawn     "amixer" ["-M", "set", "Master", "on", "10%-"])
+          , ((0, xF86XK_AudioPrev),        safeSpawn     "mocp"   ["-r"])
+          , ((0, xF86XK_AudioNext),        safeSpawn     "mocp"   ["-f"])
+          , ((0, xF86XK_AudioPlay),        safeSpawn     "mocp"   ["-G"])
+          , ((0, xF86XK_Calculator),       safeSpawnProg "qalculate")
+          ] ++ M.toList (keys def c)
         } `additionalKeysP`
 --         [ ("M-S-z", spawn "xscreensaver-command -lock; xset dpms force off")
         [ ("M-S-<Enter>", safeSpawnProg "kitty")
@@ -188,4 +204,6 @@ main = do
         , ("M-C-r", safeSpawn "xmonad" ["--recompile"] >> safeSpawn "xmonad" ["--restart"])
         , ("M-S-r", safeSpawn "xmonad" ["--restart"])
         , ("M-S-q", io exitSuccess)
+        , ("M-S-c", kill1)
+        , ("M-u", safeSpawn "x-terminal-emulator" ["mocp"])
         ]

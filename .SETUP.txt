@@ -81,11 +81,15 @@ fi
 
 ## Linux Desktops
 # apt install xdotool
-# Remap keys: capslock -> escape and shift-capslock -> capslock
+
+# /etc/default/keyboard:
+# XKBMODEL="pc105"
+# XKBLAYOUT="us"
+# XKBVARIANT="altgr-intl"                   # ralt+5,qeyps -> ̛€çäéüöß ralt+'"`6 are deadkey accents
+# XKBOPTIONS="caps:escape_shifted_capslock" # Remap capslock -> escape and shift-capslock -> capslock
+# BACKSPACE="guess"
 # For more options: man 7 xkeyboard-config
-# In /etc/default/keyboard
-# XKBOPTIONS="caps:escape_shifted_capslock"
-# Maybe then need to: sudo dpkg-reconfigure keyboard-configuration
+# Then need to: sudo udevadm trigger --subsystem-match=input --action=change
 
 ## Coding
 
