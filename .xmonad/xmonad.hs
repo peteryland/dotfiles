@@ -11,6 +11,7 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.Place
 import XMonad.Hooks.StatusBar
+import XMonad.Layout.Fullscreen
 import XMonad.Layout.GridVariants
 import XMonad.Layout.LimitWindows
 import XMonad.Layout.Magnifier
@@ -137,9 +138,6 @@ rocolor = "#0087af"
 incolor = "#5f5f5f"
 -- rocolor = "#d7d700"
 
-myWorkspaces = [" one ", " two ", " three ", " four "]
-myWorkspaceIndices = M.fromList $ zip myWorkspaces [1..]
-
 -- windowCount :: X (Maybe String)
 -- windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
 
@@ -159,26 +157,30 @@ main = do
 --     safeSpawnProg $ homeDir ++ "/.local/bin/tray"
 --     safeSpawnProg "volumeicon"
 --     safeSpawn "solaar" ["-w", "hide"]
---     xmproc <- spawnPipe $ "xmobar " ++ homeDir ++ "/.xmonad/xmobar.config"
-    let sb = statusBarProp ("xmobar " ++ homeDir ++ "/.xmonad/xmobar.config") (clickablePP xmobarPP {
+--     xmproc <- spawnPipe $ "xmobar"
+    let sb = statusBarProp "xmobar" (clickablePP xmobarPP {
       ppTitle           = shorten 50 . xmobarStrip
-    , ppCurrent         = xmobarColor okcolor "" . wrap ("<box type=Bottom width=1 mb=4 color=" ++ okcolor ++ ">") "</box>"
+    , ppCurrent         = xmobarColor okcolor "" . xmobarBorder "Bottom mb=4" okcolor 1
     , ppVisible         = xmobarColor rocolor ""
     , ppHidden          = xmobarColor rocolor ""
     , ppHiddenNoWindows = xmobarColor incolor ""
-    , ppLayout          = wrap "<action=xdotool key super+space>" "</action>"
+    , ppLayout          = xmobarAction "xdotool key super+space" "1"
     , ppSep             = " | "
     , ppUrgent          = xmobarColor color02 "" . wrap "!" "!"
-    , ppOrder           = \(ws:l:t:ex) -> [ws,l,t] -- ++ex++[t]
     })
     safeSpawnProg $ homeDir ++ "/.xplanet/xplanet.sh"
     replace
     xmonad . withSB sb $ gnomeConfig
-        { terminal = "kitty"
-        , manageHook = composeAll [
-            manageDocks
+        { workspaces = ["one", "two", "three", "four", "five", "six", "seven", "eight", "kodi"]
+        , terminal = "kitty"
+        , manageHook = composeAll
+          [ manageDocks
+          , fullscreenManageHook
           , className =? "Qalculate" --> centrePlacement doFloat
           , className =? "Solaar" --> centrePlacement doFloat
+          , className =? "Kodi" --> doFloat <+> doShift "kodi"
+          , className =? "MPlayer" --> doFloat
+          , className =? "Gimp" --> doFloat
           , manageHook def
           ]
         , layoutHook = myLayoutHook

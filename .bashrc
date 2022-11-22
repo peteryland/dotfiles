@@ -100,7 +100,7 @@ if [ "$UID" -eq 0 ]; then
 else
   usercol=6
 fi
-export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\em\]}\[\e[m\]${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
+export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\e[m\]}${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
 
 case "$(uname -s)" in
@@ -275,6 +275,7 @@ bashrc_path_add() {
   done
 }
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 bashrc_path_add "$HOME/.ghcup/bin"
 bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
 bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
@@ -284,8 +285,6 @@ bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"
 bashrc_path_add "$HOME/local/bin" "$HOME/local/sbin"
 bashrc_path_add "$HOME/.bin" "$HOME/.sbin"
 bashrc_path_add "$HOME/bin" "$HOME/sbin"
-
-[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 export PATH
 
@@ -369,7 +368,7 @@ n() {
           continue
         else
           # mkaoc for part 1 tries to create a parser for the input file and for part 2 simply copies over part 1
-          vi +$ "$(mkaoc "$n" b)"
+          vi +$ "$("$HOME"/src/games/coding/adventofcode/mkaoc "$n" b)"
           return
         fi
       else
@@ -385,7 +384,7 @@ n() {
             "$HOME"/src/games/coding/adventofcode/get_input
           fi
         fi
-        vi +$ "$(mkaoc "$n" a)"
+        vi +$ "$("$HOME"/src/games/coding/adventofcode/mkaoc "$n" a)"
         return
       fi
     done

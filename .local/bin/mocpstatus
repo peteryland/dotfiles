@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if ! command -v mocp &> /dev/null; then
+  exit 0
+fi
+
 music='\xef\xb1\x98'
 state="$(mocp -Q %state)"
 

@@ -366,11 +366,11 @@ function! ConcealToggle()
 endfunction
 
 " silence gq
-nnoremap <silent> gq :setlocal opfunc=FormatPrg<cr>g@
+" nnoremap <silent> gq :setlocal opfunc=FormatPrg<cr>g@
 
-function! FormatPrg(...)
-  silent exe "'[,']!".&formatprg
-endfunction
+" function! FormatPrg(...)
+"   silent exe "'[,']!".&formatprg
+" endfunction
 
 " haskell
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* setlocal formatprg=stylish-haskell
@@ -509,10 +509,10 @@ if executable('pyls')
         \ })
 endif
 
-if executable('hls')
+if executable('haskell-language-server')
   au User lsp_setup call lsp#register_server({
-      \ 'name': 'hls',
-      \ 'cmd': {server_info->['hls', '--lsp']},
+      \ 'name': 'haskell-language-server',
+      \ 'cmd': {server_info->['haskell-language-server', '--lsp']},
       \ 'whitelist': ['haskell'],
       \ })
 endif

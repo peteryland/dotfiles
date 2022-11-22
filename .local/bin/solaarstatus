@@ -2,26 +2,30 @@
 # -*- python-mode -*-
 # -*- coding: UTF-8 -*-
 
-## Copyright (C) 2012-2013  Daniel Pavel
-##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License along
-## with this program; if not, write to the Free Software Foundation, Inc.,
-## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# Copyright (C) 2022 Pete Ryland
+# Based on work that is:
+
+# Copyright (C) 2012-2013 Daniel Pavel
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import sys
 
 
 def init_paths():
     """Make the app work in the source tree."""
-    import sys
     import os.path as _path
 
     # Python 2 need conversion from utf-8 filenames
@@ -51,105 +55,120 @@ def init_paths():
 variant=0
 
 def myprintdevice(d):
-    from logitech_receiver.common import NamedInt as _NamedInt
-    d.ping()
-    level=None
-    status=0
-    if d.protocol:
-      b = d.battery()
-      if b is not None:
-        level, _, status, _ = b
-    if status is None:
-      status="discharging"
-    if isinstance(status, _NamedInt):
-      status=str(status)
-    if status != "recharging" and status != "discharging" and level is not None:
-      level='  %s' % status
+  from logitech_receiver.common import NamedInt as _NamedInt
+  d.ping()
+  level=None
+  status=0
+  if d.protocol:
+    b = d.battery()
+    if b is not None:
+      level, _, status, _ = b
+  if status is None:
+    status="discharging"
+  if isinstance(status, _NamedInt):
+    status=str(status)
+  if status != "recharging" and status != "discharging" and level is not None:
+    level='  %s' % status
+  else:
+    if level is None:
+      if status == "recharging": level=' ﮣ' # 
+      else: level=''
+    elif isinstance(level, _NamedInt):
+      level=str(level)
+    elif level > 90:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 80:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 70:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 60:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 50:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 40:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 30:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 20:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 10:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level > 0:
+      if status == "recharging": level=' '
+      else: level=' '
+    elif level == 0:
+      if status == "recharging": level=' '
+      else: level=' '
     else:
-      if level is None:
-        if status == "recharging": level=' ﮣ' # 
-        else: level=''
-      elif isinstance(level, _NamedInt):
-        level=str(level)
-      elif level > 90:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 80:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 70:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 60:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 50:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 40:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 30:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 20:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 10:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level > 0:
-        if status == "recharging": level=' '
-        else: level=' '
-      elif level == 0:
-        if status == "recharging": level=' '
-        else: level=' '
-      else:
-        level=' '
-    if d.kind == 'keyboard':
-      if d.protocol:
-        if variant: icon=''
-        else: icon=''
-      else:
-        if variant: icon=''
-        else: icon=''
-    elif d.kind == 'mouse':
-      if d.protocol:
-        if status == "recharging":
-          icon=''
-          if level == ' ﮣ':
-            level=''
-        else: icon=''
-      else:
-        icon=''
-    print("%s%s" % (icon, level), end='')
+      level=' '
+  if d.kind == 'keyboard':
+    if d.protocol:
+      if variant: icon=''
+      else: icon=''
+    else:
+      if variant: icon=''
+      else: icon=''
+  elif d.kind == 'mouse':
+    if d.protocol:
+      if status == "recharging":
+        icon=''
+        if level == ' ﮣ':
+          level=''
+      else: icon=''
+    else:
+      icon=''
+  print("%s%s" % (icon, level), end='')
 
 def main():
-    init_paths()
+  init_paths()
+  import logging
+  logging.getLogger('').setLevel(logging.ERROR)
+  try:
     import solaar.cli.show
     import solaar.cli
+  except:
+    return
 
-    devices = list(solaar.cli._receivers(None))
-    devices += list(solaar.cli._wired_devices(None))
+  # We're being naughty and using the private API calls, but these changed in v1.1.7 of Solaar, so let's try to handle all variations
+  try:
+    devices = list(solaar.cli._receivers_and_devices(None))
+  except:
+    try:
+      devices = list(solaar.cli._receivers(None))
+      devices += list(solaar.cli._wired_devices(None))
+    except:
+      return
 
-    first = True
-    dev_num = 1
-    for d in devices:
-      if isinstance(d, solaar.cli.show._receiver.Receiver):
-        count = d.count()
-        if count:
-          for dev in d:
-            if not first: print('  ', end='')
-            first = False
-            myprintdevice(dev)
-            count -= 1
-            if not count:
-              break
-      else:
-        if not first: print('  ', end='')
-        first = False
-        myprintdevice(d)
-        dev_num += 1
+  print('<action=solaar>', end='')
+
+  first = True
+  dev_num = 1
+  for d in devices:
+    if isinstance(d, solaar.cli.show._receiver.Receiver):
+      count = d.count()
+      if count:
+        for dev in d:
+          if not first: print('  ', end='')
+          first = False
+          myprintdevice(dev)
+          count -= 1
+          if not count:
+            break
+    else:
+      if not first: print('  ', end='')
+      first = False
+      myprintdevice(d)
+      dev_num += 1
+  print('</action>', end='')
 
 #     dev = solaar.cli._find_receiver(devices, 'all')
 #     if dev and not dev.isDevice:
@@ -163,6 +182,4 @@ def main():
 #     solaar.cli.show._print_device(dev)
 
 if __name__ == '__main__':
-  print('<action=solaar>', end='')
   main()
-  print('</action>', end='')
