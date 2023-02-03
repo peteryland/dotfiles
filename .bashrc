@@ -447,6 +447,105 @@ fcd() {
   cd "$1"
 }
 
+fzf-d~() {
+  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
+  local excludeall=(Library .git .vim/plugged .cabal/packages .cabal/store "Pictures/Photos Library.photoslibrary" .ghc/\* .npm/_cacache .cache .mozilla)
+  local x
+  for d in "${excludeall[@]}"; do
+    x+=(-path */"$d" -prune -o)
+  done
+  x+=(-false)
+  echo -n "$HOME"/
+  (
+    echo -e -n "\0"
+    find ~ -type d -mindepth 1 -maxdepth 5 -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
+      echo -e -n "${line#~/}\0"
+    done
+  ) | fzf-tmux -p -q "$1" --reverse --read0 --scheme=path --bind backward-eof:abort --preview 'ls -al --color ~/{}'
+}
+
+fzf-d() {
+  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
+  local excludeall=(.git/\*)
+  local x
+  for d in "${excludeall[@]}"; do
+    x+=(-path */"$d" -prune -o)
+  done
+  x+=(-false)
+  (
+    echo -e -n "\0"
+    find . -type d -mindepth 1 -maxdepth 8 -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
+      echo -e -n "${line#./}\0"
+    done
+  ) | fzf-tmux -p -q "$1" --reverse --read0 --scheme=path --bind backward-eof:abort --preview 'ls -al --color ./{}'
+}
+
+fzf-r() {
+  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
+  echo -n "$HOME"/
+  (
+    echo -e -n "\0"
+    find ~/src -type d -name .git -maxdepth 5 -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
+      line="${line#~/}"
+      echo -e -n "${line%/.git}\0"
+    done
+  ) | fzf-tmux -p -q "$1" --reverse --read0 --scheme=path --bind backward-eof:abort --preview 'git -C ~/{} lola --color=always'
+}
+
+f() {
+  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
+  local d
+  if d="$(fzf-d "$@")"; then
+    cd "$d"
+    ls
+  fi
+}
+
+ff() {
+  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
+  local d
+  if d="$(fzf-d~ "$@")"; then
+    cd "$d"
+    ls
+  fi
+}
+
+fs() {
+  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
+  local d s t
+  if d="$(fzf-r "$@")"; then
+    s="${d#~/}"
+    s="${s#src/}"
+    s="$(tr -cd '[:print:]' <<< "$s")"
+    if [[ -z $s ]]; then s=\~; fi
+    t="$(tmux -q ls -f "#{==:#S,$s}" -F '#S' 2> /dev/null)"
+    if [[ $t ]]; then
+      if [[ $TMUX ]]; then
+        if [[ $s == "~" ]]; then
+          tmux switchc -t \\\~
+        else
+          tmux switchc -t "$s"
+        fi
+      else
+        tmux a -t "$s"
+      fi
+    else
+      pushd "$d" > /dev/null
+      if [[ $TMUX ]]; then
+        tmux new -d -s "$s"
+        if [[ $s == "~" ]]; then
+          tmux switchc -t \\\~
+        else
+          tmux switchc -t "$s"
+        fi
+      else
+        tmux new -s "$s"
+      fi
+      popd > /dev/null
+    fi
+  fi
+}
+
 j() {
   if [ "$1" = "-v" ]; then
     verbose=1
