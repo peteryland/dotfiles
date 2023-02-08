@@ -1,0 +1,31 @@
+#!/usr/bin/env runhaskell
+
+import System.Process(readProcessWithExitCode)
+import System.Environment(getArgs)
+import Data.List(isPrefixOf, sort)
+import Data.List.Split(split, whenElt, keepDelimsL)
+import Data.Maybe(catMaybes)
+
+sep = isPrefixOf "\ESC[36m@@"
+
+f :: Bool -> String -> [((Int, Bool), String)]
+f t s = catMaybes $ map f' xss
+  where
+    xs = dropWhile (not . sep) $ lines s
+    xss = split (keepDelimsL $ whenElt sep) xs
+    f' []     = Nothing
+    f' (y:ys) = Just ((read $ takeWhile (/=',') $ drop 1 $ dropWhile (/='-') $ y, t), unlines (y:ys))
+
+main = do
+  args <- getArgs
+  mapM_ g args
+
+g filename = do
+  putStrLn $ "\ESC[1mdiff " ++ filename ++ " " ++ filename ++ "\ESC[m"
+  (ec, out, err) <- readProcessWithExitCode "git" (["-c", "color.diff.new=dim italic green", "-c", "color.diff.old=dim italic red", "diff",             "--color", "--", filename]) ""
+  let changed = f False out
+
+  (ec, out, err) <- readProcessWithExitCode "git" (["-c", "color.diff.new=bold green",   "-c", "color.diff.old=bold red",   "diff", "--staged", "--color", "--", filename]) ""
+  let staged = f True out
+
+  putStr $ concatMap snd $ sort $ staged ++ changed

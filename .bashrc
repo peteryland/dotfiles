@@ -11,7 +11,9 @@ done
 if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
   if [[ -r ~/.bash_completion ]]; then
     . ~/.bash_completion
-  elif [[ -r /etc/bash_completion ]]; then
+  fi
+
+  if [[ -r /etc/bash_completion ]]; then
     . /etc/bash_completion
   elif [[ -r /usr/local/etc/bash_completion ]]; then
     . /usr/local/etc/bash_completion
@@ -19,6 +21,16 @@ if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
     . /usr/local/share/bash-completion/bash_completion
   elif [[ -r /usr/share/bash-completion/bash_completion ]]; then
     . /usr/share/bash-completion/bash_completion
+  fi
+
+  if [[ -r /usr/share/doc/fzf/examples/completion.bash ]]; then
+    . /usr/share/doc/fzf/examples/completion.bash
+  else
+    f=( /opt/homebrew/Cellar/fzf/*/shell/completion.bash )
+    if [[ -r $f ]]; then
+      . "$f"
+    fi
+    unset f
   fi
 
   if type -p stack > /dev/null; then
@@ -67,7 +79,7 @@ case "$OSTYPE" in
     if [[ ! -r "$local_locatedb" ]]; then
       mkdir -p "$(dirname "$local_locatedb")"
       # This should be put into cron as well
-      sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$HOME"/.local/var/locate/locatedb
+      sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.vim/undo -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$HOME"/.local/var/locate/locatedb
     fi
     export LOCATE_PATH=~/.local/var/locate/locatedb
     ;;
@@ -226,6 +238,49 @@ alias pj='pg java'
 alias ll='ls -al'
 alias lt='ls -altr'
 alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
+
+# Git aliases and functions
+
+alias ga='git add'
+alias gd='git d'
+alias gds='git ds'
+alias gl='git lola'
+alias gca='git ca'
+alias gpf='git pf'
+alias gcapf='git capf'
+alias gsh='git show'
+alias gst='git s'
+alias gsu='git su'
+alias gf='git f'
+alias gb='git b'
+alias gco='git co'
+alias gpu='git pull'
+
+_gitline_to_hash() {
+  sed 's/^.* \([a-f0-9]\{7\}\) .*$/\1/' <<< "$1"
+}
+
+ggl() {
+  local h
+  if h="$(gl --format='%C(auto)%h %Cgreen%aL %Cblue%as%Creset: %s%C(auto)%d' --color | \
+          fzf --ansi --reverse --preview "git show --color \"\$(sed 's/^.* \\([a-f0-9]\\{7,9\\}\\) .*\$/\\1/' <<< {})\"")"; then
+    h="$(_gitline_to_hash "$h")"
+    echo "$h"
+  else
+    return $?
+  fi
+}
+
+gai() {
+  local cmd='git -c color.status=always status -s'
+  $cmd | fzf -d '' --ansi --reverse --preview "git-dd {4..}" --bind="enter:execute-silent(git add -- {4..})+reload($cmd)+down,tab:execute(git add -p -- {4..})+reload($cmd)+down,ctrl-\\:execute-silent(git restore --staged -- {4..})+reload($cmd)+down,ctrl-l:refresh-preview+clear-screen"
+  return 0
+}
+
+gci() {
+  gai
+  git c
+}
 
 mv. () {
   oldname="$(pwd)"
@@ -447,41 +502,41 @@ fcd() {
   cd "$1"
 }
 
-fzf-d~() {
-  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
-  local excludeall=(Library .git .vim/plugged .cabal/packages .cabal/store "Pictures/Photos Library.photoslibrary" .ghc/\* .npm/_cacache .cache .mozilla)
-  local x
-  for d in "${excludeall[@]}"; do
-    x+=(-path */"$d" -prune -o)
-  done
-  x+=(-false)
-  echo -n "$HOME"/
-  (
-    echo -e -n "\0"
-    find ~ -type d -mindepth 1 -maxdepth 5 -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
-      echo -e -n "${line#~/}\0"
-    done
-  ) | fzf-tmux -p -q "$1" --reverse --read0 --scheme=path --bind backward-eof:abort --preview 'ls -al --color ~/{}'
-}
-
 fzf-d() {
-  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
-  local excludeall=(.git/\*)
+  if ! command -v fzf-tmux > /dev/null; then echo 'Please install fzf-tmux' >&2; return 1; fi
+  local path="$1"; shift
+  local maxdepth="$1"; shift
+  local query="$1"; shift
+  if [[ -z $path ]]; then path=.; fi
+  if [[ -z $maxdepth ]]; then maxdepth=5; fi
+  if [[ -z $query ]]; then query=''; fi
+
+  echo -n "$path"/
+
+  local fzfopts fzfver="$(fzf --version)"; fzfver="${fzfver#*.}"; fzfver="${fzfver%%[. ]*}"
+  if [[ $fzfver -ge 33 ]]; then
+    fzfopts+=(--scheme=path)
+  fi
+
   local x
-  for d in "${excludeall[@]}"; do
+  for d in "$@"; do
     x+=(-path */"$d" -prune -o)
   done
   x+=(-false)
   (
     echo -e -n "\0"
-    find . -type d -mindepth 1 -maxdepth 8 -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
-      echo -e -n "${line#./}\0"
+    find "$path" -type d -mindepth 1 -maxdepth "$maxdepth" -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
+      echo -e -n "${line#$path/}\0"
     done
-  ) | fzf-tmux -p -q "$1" --reverse --read0 --scheme=path --bind backward-eof:abort --preview 'ls -al --color ./{}'
+  ) | fzf-tmux -0 -1 -p -q "$query" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'ls -al --color '"$path"'/{}'
 }
 
 fzf-r() {
-  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
+  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return 1; fi
+  local fzfopts fzfver="$(fzf --version)"; fzfver="${fzfver#*.}"; fzfver="${fzfver%%[. ]*}"
+  if [[ $fzfver -ge 33 ]]; then
+    fzfopts+=(--scheme=path)
+  fi
   echo -n "$HOME"/
   (
     echo -e -n "\0"
@@ -489,29 +544,38 @@ fzf-r() {
       line="${line#~/}"
       echo -e -n "${line%/.git}\0"
     done
-  ) | fzf-tmux -p -q "$1" --reverse --read0 --scheme=path --bind backward-eof:abort --preview 'git -C ~/{} lola --color=always'
+  ) | fzf-tmux -0 -1 -p -q "$1" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'git -C ~/{} lola --color=always'
 }
 
 f() {
-  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
   local d
-  if d="$(fzf-d "$@")"; then
-    cd "$d"
-    ls
+  if d="$(fzf-d . 8 "$1" .git/\*)"; then
+    if [[ $d != "./" ]]; then
+      cd "$d"
+      ls -al
+    fi
   fi
 }
 
 ff() {
-  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
   local d
-  if d="$(fzf-d~ "$@")"; then
-    cd "$d"
-    ls
+  if d="$(fzf-d ~ 4 "$1" Library '.*' 'Pictures/Photos Library.photoslibrary' '*.localized' '*.fcpbundle')"; then
+    if [[ $d != ~/ ]]; then
+      cd "$d"
+      f "$2"
+    fi
+  fi
+}
+
+tmux_switchc() {
+  if [[ -z $1 || $1 == "~" ]]; then
+    tmux switchc -t '\~'
+  else
+    tmux switchc -t "$1"
   fi
 }
 
 fs() {
-  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return; fi
   local d s t
   if d="$(fzf-r "$@")"; then
     s="${d#~/}"
@@ -521,11 +585,7 @@ fs() {
     t="$(tmux -q ls -f "#{==:#S,$s}" -F '#S' 2> /dev/null)"
     if [[ $t ]]; then
       if [[ $TMUX ]]; then
-        if [[ $s == "~" ]]; then
-          tmux switchc -t \\\~
-        else
-          tmux switchc -t "$s"
-        fi
+        tmux_switchc "$s"
       else
         tmux a -t "$s"
       fi
@@ -533,16 +593,14 @@ fs() {
       pushd "$d" > /dev/null
       if [[ $TMUX ]]; then
         tmux new -d -s "$s"
-        if [[ $s == "~" ]]; then
-          tmux switchc -t \\\~
-        else
-          tmux switchc -t "$s"
-        fi
+        tmux_switchc "$s"
       else
         tmux new -s "$s"
       fi
       popd > /dev/null
     fi
+  else
+    exec bash -il
   fi
 }
 

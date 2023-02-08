@@ -4,7 +4,7 @@
 [push]
   default = simple
 [pretty]
-  l = format:%C(auto)%h%d %Cgreen%an <%ae> %Cblue%ar%Creset: %s
+  l = format:%C(auto)%h%d %Cgreen%aN <%ae> %Cblue%ar%Creset: %s
 [format]
   pretty = l
 [alias]
@@ -15,7 +15,6 @@
   f = fetch
   rn = release-notes
   d = diff
-  dc = diff --cached
   ds = diff --staged
   c = commit
   fp = format-patch

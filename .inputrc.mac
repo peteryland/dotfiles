@@ -1,2 +1,4 @@
 "\C-f": forward-word
 "\C-b": backward-word
+"\e\e[C": shell-forward-word
+"\e\e[D": shell-backward-word
