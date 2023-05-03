@@ -101,23 +101,22 @@ set splitbelow splitright
 
 augroup statusline
   autocmd!
-  autocmd BufEnter,FocusGained,BufWrite,BufWritePost <buffer> let b:git_status=system("git_status " . expand("%:p"))
-  autocmd BufEnter,FocusGained <buffer> let b:focus=1
-  autocmd BufLeave,FocusLost <buffer> let b:focus=0
+  autocmd BufEnter,BufWrite,BufWritePost <buffer> let b:git_status=system("git_status " . expand("%:p"))
 augroup end
 
 " status line
 set laststatus=2
 function MyStatusLine()
   if !exists("g:statusline_winid")
-    " Vim < 8.2 e.g. Debian buster
+    " Vim < 8.2 e.g. Debian buster, doesn't quite work properly with splits, but prevents errors
     let l:buf=bufnr("%")
+    let l:win=win_getid()
   else
     let l:buf=winbufnr(g:statusline_winid)
+    let l:win=g:statusline_winid
   endif
 
-  let l:focus = getbufvar(l:buf, "focus", v:none)
-  if l:focus == 1 || l:focus == v:none
+  if l:win == win_getid()
     if getbufvar(l:buf, "&mod") == 1
       let l:mystatus="Mod"
     else
@@ -152,7 +151,7 @@ function MyStatusLine()
 endfunction
 set statusline=%!MyStatusLine()
 
-au BufNewFile,BufRead,BufEnter,FocusGained,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
+au BufNewFile,BufRead,BufEnter,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
 function ModifiedColor()
   if &mod == 1
     hi StatusLine ctermfg=58 ctermbg=110

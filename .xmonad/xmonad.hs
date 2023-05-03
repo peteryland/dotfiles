@@ -160,7 +160,7 @@ main = do
 --     xmproc <- spawnPipe $ "xmobar"
     let sb = statusBarProp "xmobar" (clickablePP xmobarPP {
       ppTitle           = shorten 50 . xmobarStrip
-    , ppCurrent         = xmobarColor okcolor "" . xmobarBorder "Bottom mb=4" okcolor 1
+    , ppCurrent         = xmobarColor okcolor "" . xmobarBorder "Bottom mb=2" okcolor 1
     , ppVisible         = xmobarColor rocolor ""
     , ppHidden          = xmobarColor rocolor ""
     , ppHiddenNoWindows = xmobarColor incolor ""

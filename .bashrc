@@ -577,17 +577,22 @@ tmux_switchc() {
 
 fs() {
   local d s t
+  local tmuxver="$(tmux -V)"; tmuxver="$(tr -cd 0-9 <<< "${tmuxver#* }")"
   if d="$(fzf-r "$@")"; then
     s="${d#~/}"
     s="${s#src/}"
     s="$(tr -cd '[:print:]' <<< "$s")"
     if [[ -z $s ]]; then s=\~; fi
-    t="$(tmux -q ls -f "#{==:#S,$s}" -F '#S' 2> /dev/null)"
+    if [[ $tmuxver -ge 33 ]]; then
+      t="$(tmux -q ls -f "#{==:#S,$s}" -F '#S' 2> /dev/null)"
+    else
+      t="$(tmux -q ls -F '#S' | grep "^$s\$")"
+    fi
     if [[ $t ]]; then
       if [[ $TMUX ]]; then
         tmux_switchc "$s"
       else
-        tmux a -t "$s"
+        tmux new -t "$s" \; set-option destroy-unattached
       fi
     else
       pushd "$d" > /dev/null
