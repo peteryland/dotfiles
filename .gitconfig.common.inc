@@ -45,3 +45,5 @@
   algorithm = histogram
   indentHeuristic = true
   tool = vimdiff
+[core]
+  sshCommand = ssh -o RemoteCommand=none -o RequestTTY=no
