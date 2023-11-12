@@ -38,6 +38,13 @@ if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
   fi
 fi
 
+# Prefer /bin/echo over built-in echo as it is more likely to support -n and -e
+if [[ -x /bin/echo ]]; then
+  echo=/bin/echo
+else
+  echo=echo
+fi
+
 # Hide recommendation to switch to zsh in MacOS Catalina.
 export BASH_SILENCE_DEPRECATION_WARNING=1
 # Don't put duplicate lines or lines starting with space in the history.
@@ -50,7 +57,7 @@ export EDITOR=vim
 
 shopt -s checkwinsize
 
-export LESS=-R
+export LESS="-R -F"
 if [[ -x ~/.lessfilter ]]; then
   export LESSOPEN="|~/.lessfilter %s"
   export LESSQUIET=1
@@ -69,7 +76,7 @@ case "$OSTYPE" in
     export CLICOLOR=1
     export LSCOLORS=ExFxBxDxCxegedabagacad
     export GREP_COLOR='1;3;34'
-    alias ls='ls -Gh'
+    alias ls='ls -G'
     alias dfh='df -h /System/Volumes/Data'
     alias pps='ps -ef'
     md5s() { md5 "$@"; }
@@ -112,7 +119,7 @@ if [ "$UID" -eq 0 ]; then
 else
   usercol=6
 fi
-export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\e[m\]}${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
+export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\e[m\]}${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\] $bashrc_git_branch }${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
 
 case "$(uname -s)" in
@@ -219,7 +226,7 @@ bashrc_check_repo() {
     fi
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
     bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-    bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && echo -n S; grep -q ^.M <<< "$status" && echo -n M) #; grep -q ^\?\? <<< "$status" && echo -n U)
+    bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && "$echo" -n S; grep -q ^.M <<< "$status" && "$echo" -n M) #; grep -q ^\?\? <<< "$status" && "$echo" -n U)
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
   fi
 }
@@ -265,7 +272,7 @@ ggl() {
   if h="$(gl --format='%C(auto)%h %Cgreen%aL %Cblue%as%Creset: %s%C(auto)%d' --color | \
           fzf --ansi --reverse --preview "git show --color \"\$(sed 's/^.* \\([a-f0-9]\\{7,9\\}\\) .*\$/\\1/' <<< {})\"")"; then
     h="$(_gitline_to_hash "$h")"
-    echo "$h"
+    "$echo" "$h"
   else
     return $?
   fi
@@ -289,7 +296,7 @@ mv. () {
     if [[ -d $newname ]]; then
       newname="$newname/"
     else
-      echo "Usage: mv. newname" >&2
+      "$echo" "Usage: mv. newname" >&2
       return 1
     fi
   fi
@@ -307,7 +314,7 @@ rm. () {
   dirname="$(pwd)"
   if [[ $flag != '-f' ]]; then
     if [[ $flag ]]; then
-      echo "Usage: rm. [-f]" >&2
+      "$echo" "Usage: rm. [-f]" >&2
       return 1
     fi
     read -p "Really remove current directory [yN]? " ans
@@ -382,7 +389,7 @@ l() {
     if [[ $1 = s-* ]]; then
       opts="${1/s}"
       shift
-      echo "ls $opts $@" >&2
+      "$echo" "ls $opts $@" >&2
       ls "$opts" "$@"
     elif [[ -n $dir && -d "$LOOKINGDIR"/$dir ]]; then
       cd "$LOOKINGDIR"/"$dir"
@@ -394,12 +401,12 @@ l() {
         cd "$LOOKINGDIR"
         git clone https://github.com/"$1"
       else
-        echo "l: $1 not found" >&2
+        "$echo" "l: $1 not found" >&2
         return 1
       fi
       cd "$dir"
     else
-      echo "l: Error parsing arguments" >&2
+      "$echo" "l: Error parsing arguments" >&2
       return 1
     fi
   else
@@ -470,7 +477,7 @@ sub() {
           elif [ -r "$n"ac.output ]; then
             do_submit "$year" "$n" 1 "$n"ac.output
           else
-            echo "Couldn't find anything to submit." >&2
+            "$echo" "Couldn't find anything to submit." >&2
             exit 1
           fi
           return
@@ -482,7 +489,7 @@ sub() {
         elif [ -r "$n"bc.output ]; then
           do_submit "$year" "$n" 2 "$n"bc.output
         else
-          echo "Couldn't find anything to submit." >&2
+          "$echo" "Couldn't find anything to submit." >&2
           exit 1
         fi
         return
@@ -503,7 +510,7 @@ fcd() {
 }
 
 fzf-d() {
-  if ! command -v fzf-tmux > /dev/null; then echo 'Please install fzf-tmux' >&2; return 1; fi
+  if ! command -v fzf-tmux > /dev/null; then "$echo" 'Please install fzf-tmux' >&2; return 1; fi
   local path="$1"; shift
   local maxdepth="$1"; shift
   local query="$1"; shift
@@ -511,7 +518,7 @@ fzf-d() {
   if [[ -z $maxdepth ]]; then maxdepth=5; fi
   if [[ -z $query ]]; then query=''; fi
 
-  echo -n "$path"/
+  "$echo" -n "$path"/
 
   local fzfopts fzfver="$(fzf --version)"; fzfver="${fzfver#*.}"; fzfver="${fzfver%%[. ]*}"
   if [[ $fzfver -ge 33 ]]; then
@@ -524,25 +531,25 @@ fzf-d() {
   done
   x+=(-false)
   (
-    echo -e -n "\0"
+    "$echo" -e -n "\0"
     find "$path" -type d -mindepth 1 -maxdepth "$maxdepth" -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
-      echo -e -n "${line#$path/}\0"
+      "$echo" -e -n "${line#$path/}\0"
     done
   ) | fzf-tmux -0 -1 -p -q "$query" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'ls -al --color '"$path"'/{}'
 }
 
 fzf-r() {
-  if ! command -v fzf-tmux > /dev/null; then echo "Please install fzf-tmux" >&2; return 1; fi
+  if ! command -v fzf-tmux > /dev/null; then "$echo" "Please install fzf-tmux" >&2; return 1; fi
   local fzfopts fzfver="$(fzf --version)"; fzfver="${fzfver#*.}"; fzfver="${fzfver%%[. ]*}"
   if [[ $fzfver -ge 33 ]]; then
     fzfopts+=(--scheme=path)
   fi
-  echo -n "$HOME"/
+  "$echo" -n "$HOME"/
   (
-    echo -e -n "\0"
+    "$echo" -e -n "\0"
     find ~/src -type d -name .git -maxdepth 5 -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
       line="${line#~/}"
-      echo -e -n "${line%/.git}\0"
+      "$echo" -e -n "${line%/.git}\0"
     done
   ) | fzf-tmux -0 -1 -p -q "$1" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'git -C ~/{} lola --color=always'
 }
@@ -600,7 +607,8 @@ fs() {
         tmux new -d -s "$s"
         tmux_switchc "$s"
       else
-        tmux new -s "$s"
+#         tmux new -s "$s"
+        tmux new -t "$s" \; set-option destroy-unattached
       fi
       popd > /dev/null
     fi
@@ -617,14 +625,14 @@ j() {
 
   if [[ ! -x /usr/libexec/java_home ]] || ! /usr/libexec/java_home > /dev/null 2>&1; then
     if [ "$verbose" ]; then
-      echo "No Java installed."
+      "$echo" "No Java installed."
     fi
     return
   fi
 
   ver="$1"
   if [ -z "$ver" ]; then
-    echo JAVA_HOME="$JAVA_HOME"
+    "$echo" JAVA_HOME="$JAVA_HOME"
     /usr/libexec/java_home -V
   else
     if [ "$ver" = latest ]; then
@@ -632,7 +640,7 @@ j() {
     fi
     export JAVA_HOME=$(/usr/libexec/java_home -v "$ver")
     if [ "$verbose" ]; then
-      echo JAVA_HOME="$JAVA_HOME"
+      "$echo" JAVA_HOME="$JAVA_HOME"
     fi
   fi
 }
