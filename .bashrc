@@ -233,7 +233,10 @@ bashrc_check_repo() {
 
 if [[ $(type -t pg) = alias ]]; then unalias pg; fi
 pg() {
-  ps -fp $(pgrep -f "$@")
+  pids=($(pgrep -f "$@"))
+  if [[ -n $pids ]]; then
+    ps -fp "${pids[@]}"
+  fi
 }
 
 alias grep='grep --color=auto'
