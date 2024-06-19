@@ -47,3 +47,5 @@
   tool = vimdiff
 [core]
   sshCommand = ssh -o RemoteCommand=none -o RequestTTY=no
+[advice]
+  skippedCherryPicks = false
