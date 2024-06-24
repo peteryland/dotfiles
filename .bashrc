@@ -142,8 +142,10 @@ bashrc_term_title() {
   printf "\e]1;$(id -un)@$(hostname -s):${PWD/$HOME/\~}\a"
   # set terminal window title
   printf "\e]2;$(id -un)@$(hostname -s):${PWD/$HOME/\~}\a"
-  # set tmux window title (allow-rename must be on for this to work)
-  printf "\ek$(id -un)@$(hostname -s):${PWD/$HOME/\~}\e\\"
+  if [[ $TERM =~ ^(tmux|screen)- ]]; then
+    # set tmux window title (allow-rename must be on for this to work)
+    printf "\ek$(id -un)@$(hostname -s):${PWD/$HOME/\~}\e\\"
+  fi
 }
 
 if [ "$LC_TERMINAL" ]; then

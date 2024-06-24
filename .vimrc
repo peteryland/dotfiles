@@ -1,6 +1,8 @@
 set encoding=utf-8
 set fileencoding=utf-8
 
+set title titlestring=%F
+
 " source the vimrc file after saving it
 autocmd! bufwritepost ~/.vimrc source $MYVIMRC
 
@@ -76,6 +78,12 @@ if &term =~ '256color'
   " disable Background Color Erase (BCE)
   " see http://snk.tuxfamily.org/log/vim-256color-bce.html
   set t_ut=
+endif
+
+if &term =~ 'screen\|tmux'
+  " allow tab title setting when using tmux
+  let &t_ts="\<ESC>k"
+  let &t_fs="\<ESC>\\"
 endif
 
 set smarttab smartindent autoindent softtabstop=2 tabstop=2 shiftwidth=2 expandtab
