@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Idea from: https://github.com/Townk/tmux-config/blob/master/scripts/window-flags
+
+# Replace tmux window flag for a unicode character:
+# *: current window flag removed
+# -: last window flag replaced by (⦁)
+# #: window activity flag replaced by ()
+# ~: window silence flag replaced by ()
+# !: window bell flag replaced by ()
+# Z: window zoomed flag replaced by ()
+
+tr -d '*-' <<< "$1" | tr -s '#~!Z-' '⦁'
