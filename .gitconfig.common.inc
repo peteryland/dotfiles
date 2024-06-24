@@ -37,6 +37,7 @@
 [rebase]
   autoStash = true
   autoSquash = true
+  updateRefs = true
 [init]
   defaultBranch = main
 [apply]

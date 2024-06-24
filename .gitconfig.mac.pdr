@@ -3,7 +3,4 @@
   path = .gitconfig.mac.inc
 
 [includeIf "gitdir:~/src/work/"]
-  path = .gitconfig.magnolia.inc
-
-[includeIf "gitdir:~/src/magnolia/"]
-  path = .gitconfig.magnolia.inc
+  path = .gitconfig.work.inc
