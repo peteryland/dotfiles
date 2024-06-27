@@ -80,6 +80,7 @@ fi
 # sudo systemctl restart fail2ban
 
 ## Linux Desktops
+# sudo cp -r ~/.fonts/firacodenerd /usr/share/fonts/truetype/
 # apt install xdotool
 
 # /etc/default/keyboard:
