@@ -1,3 +1,8 @@
+# install this repo
+git clone https://github.com/peteryland/dotfiles
+mv dotfiles/.[a-zA-Z]* .
+rmdir dotfiles
+
 ## Mac specific:
 if [ "$OSTYPE" = darwin18 ]; then
 
@@ -7,11 +12,6 @@ if [ "$OSTYPE" = darwin18 ]; then
       # Tracking speed: fastest
 
   # install iTerm2 https://www.iterm2.com/downloads.html
-
-  # install this repo
-  git clone https://github.com/peteryland/dotfiles
-  mv dotfiles/.[a-zA-Z]* .
-  rmdir dotfiles
 
   # install brew https://brew.sh/
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -49,19 +49,19 @@ fi
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
-  sudo apt install bc build-essential haskell-platform hlint locate haskell-platform-doc haskell-platform-prof autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix fswatch pkg-config jq
+  sudo apt install bc build-essential hlint locate autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix fswatch pkg-config jq
   sudo apt install vim-nox curl tmux mtr htop exa bat fswatch
   sudo apt purge vim-tiny nano
 
-  # sudo apt install haskell-stack hoogle hlint lambdabot happy bc cabal-install locate
-  sudo apt install libpcre2-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
+  # sudo apt install hlint happy bc cabal-install locate
+  sudo apt install libpcre2-dev libpcre3-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
   cabal update
-  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell haskell-language-server --overwrite-policy=always
+  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell --overwrite-policy=always
 
   ln -s .gitconfig.linux.pdr .gitconfig
 fi
 
-## Raspberry Pi (Raspbian)
+## Raspberry Pi (Raspbian) / Media Centre
 # Add "xserver-command=X -s 0 dpms" into /etc/lightdm/lightdm.conf to disable screen sleeping
 # sudo apt install kodi
 
@@ -81,7 +81,7 @@ fi
 
 ## Linux Desktops
 # sudo cp -r ~/.fonts/firacodenerd /usr/share/fonts/truetype/
-# apt install xdotool
+# apt install xdotool xmonad xmobar xplanet hsetroot kitty
 
 # /etc/default/keyboard:
 # XKBMODEL="pc105"
@@ -97,8 +97,9 @@ fi
 # install vim-plug (already copied into this repo)
 # curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-# install haskell-language-server https://github.com/haskell/haskell-language-server
-ln -s "$(command -v haskell-language-server-wrapper)" ~/.local/bin/hls
+# Install ghcup, then install ghc/cabal/hls
+sudo apt install build-essential curl libffi-dev libffi8 libgmp-dev libgmp10 libncurses-dev libncurses5 libtinfo5 pkg-config
+curl -sSf https://get-ghcup.haskell.org | sh
 
 # install nix via apt
 #?? nix-env -i cabal-install hlint goa lambdabot
