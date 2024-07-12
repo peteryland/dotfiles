@@ -551,7 +551,7 @@ fzf-r() {
       line="${line#~/}"
       echo -e -n "${line%/.git}\0"
     done
-  ) | fzf-tmux -0 -1 -p -q "$1" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'git -C ~/{} lola --color=always'
+  ) | fzf-tmux -p 90%,90% -0 -1 -p -q "$1" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'git -C ~/{} lola --color=always'
 }
 
 f() {

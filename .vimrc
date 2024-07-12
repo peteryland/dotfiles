@@ -530,11 +530,11 @@ if executable('pyls')
         \ })
 endif
 
-if executable('haskell-language-server')
+if executable('haskell-language-server-wrapper')
   au User lsp_setup call lsp#register_server({
-      \ 'name': 'haskell-language-server',
-      \ 'cmd': {server_info->['haskell-language-server', '--lsp']},
-      \ 'whitelist': ['haskell'],
+      \ 'name': 'haskell-language-server-wrapper',
+      \ 'cmd': {server_info->['haskell-language-server-wrapper', '--lsp']},
+      \ 'whitelist': ['haskell', 'lhaskell'],
       \ })
 endif
 

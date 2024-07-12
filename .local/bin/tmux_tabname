@@ -1,19 +1,71 @@
 #!/bin/bash
 
+if [[ $1 == '-t' ]]; then
+  is_title=1
+  shift
+fi
+
 tmux_loc="$1"
 tmux_dir="$2"
 local_info="$3"
+cmd="$4"
+
 local_loc="${local_info%:*}"
-local_dir="${local_info#*:}"
-local_dir="${local_dir#\~/}"
-local_dir="${local_dir#src/}"
-local_dir="${local_dir#$tmux_dir}"
-local_dir="${local_dir#/}"
-if [[ -z $local_dir ]]; then
-  local_dir=.
-fi
+local_info="${local_info#*:}"
+local_info="${local_info#\~/}"
+local_info="${local_info#src/}"
+local_info="${local_info#$tmux_dir}"
+local_info="${local_info#/}"
 
 if [[ $local_loc != $local_info && $tmux_loc != $local_loc ]]; then
-  echo -n "$local_loc:"
+  myloc="$local_loc:"
 fi
-echo "$local_dir"
+
+case "$cmd" in
+  irssi)
+    if [[ $is_title ]]; then
+      echo "$cmd"
+    else
+      echo "󰭹 IRC"
+    fi
+    ;;
+  bash|zsh|sh|fish|tcsh|csh)
+    myloc="$myloc$local_info"
+    if [[ $is_title ]]; then
+      echo "${myloc:-.}"
+    else
+      echo "${myloc:+ $myloc}"
+    fi
+    ;;
+  vi|vim|nvim)
+    if [[ $is_title ]]; then
+      echo "$local_info"
+    else
+      echo "${local_info:+ $local_info}"
+    fi
+    ;;
+  cabal)
+    if [[ $is_title ]]; then
+      echo "$cmd${local_info:+ $local_info}"
+    else
+      echo "${local_info:+ $local_info}"
+    fi
+    ;;
+  ghci)
+    if [[ $is_title ]]; then
+      echo "$cmd${local_info:+ $local_info}"
+    else
+      echo "${local_info:+ $local_info}"
+    fi
+    ;;
+  make)
+    if [[ $is_title ]]; then
+      echo "Building${local_info:+ $local_info}..."
+    else
+      echo "${local_info:+ $local_info} 󱑞"
+    fi
+    ;;
+  *)
+    echo "$cmd"
+    ;;
+esac
