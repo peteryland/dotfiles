@@ -66,6 +66,8 @@ fi
 
 case "$OSTYPE" in
   darwin*)
+    ismac=1
+    stty discard undef # Give me my ctrl-o back!
     export CLICOLOR=1
     export LSCOLORS=ExFxBxDxCxegedabagacad
     export GREP_COLOR='1;3;34'
@@ -74,7 +76,6 @@ case "$OSTYPE" in
     alias pps='ps -ef'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
-    stty discard undef # Give me my ctrl-o back!
     local_locatedb=~/.local/var/locate/locatedb
     if [[ ! -r "$local_locatedb" ]]; then
       mkdir -p "$(dirname "$local_locatedb")"
@@ -82,8 +83,23 @@ case "$OSTYPE" in
       sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.vim/undo -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$HOME"/.local/var/locate/locatedb
     fi
     export LOCATE_PATH=~/.local/var/locate/locatedb
+    if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.mac ~/.gitconfig; fi
     ;;
   linux*)
+    islinux=1
+    case "$(lsb_release -s -i)" in
+      Debian|Raspbian)
+        isdeb=1
+        islinux=
+        ;;
+    esac
+    case "$(uname -m)" in
+      armv7l)
+        isrpi=1
+        islinux=
+        isdeb=
+        ;;
+    esac
     if [[ -x /usr/bin/dircolors ]]; then
       test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
       export GREP_COLORS='mt=1;3;34'
@@ -102,6 +118,7 @@ case "$OSTYPE" in
     fi
     md5s() { md5sum "$@"; }
     statm() { stat --printf %Y "$@"; }
+    if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.linux ~/.gitconfig; fi
     ;;
   *)
     statm() { return 0; }
@@ -114,28 +131,6 @@ else
 fi
 export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\e[m\]}${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\] $bashrc_git_branch }${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
-
-case "$(uname -s)" in
-  Darwin)
-    ismac=1
-    ;;
-  Linux)
-    islinux=1
-    case "$(lsb_release -s -i)" in
-      Debian|Raspbian)
-        isdeb=1
-        islinux=
-        ;;
-    esac
-    case "$(uname -m)" in
-      armv7l)
-        isrpi=1
-        islinux=
-        isdeb=
-        ;;
-    esac
-    ;;
-esac
 
 bashrc_term_title() {
   # set terminal tab title
@@ -251,7 +246,7 @@ alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
 alias ga='git add'
 alias gd='git d'
 alias gds='git ds'
-alias gl='git lola'
+alias gl='git la'
 alias gca='git ca'
 alias gpf='git pf'
 alias gcapf='git capf'
@@ -551,7 +546,7 @@ fzf-r() {
       line="${line#~/}"
       echo -e -n "${line%/.git}\0"
     done
-  ) | fzf-tmux -p 90%,90% -0 -1 -p -q "$1" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'git -C ~/{} lola --color=always'
+  ) | fzf-tmux -p 90%,90% -0 -1 -p -q "$1" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'git -C ~/{} la --color=always'
 }
 
 f() {

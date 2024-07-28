@@ -4,12 +4,12 @@
 [push]
   default = simple
 [pretty]
-  l = format:%C(auto)%h%d %Cgreen%aN <%ae> %Cblue%ar%Creset: %s
+  l = format:%C(auto)%h%d %G? %Cgreen%aN <%ae> %Cblue%ar%Creset: %s
 [format]
   pretty = l
 [alias]
-  lol = log --graph --decorate --abbrev-commit
-  lola = log --graph --decorate --abbrev-commit --all
+  l = log --graph --decorate --abbrev-commit
+  la = log --graph --decorate --abbrev-commit --all
   s = status -uno
   su = status
   f = fetch
@@ -21,6 +21,7 @@
   hist = log HEAD^^^..
   co = checkout
   b = branch
+  w = switch
   ca = commit --amend -q --no-edit
   pf = push --force-with-lease
   capf = !git commit --amend -q --no-edit && git push -q --force-with-lease && :
@@ -50,3 +51,8 @@
   sshCommand = ssh -o RemoteCommand=none -o RequestTTY=no
 [advice]
   skippedCherryPicks = false
+[fetch]
+  writeCommitGraph = true
+
+[includeIf "gitdir:~/src/debian/"]
+  path = ~/src/debian/.gitconfig

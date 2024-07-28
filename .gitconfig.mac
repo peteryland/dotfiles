@@ -1,6 +1,3 @@
 [include]
   path = .gitconfig.common.inc
   path = .gitconfig.mac.inc
-
-[includeIf "gitdir:~/src/work/"]
-  path = .gitconfig.work.inc
