@@ -74,6 +74,12 @@ case "$OSTYPE" in
     alias ls='ls -G'
     alias dfh='df -h /System/Volumes/Data'
     alias pps='ps -ef'
+    if command -v netstat > /dev/null; then
+      alias np='sudo netstat -plant'
+    else
+      alias np='sudo lsof -nP -iudp -itcp -stcp:LISTEN | grep -v -- "->"'
+    fi
+    alias ng='np | grep'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
     local_locatedb=~/.local/var/locate/locatedb
@@ -111,7 +117,11 @@ case "$OSTYPE" in
     alias st='systemctl status'
     alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
     alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
-    alias np='sudo netstat -plant'
+    if command -v netstat > /dev/null; then
+      alias np='sudo netstat -plant'
+    else
+      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | grep -v -- "->"'
+    fi
     alias ng='np | grep'
     if [[ -r ~/.xmonad/xmonad.hs ]]; then
       alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
@@ -129,7 +139,7 @@ if [ "$UID" -eq 0 ]; then
 else
   usercol=6
 fi
-export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\e[m\]}${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\] $bashrc_git_branch }${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
+export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\e[m\]}${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+[${bashrc_git_branch:+\[\e[34m\] $bashrc_git_branch }${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+ \[\e[38;5;66m\]$bashrc_git_tag }${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\]]}\$ '
 unset usercol
 
 bashrc_term_title() {
@@ -210,6 +220,7 @@ bashrc_check_repo() {
         GIT_TERMINAL_PROMPT=0 git fetch --quiet &> /dev/null & disown -a
       )
     fi
+    bashrc_git_tag="$(git log --pretty=%d -1 | tr , \\n | grep '^ tag: ' | head -1 | cut -d\  -f3-)"
     status="$(git status --porcelain=1 -b)"
     status1="$(head -1 <<< "$status")"
     bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
@@ -219,7 +230,7 @@ bashrc_check_repo() {
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
     bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
     bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && echo -n S; grep -q ^.M <<< "$status" && echo -n M) #; grep -q ^\?\? <<< "$status" && echo -n U)
-    bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
+    bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}${bashrc_git_tag:+ $bashrc_git_tag }$bashrc_git_extrastatus"
   fi
 }
 

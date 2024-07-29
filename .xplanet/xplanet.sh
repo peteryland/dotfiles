@@ -11,6 +11,10 @@ if [[ $(pgrep -c xplanet.sh) -gt 1 ]]; then
   killall -eq -u "$USER" -o 2s xplanet.sh
 fi
 
+firstscreen="$(xrandr --current | grep current | head -1)"
+xres="$(sed 's/^.*current \([0-9]\+\) \?x.*$/\1/' <<< "$firstscreen")"
+yres="$(sed 's/^.*current [0-9]\+ \?x \?\([0-9]\+\),.*$/\1/' <<< "$firstscreen")"
+
 cd "$(dirname "$0")"
 
 outfile="$HOME"/.xplanet/out.png
@@ -29,7 +33,7 @@ if [[ $haveclouds ]]; then
         newsha="$(sha256sum "$cloudsfile".new | awk '{print $1;}')"
         if [[ $newsha = $originsha ]]; then
           mv -f "$cloudsfile".new "$cloudsfile"
-          convert -resize 3840x2160 -quality 95 "$cloudsfile" "$clouds4k"
+          convert -resize "$xres"x"$yres" -quality 95 "$cloudsfile" "$clouds4k"
         else
           rm -f "$cloudsfile".new
         fi
@@ -37,7 +41,7 @@ if [[ $haveclouds ]]; then
     fi
   else
     wget https://raw.githubusercontent.com/apollo-ng/cloudmap/master/global.jpg?${originsha} --no-cache -q -T 5 -O "$cloudsfile"
-    convert -resize 3840x2160 -quality 95 "$cloudsfile" "$clouds4k"
+    convert -resize "$xres"x"$yres" -quality 95 "$cloudsfile" "$clouds4k"
   fi
 fi
 
@@ -58,7 +62,7 @@ for i in markers/*.marker; do
 done
 # cat ~/.xplanet/satellites/config >> ~/.xplanet/xplanet.config
 
-nice xplanet -config ~/.xplanet/xplanet.config -projection rect -verbosity 0 -output "$outfile" -num_times 1 -geometry 3840x2160 -longitude 11
+nice xplanet -config ~/.xplanet/xplanet.config -projection rect -verbosity 0 -output "$outfile" -num_times 1 -geometry "$xres"x"$yres" -longitude 11
 hsetroot -fill "$outfile" > /dev/null
 if [[ $? -eq 123 ]]; then exit 123; fi
 sleep 600
