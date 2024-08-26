@@ -49,13 +49,17 @@ fi
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
-  sudo apt install bc build-essential hlint locate autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix fswatch pkg-config jq
-  sudo apt install vim-nox curl tmux mtr htop exa bat fswatch
+  sudo apt install bc locate vim-nox curl tmux mtr htop exa bat fswatch pkg-config jq tldr fzf
   sudo apt purge vim-tiny nano
 
-  # sudo apt install hlint happy bc cabal-install locate
+  # Build/Dev:
+  sudo apt install build-essential autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix
+
+  # Haskell Dev (can install tool-chain with apt, cabal or ghcup as needed):
+  # sudo apt install hlint happy cabal-install
   sudo apt install libpcre2-dev libpcre3-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
   cabal update
+  # The following will likely need to be installed one by one:
   cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell --overwrite-policy=always
 
   ln -s .gitconfig.linux.pdr .gitconfig
@@ -75,9 +79,12 @@ fi
 # Turn on ip_forwarding in /etc/sysctl.conf
 
 # Install fail2ban if ssh exposed to public
+# (might not be so necessary any more since ssh has some similar protection built in now)
 # sudo apt install fail2ban
 # echo -e "[DEFAULT]\nbantime = -1\nmaxretry = 2\n" | sudo tee /etc/fail2ban/jail.d/defaults.local
 # sudo systemctl restart fail2ban
+
+echo 'This is a private server.  Unauthorized access is forbidden.' | sudo tee /etc/motd > /dev/null
 
 ## Linux Desktops
 # sudo cp -r ~/.fonts/firacodenerd /usr/share/fonts/truetype/
@@ -91,6 +98,11 @@ fi
 # BACKSPACE="guess"
 # For more options: man 7 xkeyboard-config
 # Then need to: sudo udevadm trigger --subsystem-match=input --action=change
+
+# Download and install FiraCode with Nerd Fonts from https://github.com/ryanoasis/nerd-fonts
+
+sudo apt install kitty xmonad xmobar moc picom renameutils hsetroot xplanet
+cabal install --lib xmonad xmonad-contrib X11 --overwrite-policy=always
 
 ## Coding
 

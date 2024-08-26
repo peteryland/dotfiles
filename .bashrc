@@ -82,13 +82,12 @@ case "$OSTYPE" in
     alias ng='np | grep'
     md5s() { md5 "$@"; }
     statm() { stat -f %m "$@"; }
-    local_locatedb=~/.local/var/locate/locatedb
-    if [[ ! -r "$local_locatedb" ]]; then
-      mkdir -p "$(dirname "$local_locatedb")"
-      # This should be put into cron as well
-      sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.vim/undo -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$HOME"/.local/var/locate/locatedb
-    fi
     export LOCATE_PATH=~/.local/var/locate/locatedb
+    if [[ ! -r "$LOCATE_PATH" ]]; then
+      mkdir -p "$(dirname "$LOCATE_PATH")"
+      # This should be put into cron as well
+      sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.Trash -prune -or -path "$HOME"/.vim/undo -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$LOCATE_PATH"
+    fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.mac ~/.gitconfig; fi
     ;;
   linux*)
@@ -113,7 +112,7 @@ case "$OSTYPE" in
       alias dir='dir --color=auto --hyperlink=auto'
       alias vdir='vdir --color=auto --hyperlink=auto'
     fi
-    alias dfh='df -lh -x tmpfs -x devtmpfs'
+    alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs'
     alias st='systemctl status'
     alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
     alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
@@ -128,6 +127,12 @@ case "$OSTYPE" in
     fi
     md5s() { md5sum "$@"; }
     statm() { stat --printf %Y "$@"; }
+    export LOCATE_PATH=~/.local/var/locate/locatedb
+    if [[ ! -r "$LOCATE_PATH" ]]; then
+      mkdir -p "$(dirname "$LOCATE_PATH")"
+      # This should be put into cron as well
+      updatedb --localpaths="$HOME" --findoptions="-path $HOME/.cache -prune -or -path $HOME/.cabal -prune -or -path $HOME/.ghcup -prune -or -path $HOME/.vim/undo -prune -or -path $HOME/.local/share -prune -or -name .git -type d -prune" --output="$LOCATE_PATH"
+    fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.linux ~/.gitconfig; fi
     ;;
   *)

@@ -2,7 +2,7 @@ mylocale_lang=en_AU.UTF-8
 mylocale_place=de_CH.UTF-8
 
 ensure_locale_exists() {
-  if ! locale -a | grep -q "^$1 "; then
+  if ! locale -a | grep -iq "^${1/-}\$"; then
     [[ -r /etc/locale.gen ]] && echo "$1 UTF-8" | sudo tee -a /etc/locale.gen > /dev/null && sudo locale-gen
   fi
 }

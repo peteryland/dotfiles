@@ -2,6 +2,7 @@ import qualified Data.Map as M
 import Data.Maybe
 import System.IO
 import System.Environment
+import System.FilePath
 import Graphics.X11.ExtraTypes.XF86
 import XMonad
 import XMonad.Actions.CopyWindow
@@ -9,6 +10,7 @@ import XMonad.Actions.MouseResize
 import XMonad.Config.Gnome
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.Place
 import XMonad.Hooks.StatusBar
 import XMonad.Layout.Fullscreen
@@ -147,6 +149,10 @@ incolor = "#5f5f5f"
 centrePlacement = (placeHook (withGaps (16,0,16,0) (fixed (0.5,0.5))) <>)
 smartCPlacement = (placeHook (withGaps (16,0,16,0) (smart (0.5,0.5))) <>)
 
+myworkspaces' :: Bool -> [String]
+myworkspaces' True  = map show [1..4]
+myworkspaces' False = ["one", "two", "three", "four", "five", "six", "seven", "eight", "kodi"]
+
 main :: IO ()
 main = do
     safeSpawn "xset" ["s", "off"]
@@ -154,10 +160,12 @@ main = do
     safeSpawn "picom" ["-b"]
     safeSpawn "mocp" ["-S", "-m", "/media/Audio"]
     homeDir <- getEnv "HOME"
+    safeSpawn "sh" [(homeDir </> ".xsession")]
 --     safeSpawnProg $ homeDir ++ "/.local/bin/tray"
 --     safeSpawnProg "volumeicon"
 --     safeSpawn "solaar" ["-w", "hide"]
 --     xmproc <- spawnPipe $ "xmobar"
+    let myworkspaces = myworkspaces' False
     let sb = statusBarProp "xmobar" (clickablePP xmobarPP {
       ppTitle           = shorten 50 . xmobarStrip
     , ppCurrent         = xmobarColor okcolor "" . xmobarBorder "Bottom mb=2" okcolor 1
@@ -171,16 +179,23 @@ main = do
     safeSpawnProg $ homeDir ++ "/.xplanet/xplanet.sh"
     replace
     xmonad . withSB sb $ gnomeConfig
-        { workspaces = ["one", "two", "three", "four", "five", "six", "seven", "eight", "kodi"]
+        { workspaces = myworkspaces
         , terminal = "kitty"
+--         , startupHook = do
+--             screensize <- fmap (W.screenDetail . W.current) (gets windowset)
+--             return ()
         , manageHook = composeAll
           [ manageDocks
           , fullscreenManageHook
+          , isFullscreen --> doFullFloat
           , className =? "Qalculate" --> centrePlacement doFloat
           , className =? "Solaar" --> centrePlacement doFloat
-          , className =? "Kodi" --> doFloat <+> doShift "kodi"
-          , className =? "MPlayer" --> doFloat
+          , className =? "Nm-connection-editor" --> centrePlacement doFloat
+          , className =? "Virt-manager" --> centrePlacement doFloat
           , className =? "Gimp" --> doFloat
+          , className =? "MPlayer" --> doFullFloat
+          , className =? "Brave-browser" --> doFullFloat
+          , className =? "Kodi" --> doFullFloat <+> doShift (last myworkspaces)
           , manageHook def
           ]
         , layoutHook = myLayoutHook
