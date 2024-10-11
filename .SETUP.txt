@@ -1,5 +1,5 @@
 # install this repo
-git clone https://github.com/peteryland/dotfiles
+git clone https://dev.piglet.ch/pdr/dotfiles.git
 mv dotfiles/.[a-zA-Z]* .
 rmdir dotfiles
 
@@ -30,7 +30,7 @@ if [ "$OSTYPE" = darwin18 ]; then
   brew install font-hack-nerd-font
 
   # install other useful things from brew
-  brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git fswatch bash qutebrowser brave-browser haskell-language-server vim tmux htop bat exa gawk fswatch make fzf
+  brew install jq lesspipe ffmpeg pcre cabal-install node gnupg python git fswatch bash qutebrowser brave-browser haskell-language-server vim tmux htop bat eza gawk fswatch make fzf
 
   sudo chsh $USER  # set to /opt/homebrew/bin/bash
 
@@ -41,7 +41,7 @@ if [ "$OSTYPE" = darwin18 ]; then
   # stack update
   # stack install hoogle hlint lambdabot happy pretty-show hscolour ghc-paths hindent
 
-  ln -s .gitconfig.mac.pdr .gitconfig
+  ln -nfs .gitconfig.mac .gitconfig
 
   # Install XQuartz (xquartz.org)
 fi
@@ -49,7 +49,7 @@ fi
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
-  sudo apt install bc locate vim-nox curl tmux mtr htop exa bat fswatch pkg-config jq tldr fzf
+  sudo apt install bc locate vim-nox curl tmux mtr htop eza bat fswatch pkg-config jq tldr fzf
   sudo apt purge vim-tiny nano
 
   # Build/Dev:
@@ -62,7 +62,7 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # The following will likely need to be installed one by one:
   cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell --overwrite-policy=always
 
-  ln -s .gitconfig.linux.pdr .gitconfig
+  ln -nfs .gitconfig.linux .gitconfig
 fi
 
 ## Raspberry Pi (Raspbian) / Media Centre
@@ -87,7 +87,7 @@ fi
 echo 'This is a private server.  Unauthorized access is forbidden.' | sudo tee /etc/motd > /dev/null
 
 ## Linux Desktops
-# sudo cp -r ~/.fonts/firacodenerd /usr/share/fonts/truetype/
+# sudo cp -r ~/.fonts/firacodenerd /usr/share/fonts/truetype/ # https://github.com/ryanoasis/nerd-fonts
 # apt install xdotool xmonad xmobar xplanet hsetroot kitty
 
 # /etc/default/keyboard:
@@ -99,18 +99,18 @@ echo 'This is a private server.  Unauthorized access is forbidden.' | sudo tee /
 # For more options: man 7 xkeyboard-config
 # Then need to: sudo udevadm trigger --subsystem-match=input --action=change
 
-# Download and install FiraCode with Nerd Fonts from https://github.com/ryanoasis/nerd-fonts
-
 sudo apt install kitty xmonad xmobar moc picom renameutils hsetroot xplanet
 cabal install --lib xmonad xmonad-contrib X11 --overwrite-policy=always
 
 ## Coding
 
+mkdir -p src/{scratch,looking,notes}
+
 # install vim-plug (already copied into this repo)
 # curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # Install ghcup, then install ghc/cabal/hls
-sudo apt install build-essential curl libffi-dev libffi8 libgmp-dev libgmp10 libncurses-dev libncurses5 libtinfo5 pkg-config
+sudo apt install build-essential curl libffi-dev libffi8 libgmp-dev libgmp10 libncurses-dev libncurses6 libtinfo6 pkg-config
 curl -sSf https://get-ghcup.haskell.org | sh
 
 # install nix via apt

@@ -194,6 +194,7 @@ main = do
           , className =? "Virt-manager" --> centrePlacement doFloat
           , className =? "Gimp" --> doFloat
           , className =? "MPlayer" --> doFullFloat
+          , className =? "Totem" --> doFullFloat
           , className =? "Brave-browser" --> doFullFloat
           , className =? "Kodi" --> doFullFloat <+> doShift (last myworkspaces)
           , manageHook def
@@ -216,6 +217,7 @@ main = do
         [ ("M-S-<Enter>", safeSpawnProg "kitty")
         , ("M-S-b", safeSpawnProg "x-www-browser")
         , ("M-S-h", safeSpawnProg "nautilus")
+        , ("M-C-k", safeSpawnProg "kodi")
         , ("C-<Print>", safeSpawn "sleep" ["0.2"] >> safeSpawn "scrot" ["-s"])
         , ("<Print>", safeSpawnProg "scrot")
         , ("M-C-r", safeSpawn "xmonad" ["--recompile"] >> safeSpawn "xmonad" ["--restart"])
