@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if ! hdmi="$(command wpctl status | tr -cs '[:alnum:]*\n' '[ *]')"; then
+  echo "$0: Fatal: wpctl command not found"
+  exit 1
+fi
+
+if ! hdmi="$(grep HDMI <<< "$hdmi")"; then
+  echo "$0: Fatal: no HDMI audio sink found"
+  exit 2
+fi
+
+read -a hdmi <<< "$hdmi"
+
+if [[ ${hdmi[0]} == '1*' ]]; then
+  exit 0
+fi
+
+exec wpctl set-default "${hdmi[1]}"

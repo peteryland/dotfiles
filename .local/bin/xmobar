@@ -1,5 +1,10 @@
 #!/bin/bash
 
 while true; do
-  /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config &> ~/.xmonad/xmobar.errors
+  res="$(xrandr | grep '^ *[0-9]*x[0-9]* *.*\*' | cut -d\  -f4)"
+  if [[ -r ~/.xmonad/xmobar.config.$res ]]; then
+    /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config."$res" &> ~/.xmonad/xmobar.errors
+  else
+    /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config &> ~/.xmonad/xmobar.errors
+  fi
 done

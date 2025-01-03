@@ -1,0 +1,9 @@
+#!/bin/bash
+
+res="$(xrandr | grep '^ *[0-9]*x[0-9]* *.*\*' | cut -d\  -f4)"
+
+case "$res" in
+  1920x1080) exec kitty -o font_size=16;;
+  3840x2160) exec kitty -o font_size=24;;
+          *) exec kitty;;
+esac

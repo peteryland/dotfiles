@@ -88,7 +88,6 @@ echo 'This is a private server.  Unauthorized access is forbidden.' | sudo tee /
 
 ## Linux Desktops
 # sudo cp -r ~/.fonts/firacodenerd /usr/share/fonts/truetype/ # https://github.com/ryanoasis/nerd-fonts
-# apt install xdotool xmonad xmobar xplanet hsetroot kitty
 
 # /etc/default/keyboard:
 # XKBMODEL="pc105"
@@ -99,7 +98,7 @@ echo 'This is a private server.  Unauthorized access is forbidden.' | sudo tee /
 # For more options: man 7 xkeyboard-config
 # Then need to: sudo udevadm trigger --subsystem-match=input --action=change
 
-sudo apt install kitty xmonad xmobar moc picom renameutils hsetroot xplanet
+sudo apt install kitty xmonad xmobar moc picom renameutils hsetroot xplanet xdotool
 cabal install --lib xmonad xmonad-contrib X11 --overwrite-policy=always
 
 ## Coding
