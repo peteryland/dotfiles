@@ -185,22 +185,46 @@ hi StatusLineNC ctermfg=237 ctermbg=110
 hi StatusLineTerm cterm=bold,reverse ctermfg=22 ctermbg=110
 hi StatusLineTermNC cterm=bold,reverse ctermfg=237 ctermbg=110
 
-hi GitGreenOK ctermfg=040 ctermbg=24
-hi GitGreenMod ctermfg=040 ctermbg=58
-hi GitGreenRO ctermfg=040 ctermbg=23
-hi GitGreenInactive ctermfg=040 ctermbg=237
-hi GitBlueOK ctermfg=004 ctermbg=24
-hi GitBlueMod ctermfg=004 ctermbg=58
-hi GitBlueRO ctermfg=004 ctermbg=23
-hi GitBlueInactive ctermfg=004 ctermbg=237
-hi GitYellowOK cterm=bold ctermfg=440 ctermbg=24
-hi GitYellowMod cterm=bold ctermfg=440 ctermbg=58
-hi GitYellowRO cterm=bold ctermfg=440 ctermbg=23
-hi GitYellowInactive cterm=bold ctermfg=440 ctermbg=237
-hi GitRedOK ctermfg=400 ctermbg=24
-hi GitRedMod ctermfg=400 ctermbg=58
-hi GitRedRO ctermfg=400 ctermbg=23
-hi GitRedInactive ctermfg=400 ctermbg=237
+hi StatusLineOK ctermfg=110 ctermbg=24
+hi StatusLineMod ctermfg=110 ctermbg=58
+hi StatusLineRO ctermfg=110 ctermbg=23
+hi StatusLineInactive ctermfg=110 ctermbg=237
+" hi GitGreenOK ctermfg=040 ctermbg=24
+" hi GitGreenMod ctermfg=040 ctermbg=58
+" hi GitGreenRO ctermfg=040 ctermbg=23
+" hi GitGreenInactive ctermfg=040 ctermbg=237
+" hi GitBlueOK ctermfg=004 ctermbg=24
+" hi GitBlueMod ctermfg=004 ctermbg=58
+" hi GitBlueRO ctermfg=004 ctermbg=23
+" hi GitBlueInactive ctermfg=004 ctermbg=237
+" hi GitYellowOK cterm=bold ctermfg=440 ctermbg=24
+" hi GitYellowMod cterm=bold ctermfg=440 ctermbg=58
+" hi GitYellowRO cterm=bold ctermfg=440 ctermbg=23
+" hi GitYellowInactive cterm=bold ctermfg=440 ctermbg=237
+" hi GitRedOK ctermfg=400 ctermbg=24
+" hi GitRedMod ctermfg=400 ctermbg=58
+" hi GitRedRO ctermfg=400 ctermbg=23
+" hi GitRedInactive ctermfg=400 ctermbg=239
+hi GitGreenOK ctermfg=040 ctermbg=239
+hi GitGreenMod ctermfg=040 ctermbg=239
+hi GitGreenRO ctermfg=040 ctermbg=239
+hi GitGreenInactive ctermfg=040 ctermbg=239
+hi GitBlueOK ctermfg=004 ctermbg=239
+hi GitBlueMod ctermfg=004 ctermbg=239
+hi GitBlueRO ctermfg=004 ctermbg=239
+hi GitBlueInactive ctermfg=004 ctermbg=239
+hi GitYellowOK ctermfg=3 ctermbg=239
+hi GitYellowMod ctermfg=3 ctermbg=239
+hi GitYellowRO ctermfg=3 ctermbg=239
+hi GitYellowInactive ctermfg=3 ctermbg=239
+hi GitRedOK ctermfg=1 ctermbg=239
+hi GitRedMod ctermfg=1 ctermbg=239
+hi GitRedRO ctermfg=1 ctermbg=239
+hi GitRedInactive ctermfg=1 ctermbg=239
+hi GitBGOK ctermfg=239 ctermbg=24
+hi GitBGMod ctermfg=239 ctermbg=58
+hi GitBGRO ctermfg=239 ctermbg=23
+hi GitBGInactive ctermfg=239 ctermbg=237
 hi HaskellPurpleOK cterm=bold ctermfg=129 ctermbg=24
 hi HaskellPurpleMod cterm=bold ctermfg=129 ctermbg=58
 hi HaskellPurpleRO cterm=bold ctermfg=129 ctermbg=23

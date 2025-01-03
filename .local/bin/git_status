@@ -48,4 +48,4 @@ if [[ -e "$(git rev-parse --git-dir 2>/dev/null)" ]]; then
   bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
 fi
 
-echo -n "${bashrc_git_status:+[${bashrc_git_branch:+%#GitBlue#$bashrc_git_branch}${bashrc_git_ahead:+%#GitGreen#↑$bashrc_git_ahead}${bashrc_git_behind:+%#GitRed#↓$bashrc_git_behind}${bashrc_git_extrastatus:+%#GitYellow#$bashrc_git_extrastatus}%*] }"
+echo -n "${bashrc_git_status:+%#GitBG#${bashrc_git_branch:+%#GitBlue#$bashrc_git_branch}${bashrc_git_ahead:+%#GitGreen#↑$bashrc_git_ahead}${bashrc_git_behind:+%#GitRed#↓$bashrc_git_behind}${bashrc_git_extrastatus:+%#GitYellow#$bashrc_git_extrastatus}%*%#GitBG#%#StatusLine# }"
