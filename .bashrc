@@ -144,7 +144,7 @@ if [ "$UID" -eq 0 ]; then
 else
   usercol=6
 fi
-export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${bashrc_exit_status:+\[\e[31m\]$bashrc_exit_status \[\e[m\]}${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;239m\]\[\e[48;5;239m\]${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;66m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;239m\]\[\e[m\]}\$ '
+export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;239m\]\[\e[48;5;239m\]${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;66m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;239m\]\[\e[m\]}\$ '
 unset usercol
 
 bashrc_term_title() {
@@ -683,16 +683,29 @@ if [[ -z "$rgb" ]]; then
   unset red green blue
 fi
 
+# Set bashrc_cmd to 1 every time a new command is executed
+trap '[[ $BASH_COMMAND != $PROMPT_COMMAND ]] && bashrc_cmd=1' DEBUG
+
 bashrc_prompt() {
-  bashrc_exit_status=${?#0}
-  # tput sc; tput home; printf "%*s" $COLUMNS "$(date)"; tput rc
+  local bashrc_exit_status="${?#0}" bashrc_row bashrc_col bashrc_nonl=
+  if [[ $bashrc_cmd ]]; then
+    IFS=\; read -sdR -p $'\e[6n' bashrc_row bashrc_col
+    bashrc_row="$(cut -c3- <<< "$bashrc_row")"
+    (( bashrc_col != 1 )) && bashrc_nonl=1
+    if [[ $bashrc_nonl || $bashrc_exit_status ]]; then
+      [[ $bashrc_nonl ]] || echo -en $'.\e[A'
+      echo -e $"\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[31m\e[41m\e[30m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[31m\e[m"
+    fi
+  fi
+  unset bashrc_cmd
+#   tput sc; tput home; printf "%*s" $COLUMNS "$(date)"; tput rc
   bashrc_check_repo
   bashrc_term_title_and_colours
 }
 
-PROMPT_COMMAND=bashrc_prompt
-bashrc_prompt
-
 if [[ -r "$HOME/.bashrc_localafter" ]]; then
   . "$HOME/.bashrc_localafter"
 fi
+
+PROMPT_COMMAND=bashrc_prompt
+bashrc_prompt
