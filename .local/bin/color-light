@@ -31,19 +31,19 @@ color21=28/2a/2e   # Base 06
 color_foreground=4d/4d/4c # Base 05
 color_background=ff/ff/ff # Base 00
 
-if [ -n "$TMUX" ]; then
+if [[ $TMUX ]]; then
   # Tell tmux to pass the escape sequences through
   # (Source: http://permalink.gmane.org/gmane.comp.terminal-emulators.tmux.user/1324)
   put_template() { printf '\033Ptmux;\033\033]4;%d;rgb:%s\033\033\\\033\\' "$@"; }
   put_template_var() { printf '\033Ptmux;\033\033]%d;rgb:%s\033\033\\\033\\' "$@"; }
   put_template_custom() { printf '\033Ptmux;\033\033]%s%s\033\033\\\033\\' "$@"; }
-elif [ "${TERM%%[-.]*}" = "screen" ]; then
+elif [[ ${TERM%%[-.]*} == screen ]]; then
   # GNU screen (screen, screen-256color, screen-256color-bce)
   put_template() { printf '\033P\033]4;%d;rgb:%s\007\033\\' "$@"; }
   put_template_var() { printf '\033P\033]%d;rgb:%s\007\033\\' "$@"; }
   put_template_custom() { printf '\033P\033]%s%s\007\033\\' "$@"; }
-elif [ "${TERM%%-*}" = "linux" ]; then
-  put_template() { [ "$1" -lt 16 ] && printf '\033]P%x%s' "$1" "$(echo "$2" | sed 's/\///g')"; }
+elif [[ ${TERM%%-*} == linux ]]; then
+  put_template() { [[ $1 -lt 16 ]] && printf '\033]P%x%s' "$1" "${2//\/}"; }
   put_template_var() { true; }
   put_template_custom() { true; }
 else
@@ -79,7 +79,7 @@ put_template 20 "$color20"
 put_template 21 "$color21"
 
 # foreground / background / cursor color
-if [ -n "$ITERM_SESSION_ID" -o "$TERM_PROGRAM" = iTerm.app ]; then
+if [[ $ITERM_SESSION_ID || $TERM_PROGRAM == iTerm.app ]]; then
   # iTerm2 proprietary escape codes
   put_template_custom Pg "${color_foreground///}" # foreground
 #   put_template_custom Ph "${color_background///}" # background

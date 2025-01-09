@@ -56,7 +56,7 @@ if [[ -x ~/.lessfilter ]]; then
   export LESSQUIET=1
 fi
 
-if [ -z "${debian_chroot:-}" ] && [[ -r /etc/debian_chroot ]]; then
+if [[ -z ${debian_chroot:-} ]] && [[ -r /etc/debian_chroot ]]; then
   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
@@ -139,7 +139,11 @@ case "$OSTYPE" in
     statm() { return 0; }
 esac
 
-if [ "$UID" -eq 0 ]; then
+if [[ -r "$HOME"/.local/bin/color-dark ]]; then
+  . "$HOME"/.local/bin/color-dark
+fi
+
+if [[ $UID -eq 0 ]]; then
   usercol=1
 else
   usercol=6
@@ -148,19 +152,20 @@ export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[
 unset usercol
 
 bashrc_term_title() {
+  local title="$(id -un)@$(hostname -s):${PWD/#$HOME/\~}"
   # set terminal tab title
-  printf "\e]1;$(id -un)@$(hostname -s):${PWD/$HOME/\~}\a"
+  printf "\e]1;$title\a"
   # set terminal window title
-  printf "\e]2;$(id -un)@$(hostname -s):${PWD/$HOME/\~}\a"
+  printf "\e]2;$title\a"
   if [[ $TERM =~ ^(tmux|screen)- ]]; then
     # set tmux window title (allow-rename must be on for this to work)
-    printf "\ek$(id -un)@$(hostname -s):${PWD/$HOME/\~}\e\\"
+    printf "\ek$title\e\\"
   fi
 }
 
-if [ "$LC_TERMINAL" ]; then
+if [[ $LC_TERMINAL ]]; then
   termprog="$LC_TERMINAL"
-elif [ "$TERM_PROGRAM" -a "$TERM_PROGRAM" != tmux ]; then
+elif [[ $TERM_PROGRAM && $TERM_PROGRAM != tmux ]]; then
   termprog="$TERM_PROGRAM"
 else
   termprog="$TERM"
@@ -170,11 +175,11 @@ case "$termprog" in
   iTerm*|xterm-color|*-256color)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
-      if [ -z "$VIM_TERMINAL" ]; then
+      if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
         # set background colour
-        printf "\e]Ph$rgb\e"\\
-        printf "\e]11;#$rgb\e"\\
+        printf "\e]Ph${bashrc_bgcolour}\e\\"
+        printf "\e]11;#${bashrc_bgcolour}\e\\"
       fi
     }
     ;;
@@ -183,19 +188,28 @@ case "$termprog" in
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     export TERM=xterm-256color
     bashrc_term_title_and_colours() {
-      if [ -z "$VIM_TERMINAL" ]; then
+      if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
         # set background colour
-        printf "\e]11;#$rgb\e"\\
+        printf "\e]11;#${bashrc_bgcolour}\e\\"
       fi
     }
     ;;
   Apple_Terminal)
     bashrc_term_title_and_colours() {
-      if [ -z "$VIM_TERMINAL" ]; then
+      if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
         # set background colour
-        printf "\e]11;#$rgb\e"\\
+        printf "\e]11;#${bashrc_bgcolour}\e\\"
+      fi
+    }
+    ;;
+  linux)
+    bashrc_term_title_and_colours() {
+      if [[ -z $VIM_TERMINAL ]]; then
+        # set background colour
+        printf "\e]P0${bashrc_bgcolour}"
+        # switch consoles and back to reset the colours for the whole screen
       fi
     }
     ;;
@@ -234,12 +248,12 @@ bashrc_check_repo() {
     fi
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
     bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-    bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && echo -n S; grep -q ^.M <<< "$status" && echo -n M) #; grep -q ^\?\? <<< "$status" && echo -n U)
+    bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M) #; grep -q ^\?\? <<< "$status" && printf U)
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}${bashrc_git_tag:+ $bashrc_git_tag }$bashrc_git_extrastatus"
   fi
 }
 
-if [[ $(type -t pg) = alias ]]; then unalias pg; fi
+if [[ $(type -t pg) == alias ]]; then unalias pg; fi
 pg() {
   pids=($(pgrep -f "$@"))
   if [[ -n $pids ]]; then
@@ -283,7 +297,7 @@ ggl() {
   if h="$(gl --format='%C(auto)%h %Cgreen%aL %Cblue%as%Creset: %s%C(auto)%d' --color | \
           fzf --ansi --reverse --preview "git show --color \"\$(sed 's/^.* \\([a-f0-9]\\{7,9\\}\\) .*\$/\\1/' <<< {})\"")"; then
     h="$(_gitline_to_hash "$h")"
-    echo "$h"
+    printf "$h"
   else
     return $?
   fi
@@ -314,7 +328,7 @@ mv. () {
   cd ..
   if mv -i "$oldname" "$newname"; then
     cd "$newname"
-    if [[ $newname = */ ]]; then
+    if [[ $newname == */ ]]; then
       cd "$oldname"
     fi
   fi
@@ -365,12 +379,8 @@ if [[ -r ~/.inputrc ]]; then
   export INPUTRC=~/.inputrc
 fi
 
-if [[ -r "$HOME"/.local/bin/color-dark ]]; then
-  . "$HOME"/.local/bin/color-dark
-fi
-
 spf() {
-  while [ "$1" ]; do
+  while [[ $1 ]]; do
     host -t TXT "$1" | cut -d\" -f2 | grep --color=never '^v=spf'
     shift
   done
@@ -397,7 +407,7 @@ l() {
   mkdir -p "$LOOKINGDIR"
   local dir="${1#*/}"
   if [[ $1 ]]; then
-    if [[ $1 = s-* ]]; then
+    if [[ $1 == s-* ]]; then
       opts="${1/s}"
       shift
       echo "ls $opts $@" >&2
@@ -405,10 +415,10 @@ l() {
     elif [[ -n $dir && -d "$LOOKINGDIR"/$dir ]]; then
       cd "$LOOKINGDIR"/"$dir"
     elif [[ $1 == ?*/?* ]]; then
-      if [ "$(curl -Ls -w '%{response_code}' -o/dev/null https://gitlab.com/"$1")" -eq 200 ]; then
+      if [[ $(curl -Ls -w '%{response_code}' -o/dev/null https://gitlab.com/"$1") == 200 ]]; then
         cd "$LOOKINGDIR"
         git clone https://gitlab.com/"$1"
-      elif [ "$(curl -Ls -w '%{response_code}' -o/dev/null https://github.com/"$1")" -eq 200 ]; then
+      elif [[ $(curl -Ls -w '%{response_code}' -o/dev/null https://github.com/"$1") == 200 ]]; then
         cd "$LOOKINGDIR"
         git clone https://github.com/"$1"
       else
@@ -436,8 +446,8 @@ n() {
   if [[ $PWD == */adventofcode/* ]]; then
     diryear="$(($(basename "$PWD")))"
     for ((n=1; n<=25; n++)); do
-      if [ -r "$n"a.hs -o -r "$n"a.c ]; then
-        if [ -r "$n"b.hs -o -r "$n"b.c ]; then
+      if [[ -r ${n}a.hs || -r ${n}a.c ]]; then
+        if [[ -r ${n}b.hs || -r ${n}b.c ]]; then
           continue
         else
           # mkaoc for part 1 tries to create a parser for the input file and for part 2 simply copies over part 1
@@ -446,14 +456,14 @@ n() {
         fi
       else
         # Don't fetch anything automatically if we're not solving this year's puzzles
-        if [ "$(date +%Y)" -eq "$diryear" ]; then
+        if [[ $(date +%Y) -eq $diryear ]]; then
           export TZ=EST
-          while [ "$(date +%d)" -lt "$n" ]; do
+          while [[ $(date +%d) -lt $n ]]; do
             sleep 1
           done
           # Don't hit the server immediately, you need time to read the problem anyway
           sleep 2
-          if [ -x "$HOME"/src/games/coding/adventofcode/get_input ]; then
+          if [[ -x $HOME/src/games/coding/adventofcode/get_input ]]; then
             "$HOME"/src/games/coding/adventofcode/get_input
           fi
         fi
@@ -465,7 +475,7 @@ n() {
 }
 
 do_submit() {
-  if [ -r "$HOME"/src/games/coding/adventofcode/.cookie ]; then
+  if [[ -r $HOME/src/games/coding/adventofcode/.cookie ]]; then
     . "$HOME"/src/games/coding/adventofcode/.cookie
   fi
   curl -sS -b "$MYCOOKIE" -d level="$3" -d answer="$(cat "$4")" "https://adventofcode.com/$1/day/$2/answer" \
@@ -479,13 +489,13 @@ sub() {
   if [[ $PWD == */adventofcode/* ]]; then
     local year="$(basename "$PWD")"
     for ((n=1; n<=25; n++)); do
-      if [ -r "$n"a.hs -o -r "$n"a.c ]; then
-        if [ -r "$n"b.hs -o -r "$n"b.c ]; then
+      if [[ -r ${n}a.hs || -r ${n}a.c ]]; then
+        if [[ -r ${n}b.hs || -r ${n}b.c ]]; then
           continue
         else
-          if [ -r "$n"ah.output ]; then
+          if [[ -r ${n}ah.output ]]; then
             do_submit "$year" "$n" 1 "$n"ah.output
-          elif [ -r "$n"ac.output ]; then
+          elif [[ -r ${n}ac.output ]]; then
             do_submit "$year" "$n" 1 "$n"ac.output
           else
             echo "Couldn't find anything to submit." >&2
@@ -495,9 +505,9 @@ sub() {
         fi
       else
         ((n--))
-        if [ -r "$n"bh.output ]; then
+        if [[ -r ${n}bh.output ]]; then
           do_submit "$year" "$n" 2 "$n"bh.output
-        elif [ -r "$n"bc.output ]; then
+        elif [[ -r ${n}bc.output ]]; then
           do_submit "$year" "$n" 2 "$n"bc.output
         else
           echo "Couldn't find anything to submit." >&2
@@ -529,7 +539,7 @@ fzf-d() {
   if [[ -z $maxdepth ]]; then maxdepth=5; fi
   if [[ -z $query ]]; then query=''; fi
 
-  echo -n "$path"/
+  printf "$path"/
 
   local fzfopts fzfver="$(fzf --version)"; fzfver="${fzfver#*.}"; fzfver="${fzfver%%[. ]*}"
   if [[ $fzfver -ge 33 ]]; then
@@ -542,9 +552,9 @@ fzf-d() {
   done
   x+=(-false)
   (
-    echo -e -n "\0"
+    printf "\0"
     find "$path" -type d -mindepth 1 -maxdepth "$maxdepth" -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
-      echo -e -n "${line#$path/}\0"
+      printf "${line#$path/}\0"
     done
   ) | fzf-tmux -0 -1 -p -q "$query" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'ls -al --color '"$path"'/{}'
 }
@@ -555,12 +565,12 @@ fzf-r() {
   if [[ $fzfver -ge 33 ]]; then
     fzfopts+=(--scheme=path)
   fi
-  echo -n "$HOME"/
+  printf "$HOME"/
   (
-    echo -e -n "\0"
+    printf "\0"
     find ~/src -type d -name .git -maxdepth 5 -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
       line="${line#~/}"
-      echo -e -n "${line%/.git}\0"
+      printf "${line%/.git}\0"
     done
   ) | fzf-tmux -p 90%,90% -0 -1 -p -q "$1" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'git -C ~/{} la --color=always'
 }
@@ -625,30 +635,29 @@ fs() {
 }
 
 j() {
-  if [ "$1" = "-v" ]; then
+  local verbose= ver
+
+  if [[ $1 == -v ]]; then
     verbose=1
     shift
   fi
 
-  if [[ ! -x /usr/libexec/java_home ]] || ! /usr/libexec/java_home > /dev/null 2>&1; then
-    if [ "$verbose" ]; then
-      echo "No Java installed."
-    fi
-    return
+  if ! /usr/libexec/java_home > /dev/null 2>&1; then
+    [[ $verbose ]] && echo "No Java installed." >&2
+    return 1
   fi
 
-  ver="$1"
-  if [ -z "$ver" ]; then
-    echo JAVA_HOME="$JAVA_HOME"
+  if [[ -z $1 ]]; then
+    echo "JAVA_HOME=$JAVA_HOME"
     /usr/libexec/java_home -V
   else
-    if [ "$ver" = latest ]; then
+    ver="$1"
+    if [[ $ver == latest ]]; then
       ver="$(/usr/libexec/java_home -V 2>&1 | grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
     fi
-    export JAVA_HOME=$(/usr/libexec/java_home -v "$ver")
-    if [ "$verbose" ]; then
-      echo JAVA_HOME="$JAVA_HOME"
-    fi
+    export JAVA_HOME="$(/usr/libexec/java_home -v "$ver")"
+    [[ $verbose ]] && echo "JAVA_HOME=$JAVA_HOME"
+    return 0
   fi
 }
 
@@ -667,7 +676,9 @@ if [[ -r "$HOME/.bashrc_local" ]]; then
 fi
 
 # Set rgb in .bashrc_local for a fixed background colour
-if [[ -z "$rgb" ]]; then
+if [[ $rgb ]]; then
+  bashrc_bgcolour="$rgb"
+else
   # Set devmachine=1 in non-prod .bashrc_local to ensure brighter colours for prod machines
   if [[ $devmachine ]]; then
     bgfactor=4
@@ -675,11 +686,11 @@ if [[ -z "$rgb" ]]; then
     bgfactor=2
   fi
 
-  rgb=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
-  red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$rgb")$(cut -c 2 <<< "$rgb") / $bgfactor"))
-  green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$rgb")$(cut -c 4 <<< "$rgb") / $bgfactor"))
-  blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$rgb")$(cut -c 1 <<< "$rgb") / $bgfactor"))
-  rgb="$red$green$blue"
+  bashrc_bgcolour=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
+  red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$bashrc_bgcolour")$(cut -c 2 <<< "$bashrc_bgcolour") / $bgfactor"))
+  green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$bashrc_bgcolour")$(cut -c 4 <<< "$bashrc_bgcolour") / $bgfactor"))
+  blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$bashrc_bgcolour")$(cut -c 1 <<< "$bashrc_bgcolour") / $bgfactor"))
+  bashrc_bgcolour="$red$green$blue"
   unset red green blue
 fi
 
@@ -693,8 +704,8 @@ bashrc_prompt() {
     bashrc_row="$(cut -c3- <<< "$bashrc_row")"
     (( bashrc_col != 1 )) && bashrc_nonl=1
     if [[ $bashrc_nonl || $bashrc_exit_status ]]; then
-      [[ $bashrc_nonl ]] || echo -en $'.\e[A'
-      echo -e $"\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[31m\e[41m\e[30m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[31m\e[m"
+      [[ $bashrc_nonl ]] || printf '\e[A'
+      printf "\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[31m\e[41m\e[30m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[31m\e[m\n"
     fi
   fi
   unset bashrc_cmd
@@ -708,4 +719,3 @@ if [[ -r "$HOME/.bashrc_localafter" ]]; then
 fi
 
 PROMPT_COMMAND=bashrc_prompt
-bashrc_prompt
