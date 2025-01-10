@@ -630,6 +630,12 @@ fs() {
       popd > /dev/null
     fi
   else
+    return -1
+  fi
+}
+
+fssh() {
+  if ! fs "$@"; then
     exec bash -il
   fi
 }
