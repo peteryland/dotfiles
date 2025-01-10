@@ -1,9 +1,9 @@
 #!/bin/bash
 
-res="$(xrandr | grep '^ *[0-9]*x[0-9]* *.*\*' | cut -d\  -f4)"
+res="$(xrandr --current | grep '^ *[0-9]*x[0-9]* *.*\*' | cut -d\  -f4 | head -1)"
 
 case "$res" in
-  1920x1080) exec kitty -o font_size=16;;
-  3840x2160) exec kitty -o font_size=24;;
-          *) exec kitty;;
+  1920x1080) exec /usr/bin/kitty -o font_size=12 "$@";;
+  3840x2160) exec /usr/bin/kitty -o font_size=24 "$@";;
+          *) exec /usr/bin/kitty "$@";;
 esac

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+case "$OSTYPE" in
+  darwin*) md5s() { md5    "$@"; };;
+  linux*)  md5s() { md5sum "$@"; };;
+esac
+
+bashrc_get_bgcolour() {
+  # Set rgb in .bashrc_local for a fixed background colour
+  local r g b gam="${1//[^0-9.]}" fixedrgb="${rgb//[^0-9a-fA-F]}"
+  local col="${fixedrgb:-$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)}"
+  [[ -z $gam || $gam =~ ^0*\.?0*$ ]] && gam=4
+  r="$(printf %02x 0x"$(bc <<< "ibase=obase=16; v=$(cut -c 1-2 <<< "$col") / $gam; if(v>FF) FF else v")")"
+  g="$(printf %02x 0x"$(bc <<< "ibase=obase=16; v=$(cut -c 3-4 <<< "$col") / $gam; if(v>FF) FF else v")")"
+  b="$(printf %02x 0x"$(bc <<< "ibase=obase=16; v=$(cut -c 5-6 <<< "$col") / $gam; if(v>FF) FF else v")")"
+  printf "$r$g$b"
+}
+
+setbg() {
+  local gam1="${1//[^0-9.]}"
+  local gam="${gam1:-2}"
+  # Set devmachine=1 in non-prod .bashrc_local to ensure brighter colours for prod machines
+  [[ $devmachine ]] && gam="$(bc <<< "$gam * 2")"
+  printf "$(bashrc_get_bgcolour "${gam/%.0}")"
+}
+
+setbg "$@"

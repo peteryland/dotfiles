@@ -150,7 +150,7 @@ centrePlacement = (placeHook (withGaps (16,0,16,0) (fixed (0.5,0.5))) <>)
 smartCPlacement = (placeHook (withGaps (16,0,16,0) (smart (0.5,0.5))) <>)
 
 myworkspaces' :: Bool -> [String]
-myworkspaces' True  = map show [1..4]
+myworkspaces' True  = map show [1..8]
 myworkspaces' False = ["one", "two", "three", "four", "five", "six", "seven", "eight", "kodi"]
 
 main :: IO ()
@@ -176,11 +176,11 @@ main = do
     , ppSep             = " | "
     , ppUrgent          = xmobarColor color02 "" . wrap "!" "!"
     })
-    safeSpawnProg $ homeDir ++ "/.xplanet/xplanet.sh"
+    safeSpawnProg $ homeDir </> "/.xplanet/xplanet.sh"
     replace
     xmonad . withSB sb $ gnomeConfig
         { workspaces = myworkspaces
-        , terminal = "kitty"
+        , terminal = homeDir </> ".local/bin/kitty"
 --         , startupHook = do
 --             screensize <- fmap (W.screenDetail . W.current) (gets windowset)
 --             return ()
@@ -214,7 +214,8 @@ main = do
           ] ++ M.toList (keys def c)
         } `additionalKeysP`
 --         [ ("M-S-z", spawn "xscreensaver-command -lock; xset dpms force off")
-        [ ("M-S-<Enter>", safeSpawnProg "kitty")
+        [ ("M-S-<Return>", safeSpawnProg $ homeDir </> ".local/bin/kitty")
+        , ("M-C-<Return>", safeSpawnProg "x-terminal-emulator")
         , ("M-S-b", safeSpawnProg "x-www-browser")
         , ("M-S-h", safeSpawnProg "nautilus")
         , ("M-C-k", safeSpawnProg "kodi")
@@ -224,5 +225,6 @@ main = do
         , ("M-S-r", safeSpawn "xmonad" ["--restart"])
         , ("M-S-q", io exitSuccess)
         , ("M-S-c", kill1)
+        , ("M-S-s", safeSpawn "sudo" ["systemctl", "suspend"])
         , ("M-u", safeSpawn "x-terminal-emulator" ["mocp"])
         ]

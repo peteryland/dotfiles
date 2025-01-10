@@ -1,6 +1,6 @@
 # install this repo
 git clone https://dev.piglet.ch/pdr/dotfiles.git
-mv dotfiles/.[a-zA-Z]* .
+mv -i dotfiles/.[a-zA-Z]* .
 rmdir dotfiles
 
 ## Mac specific:
@@ -49,6 +49,10 @@ fi
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
+  sudo vi /etc/locale.gen ## Should contain:
+  # de_CH.UTF-8 UTF-8
+  # en_AU.UTF-8 UTF-8
+  sudo locale-gen
   sudo apt install bc locate vim-nox curl tmux mtr htop eza bat fswatch pkg-config jq tldr fzf
   sudo apt purge vim-tiny nano
 
@@ -97,6 +101,12 @@ echo 'This is a private server.  Unauthorized access is forbidden.' | sudo tee /
 # BACKSPACE="guess"
 # For more options: man 7 xkeyboard-config
 # Then need to: sudo udevadm trigger --subsystem-match=input --action=change
+
+sudo cp -i /usr/share/X11/xorg.conf.d/40-libinput.conf /etc/X11/xorg.conf.d/
+# Then edit /etc/X11/xorg.conf.d/40-libinput.conf to add the following to the touchpad section if necessary:
+# vi /etc/X11/xorg.conf.d/40-libinput.conf
+#         Option "Tapping" "on"
+#         Option "NaturalScrolling" "true"
 
 sudo apt install kitty xmonad xmobar moc picom renameutils hsetroot xplanet xdotool
 cabal install --lib xmonad xmonad-contrib X11 --overwrite-policy=always

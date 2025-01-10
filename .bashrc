@@ -186,7 +186,7 @@ case "$termprog" in
   xterm-kitty)
     alias icat="kitty +kitten icat"
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-    export TERM=xterm-256color
+#     export TERM=xterm-256color
     bashrc_term_title_and_colours() {
       if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
@@ -664,35 +664,20 @@ j() {
 j latest
 
 # The following is for working with NixOS
-[[ -r "$HOME/.nix-profile/etc/profile.d/nix.sh" ]] && . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-[[ -r "$HOME/.mylocale" ]] && . "$HOME/.mylocale"
+[[ -r $HOME/.nix-profile/etc/profile.d/nix.sh ]] && . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+[[ -r $HOME/.mylocale ]] && . "$HOME/.mylocale"
 
 # The following is for Go development
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
 # [[ -s "$HOME/.gvm/bin/gvm-init.sh" ]] && source "$HOME/.gvm/bin/gvm-init.sh"
 
-if [[ -r "$HOME/.bashrc_local" ]]; then
-  . "$HOME/.bashrc_local"
-fi
+[[ -r $HOME/.bashrc_local ]] && . "$HOME/.bashrc_local"
 
-# Set rgb in .bashrc_local for a fixed background colour
-if [[ $rgb ]]; then
-  bashrc_bgcolour="$rgb"
-else
-  # Set devmachine=1 in non-prod .bashrc_local to ensure brighter colours for prod machines
-  if [[ $devmachine ]]; then
-    bgfactor=4
-  else
-    bgfactor=2
-  fi
+setbg() {
+  bashrc_bgcolour="$("$HOME/.local/bin/setbg" "$@")"
+}
 
-  bashrc_bgcolour=$(hostname -s | md5s | cut -c 1-6 | tr a-f A-F)
-  red=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 6 <<< "$bashrc_bgcolour")$(cut -c 2 <<< "$bashrc_bgcolour") / $bgfactor"))
-  green=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 5 <<< "$bashrc_bgcolour")$(cut -c 4 <<< "$bashrc_bgcolour") / $bgfactor"))
-  blue=$(printf %02x 0x$(bc <<< "ibase=obase=16; $(cut -c 3 <<< "$bashrc_bgcolour")$(cut -c 1 <<< "$bashrc_bgcolour") / $bgfactor"))
-  bashrc_bgcolour="$red$green$blue"
-  unset red green blue
-fi
+setbg
 
 # Set bashrc_cmd to 1 every time a new command is executed
 trap '[[ $BASH_COMMAND != $PROMPT_COMMAND ]] && bashrc_cmd=1' DEBUG
