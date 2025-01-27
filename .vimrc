@@ -90,8 +90,11 @@ set smarttab smartindent autoindent softtabstop=2 tabstop=2 shiftwidth=2 expandt
 
 " change cursor to a vertical line when in editing mode
 set t_Co=256
-let &t_SI = "\<ESC>]50;CursorShape=1\x7"
-let &t_EI = "\<ESC>]50;CursorShape=0\x7"
+" let &t_SI = "\<ESC>]50;CursorShape=1\x7"
+" let &t_EI = "\<ESC>]50;CursorShape=0\x7"
+set t_SI=[6\ q
+set t_SR=[4\ q
+set t_EI=[2\ q
 hi! CursorLine ctermbg=000
 hi! CursorColumn ctermbg=000
 

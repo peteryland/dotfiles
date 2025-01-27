@@ -44,6 +44,7 @@ if [ "$OSTYPE" = darwin18 ]; then
   ln -nfs .gitconfig.mac .gitconfig
 
   # Install XQuartz (xquartz.org)
+  brew install --cask xquartz
 fi
 
 ## Debian
@@ -52,8 +53,10 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   sudo vi /etc/locale.gen ## Should contain:
   # de_CH.UTF-8 UTF-8
   # en_AU.UTF-8 UTF-8
+  # en_US.UTF-8 UTF-8  # for container instances
   sudo locale-gen
-  sudo apt install bc locate vim-nox curl tmux mtr htop eza bat fswatch pkg-config jq tldr fzf
+  sudo apt install bc locate vim-nox curl eza bat fswatch pkg-config jq tldr fzf kitty-terminfo bash-completion
+  sudo apt install tmux mtr htop  # for non-container instances
   sudo apt purge vim-tiny nano
 
   # Build/Dev:
