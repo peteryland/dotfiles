@@ -8,22 +8,23 @@
 [format]
   pretty = l
 [alias]
-  l = log --graph --decorate --abbrev-commit
-  la = log --graph --decorate --abbrev-commit --all
-  s = status -uno
-  su = status
-  f = fetch
-  rn = release-notes
-  d = diff
-  ds = diff --staged
-  c = commit
-  fp = format-patch
+  l    = log --graph --decorate --abbrev-commit
+  la   = log --graph --decorate --abbrev-commit --all
+  s    = status -uno
+  su   = status
+  f    = fetch
+  rn   = release-notes
+  d    = diff
+  ds   = diff --staged
+  c    = commit
+  fp   = format-patch
   hist = log HEAD^^^..
-  co = checkout
-  b = branch
-  w = switch
-  ca = commit --amend -q --no-edit
-  pf = push --force-with-lease
+  co   = checkout
+  b    = branch
+  w    = switch
+  ca   = commit --amend -q --no-edit
+  can  = commit --amend -q --no-edit --date=now
+  pf   = push --force-with-lease
   capf = !git commit --amend -q --no-edit && git push -q --force-with-lease && :
 [rerere]
   auto = true

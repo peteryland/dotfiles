@@ -6,6 +6,11 @@ f1="${1:-6}"
 f2="${2:-$((f1+4))}"
 f3="${3:-$((f2+2))}"
 f4="${4:-$((f3+2))}"
+fm="${5:-$(((f1+16)/10))}"
+
+if [[ earth_cities.marker.template -nt earth_cities.marker ]]; then
+  sed "s/{1}/$fm/g; s/{2}/$f3/g" < earth_cities.marker.template > earth_cities.marker
+fi
 
 if [[ -z $(find volcanos.marker -mmin -60 2> /dev/null) ]]; then
   if data="$(wget https://volcano.si.edu/news/WeeklyVolcanoRSS.xml -qO -)"; then

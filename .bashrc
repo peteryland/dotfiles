@@ -248,7 +248,7 @@ bashrc_check_repo() {
     fi
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
     bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-    bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M) #; grep -q ^\?\? <<< "$status" && printf U)
+    bashrc_git_extrastatus=$(grep -q '^[ADM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M) #; grep -q ^\?\? <<< "$status" && printf U)
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}${bashrc_git_tag:+ $bashrc_git_tag }$bashrc_git_extrastatus"
   fi
 }
@@ -361,7 +361,7 @@ bashrc_path_add() {
     shift
   done
 }
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PATH=/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 bashrc_path_add "$HOME/.ghcup/bin"
 bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin

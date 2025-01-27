@@ -45,7 +45,10 @@ if [[ $haveclouds ]]; then
   fi
 fi
 
-markers/getdata.sh
+case "$yres" in
+  2160) markers/getdata.sh 14;;
+     *) markers/getdata.sh;;
+esac
 
 echo "[default]
 marker_font=/usr/share/fonts/truetype/firacodenerd/FiraCodeNerd-Retina.ttf
