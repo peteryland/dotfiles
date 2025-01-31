@@ -239,11 +239,11 @@ bashrc_check_repo() {
         GIT_TERMINAL_PROMPT=0 git fetch --quiet &> /dev/null & disown -a
       )
     fi
-    bashrc_git_tag="$(git log --pretty=%d -1 | tr , \\n | grep '^ tag: ' | head -1 | cut -d\  -f3-)"
+    bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | grep '^ tag: ' | head -1 | cut -d\  -f3-)"
     status="$(git status --porcelain=1 -b)"
     status1="$(head -1 <<< "$status")"
     bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
-    if [[ $bashrc_git_branch =~ master|main ]]; then
+    if [[ $bashrc_git_branch =~ ^(master|main)$ ]]; then
       bashrc_git_branch=
     fi
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
