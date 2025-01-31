@@ -1,3 +1,4 @@
 [include]
   path = .gitconfig.common.inc
-  path = .gitconfig.mac.inc
+[credential]
+  helper = osxkeychain

@@ -63,11 +63,12 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   sudo apt install build-essential autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix
 
   # Haskell Dev (can install tool-chain with apt, cabal or ghcup as needed):
-  # sudo apt install hlint happy cabal-install
+  sudo apt install hlint happy cabal-install cabal-debian hscolour ppsh hindent doctest stylish-haskell libghc-ghc-paths-dev
   sudo apt install libpcre2-dev libpcre3-dev libicu-dev # libncurses-dev libgmp-dev zlib1g-dev # pre-requisites for many things, including haskell-language-server
   cabal update
   # The following will likely need to be installed one by one:
-  cabal install pretty-show hscolour ghc-paths hindent hoogle lambdabot doctest stylish-haskell --overwrite-policy=always
+  # cabal install pretty-show ghc-paths hindent doctest stylish-haskell --overwrite-policy=always  # if not installed via apt
+  cabal install hoogle lambdabot --overwrite-policy=always  # not (yet) available in Debian
 
   ln -nfs .gitconfig.linux .gitconfig
 fi
