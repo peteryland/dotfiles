@@ -47,7 +47,7 @@ Config { font = "FiraCode Nerd Font Regular 11"
                     , Run Com "mocpstatus" [] "mocp" 20
                     , Run Com "solaarstatus" [] "hci" 100
                     , Run Volume "default" "Master" ["-t","奔 <volumevbar>"] 20
-                    , Run Battery [ "-t", "<acstatus>", "-L", "10", "-H", "90", "--normal", "grey", "-h", "#ff9090", "-l", "#70b0ff", "--", "-o", "<left>% (<timeleft>)"] 60
+                    , Run Battery [ "-t", "<acstatus>", "-L", "20", "--normal", "grey", "-l", "#ff9090", "--", "-o", "<left>% (<timeleft>)"] 60
                     ]
        , sepChar = "%"
        , alignSep = "}{"

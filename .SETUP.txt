@@ -101,6 +101,7 @@ echo 'This is a private server.  Unauthorized access is forbidden.' | sudo tee /
 # XKBLAYOUT="us"
 # XKBVARIANT="altgr-intl"                   # ralt+5,qeyps -> ̛€çäéüöß ralt+'"`6 are deadkey accents
 # XKBOPTIONS="caps:escape_shifted_capslock" # Remap capslock -> escape and shift-capslock -> capslock
+                                            # Can also add " compose:ralt" to have altgr work in kitty
 # BACKSPACE="guess"
 # For more options: man 7 xkeyboard-config
 # Then need to: sudo udevadm trigger --subsystem-match=input --action=change
