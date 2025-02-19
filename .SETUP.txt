@@ -69,6 +69,9 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # cabal install pretty-show ghc-paths hindent doctest stylish-haskell --overwrite-policy=always  # if not installed via apt
   cabal install hoogle lambdabot --overwrite-policy=always  # not (yet) available in Debian
 
+  # Laptop (power management tools)
+  sudo apt install tlp powertop
+
   ln -nfs .gitconfig.linux .gitconfig
 fi
 
