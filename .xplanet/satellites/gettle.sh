@@ -1,10 +1,33 @@
-#!/bin/sh
+#!/bin/bash
 
 cd "$(dirname "$0")"
+
+make
+
+exit $?
 
 download_tle () {
     wget $1 -q -T 5 --no-cache -O $2 > /dev/null 2>&1
 }
+
+download_tle 'https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle' all.txt
+
+if [[ -s all.txt ]]; then
+  tr -d '' < all.txt > all.tle
+  rm -f all.txt
+  while read tlename; do
+    read dummy
+    read dummy SAT dummy
+
+    echo "${SAT} {} opacity=16 transparent={0,0,0} color={100,100,100} symbolsize=1 fontsize=2"
+  done <all.tle >all
+fi
+
+echo "satellite_file=satellites/all" > config
+
+echo "$(date +%Y%m%d-%h%m)" > .last_updated
+
+exit 0
 
 # ISS (LEO) ####################################################################
 
@@ -61,7 +84,7 @@ fi
 
 # Starlink
 
-download_tle https://celestrak.com/NORAD/elements/starlink.txt starlink.txt
+download_tle 'https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle' starlink.txt
 
 if [ -s starlink.txt ];
 then

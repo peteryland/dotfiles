@@ -63,7 +63,9 @@ echo "map=$(date +%m).4k.jpg" >> ~/.xplanet/xplanet.config
 for i in markers/*.marker; do
   echo "marker_file=$i" >> ~/.xplanet/xplanet.config
 done
-# cat ~/.xplanet/satellites/config >> ~/.xplanet/xplanet.config
+if [[ -r ~/.xplanet/satellites/config ]]; then
+  cat ~/.xplanet/satellites/config >> ~/.xplanet/xplanet.config
+fi
 
 nice xplanet -config ~/.xplanet/xplanet.config -projection rect -verbosity 0 -output "$outfile" -num_times 1 -geometry "$xres"x"$yres" -longitude 11
 hsetroot -fill "$outfile" > /dev/null

@@ -1,3 +1,5 @@
+{-#LANGUAGE FlexibleContexts #-}
+
 import Control.Monad.IO.Class
 import Data.List
 import qualified Data.Map as M
@@ -46,6 +48,7 @@ import XMonad.Util.Run
 import XMonad.Util.Replace
 import XMonad.Util.XSelection
 import System.Exit
+import XMonadLocal
 
 myLayoutHook res = avoidStruts $ mouseResize $ windowArrange $ toggleLayouts floats
                $ mkToggle (NBFULL ?? NOBORDERS ?? EOT) myDefaultLayout
@@ -106,7 +109,7 @@ main = do
     res <- getRes
     safeSpawn "xset"  ["s", "off"]
     safeSpawn "xset"  ["-dpms"]
-    safeSpawn "picom" ["-b"]
+    safeSpawn "picom" ["-b", "--backend", "glx"]
     safeSpawn "mocp"  ["-S", "-m", "/media/Audio"]
     homeDir <- getEnv "HOME"
     safeSpawn "sh" [(homeDir </> ".xsession")]
@@ -161,7 +164,7 @@ main = do
           , ((0, xF86XK_MonBrightnessUp),   safeSpawn     "brightnessctl" ["s", "10%+"])
           , ((0, xF86XK_Calculator),        safeSpawnProg "qalculate")
           ] ++ M.toList (keys def c)
-        } `additionalKeysP`
+        } `additionalKeysP` (
 --         [ ("M-S-z", spawn "xscreensaver-command -lock; xset dpms force off")
         [ ("M-S-<Return>", safeSpawnProg $ homeDir </> ".local/bin/kitty")
         , ("M-C-<Return>", safeSpawnProg "x-terminal-emulator")
@@ -177,4 +180,4 @@ main = do
         , ("M-S-c", kill1)
         , ("M-S-s", safeSpawn "sudo" ["systemctl", "suspend"])
         , ("M-u", safeSpawn "x-terminal-emulator" ["mocp"])
-        ]
+        ] ++ local_shortcuts)
