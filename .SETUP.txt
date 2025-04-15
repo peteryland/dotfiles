@@ -1,3 +1,4 @@
+sudo apt update; sudo apt upgrade; sudo apt autoremove --purge; sudo apt install git
 # install this repo
 git clone https://dev.piglet.ch/pdr/dotfiles.git
 mv -i dotfiles/.[a-zA-Z]* .
@@ -55,7 +56,7 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # en_AU.UTF-8 UTF-8
   # en_US.UTF-8 UTF-8  # for container instances
   sudo locale-gen
-  sudo apt install bc locate vim-nox curl eza bat fswatch pkg-config jq tldr fzf kitty-terminfo bash-completion mtr-tiny tmux htop
+  sudo apt install bc locate vim-nox curl eza bat fswatch pkg-config jq tldr fzf kitty-terminfo bash-completion mtr-tiny tmux htop renameutils
   sudo apt purge vim-tiny nano
 
   # Build/Dev:
@@ -69,8 +70,8 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   # cabal install pretty-show ghc-paths hindent doctest stylish-haskell --overwrite-policy=always  # if not installed via apt
   cabal install hoogle lambdabot --overwrite-policy=always  # not (yet) available in Debian
 
-  # Laptop (power management tools)
-  sudo apt install tlp powertop
+  # Laptop (power management tools, desktop tools, etc)
+  sudo apt install tlp powertop scrot
 
   ln -nfs .gitconfig.linux .gitconfig
 fi
@@ -115,7 +116,7 @@ sudo cp -i /usr/share/X11/xorg.conf.d/40-libinput.conf /etc/X11/xorg.conf.d/
 #         Option "Tapping" "on"
 #         Option "NaturalScrolling" "true"
 
-sudo apt install kitty xmonad xmobar moc picom renameutils hsetroot xplanet xdotool brightnessctl
+sudo apt install kitty xmonad xmobar moc picom hsetroot xplanet xdotool brightnessctl
 cabal install --lib xmonad xmonad-contrib X11 --overwrite-policy=always
 
 ## Coding

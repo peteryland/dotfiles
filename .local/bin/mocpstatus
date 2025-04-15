@@ -5,15 +5,14 @@ if ! command -v mocp &> /dev/null; then
 fi
 
 music='\xef\xb1\x98'
-state="$(mocp -Q %state)"
+nomusic='\xef\xb1\x99'
 
-if [[ $state = PLAY ]]; then
-  state='\\xef\\xa4\\x89' # f8e3 
-elif [[ $state = PAUSE ]]; then
-  state='\\xef\\xa3\\xa3' # f909 契
-elif [[ $state = STOP ]]; then
-  state='\\xef\\xa7\\x9a' # f9da 栗
-  exit 0
+if state="$(mocp -Q %state 2> /dev/null)"; then
+  case "$state" in
+    PLAY)  state='\\xef\\xa4\\x89' ;; # f8e3 
+    PAUSE) state='\\xef\\xa3\\xa3' ;; # f909 契
+#     STOP)  state='\\xef\\xa7\\x9a' ;; # f9da 栗
+    *) exit 0
+  esac
+  printf "<action=x-terminal-emulator mocp>$music $(mocp -Q "%a: %t </action><action=mocp -G> $state %ct/%tt</action>" 2> /dev/null) | "
 fi
-
-echo -ne "<action=x-terminal-emulator mocp>$music $(mocp -Q "%a: %t </action><action=mocp -G> $state %ct/%tt</action>") | "

@@ -168,7 +168,7 @@ def main():
       first = False
       myprintdevice(d)
       dev_num += 1
-  print('</action>', end='')
+  print('</action> | ', end='')
 
 #     dev = solaar.cli._find_receiver(devices, 'all')
 #     if dev and not dev.isDevice:

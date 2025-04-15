@@ -1,8 +1,11 @@
+*.old
+*.OLD
+*.bak
+*.BAK
 /[a-zA-Z0-9]*
 .*history
 .*hst
 .*.swp
-*.old
 .abacus
 .android
 .babel.json
@@ -17,6 +20,8 @@
 .dart
 .DS_Store
 .elm
+.fontconfig/CACHEDIR.TAG
+.fontconfig/*.cache-*
 .ghcup
 .gitconfig
 .gitit.conf
@@ -48,6 +53,14 @@
 .ssh/*.key
 .ssh/*.pub
 .ssh/*.pem
+.stack/pantry/
+.stack/programs/
+.stack/setup-exe-cache/
+.stack/setup-exe-src/
+.stack/snapshots/
+.stack/stack.sqlite3
+.stack/stack.sqlite3.pantry-write-lock
+.sudo_as_admin_successful
 .Trash
 .unison
 .v8flags.*

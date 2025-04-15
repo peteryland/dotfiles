@@ -8,6 +8,14 @@ for i in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh; do
   [[ -r $i ]] && . "$i"
 done
 
+if command -v fzf >& /dev/null; then
+  bashrc_fzfver="$(fzf --version)"; bashrc_fzfver="${bashrc_fzfver#*.}"; bashrc_fzfver="${bashrc_fzfver%%[. ]*}"
+  if [[ $bashrc_fzfver -ge 48 ]]; then
+    eval "$(fzf --bash)"
+  fi
+  unset bashrc_fzfver
+fi
+
 if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
   if [[ -r ~/.bash_completion ]]; then
     . ~/.bash_completion
@@ -23,14 +31,16 @@ if ! shopt -oq posix && [[ -z $BASH_COMPLETION_VERSINFO ]]; then
     . /usr/share/bash-completion/bash_completion
   fi
 
-  if [[ -r /usr/share/doc/fzf/examples/completion.bash ]]; then
-    . /usr/share/doc/fzf/examples/completion.bash
-  else
-    f=( /opt/homebrew/Cellar/fzf/*/shell/completion.bash )
-    if [[ -r $f ]]; then
-      . "$f"
+  if ! command -v _fzf_complete >& /dev/null; then
+    if [[ -r /usr/share/doc/fzf/examples/completion.bash ]]; then
+      . /usr/share/doc/fzf/examples/completion.bash
+    else
+      f=( /opt/homebrew/Cellar/fzf/*/shell/completion.bash )
+      if [[ -r $f ]]; then
+        . "$f"
+      fi
+      unset f
     fi
-    unset f
   fi
 
   if type -p stack > /dev/null; then
@@ -267,8 +277,16 @@ alias egrep='grep -E --color=auto'
 alias rgrep='grep -r --color=auto'
 alias glocate='locate -d :'
 alias pj='pg java'
-alias ll='ls -al'
-alias lt='ls -altr'
+if command -v eza >& /dev/null; then
+#   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
+  export EZA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
+  alias ls='eza -B --git --icons=auto'
+  alias ll='ls -al'
+  alias lt='ll -snew'
+else
+  alias ll='ls -al'
+  alias lt='ll -tr'
+fi
 alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
 
 # Git aliases and functions

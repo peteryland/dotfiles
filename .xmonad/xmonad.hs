@@ -144,6 +144,7 @@ main = do
           , className =? "Gimp" --> doFloat
           , className =? "MPlayer" --> doFullFloat
           , className =? "Totem" --> doFullFloat
+          , className =? "mpv" --> doFullFloat
           , className =? "Brave-browser" --> doShift (myworkspaces' !! 1)
           , className =? "Kodi" --> doShift (last myworkspaces')
           , className =? "nheko" --> doShift (myworkspaces' !! 5)
@@ -168,6 +169,7 @@ main = do
 --         [ ("M-S-z", spawn "xscreensaver-command -lock; xset dpms force off")
         [ ("M-S-<Return>", safeSpawnProg $ homeDir </> ".local/bin/kitty")
         , ("M-C-<Return>", safeSpawnProg "x-terminal-emulator")
+        , ("M-S-p", safeSpawnProg "pavucontrol")
         , ("M-S-b", safeSpawnProg "x-www-browser")
         , ("M-S-h", safeSpawnProg "nautilus")
         , ("M-S-m", safeSpawnProg "nheko")

@@ -24,7 +24,7 @@ Config { font = "FiraCode Nerd Font Regular 11"
                                           , ("mostly cloudy", "\xe302  ")
                                           , ("considerable cloudiness", "\xe312  ")
                                           , ("", "<fc=yellow>\xfa98</fc> ")]
-                                          ["-t","Basel <skyConditionS> \xe350<tempC>C° \xe275<rh>% \xe34b <windKmh>km/h","-L","18","-H","25","--normal","grey","--high","#ff9090","--low","#70b0ff"] 36000
+                                          ["-t","Basel <skyConditionS><tempC>C° <rh>% <windKmh>km/h","-L","18","-H","25","--normal","grey","--high","#ff9090","--low","#70b0ff"] 36000
                     , Run WeatherX "YBCG" [ ("clear", "<fc=yellow>\xfa98</fc>  ")
                                           , ("sunny", "<fc=yellow>\xfa98</fc>  ")
                                           , ("mostly clear", "<fc=yellow>\xfa98</fc>  ")
@@ -37,7 +37,7 @@ Config { font = "FiraCode Nerd Font Regular 11"
                                           , ("mostly cloudy", "\xe302  ")
                                           , ("considerable cloudiness", "\xe312  ")
                                           , ("", "<fc=yellow>\xfa98</fc> ")]
-                                          ["-t","Casuarina <skyConditionS> \xe350<tempC>C° \xe275<rh>% \xe34b <windKmh>km/h","-L","20","-H","30","--normal","grey","--high","#ff9090","--low","#70b0ff"] 36000
+                                          ["-t","Casuarina <skyConditionS><tempC>C° <rh>% <windKmh>km/h","-L","20","-H","30","--normal","grey","--high","#ff9090","--low","#70b0ff"] 36000
                     , Run Cpu ["-t","\xfb19 <total>%","-L","3","-H","50","--normal","green","--high","red"] 20
                     , Run Memory ["-t","\xf85a <usedratio>%"] 50
                     , Run Com "uname" ["-r"] "" 36000
@@ -51,5 +51,5 @@ Config { font = "FiraCode Nerd Font Regular 11"
                     ]
        , sepChar = "%"
        , alignSep = "}{"
-       , template = " %hci% | %default:Master% | %mocp%%UnsafeXMonadLog% }{ %date% | %LFSB% | %YBCG% | %cpu% | %memory% | %battery% |  %uname% "
+       , template = " %hci%%default:Master% | %mocp%%UnsafeXMonadLog% }{ %date% | %LFSB% | %YBCG% | %cpu% | %memory% | %battery% |  %uname% "
        }
