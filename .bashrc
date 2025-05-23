@@ -8,6 +8,18 @@ for i in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh; do
   [[ -r $i ]] && . "$i"
 done
 
+bashrc_hostname() {
+  local hostname
+
+  if hostname="$(hostname -s 2> /dev/null)"; then
+    printf "$hostname"
+  elif hostname="$(hostname 2> /dev/null)"; then
+    printf "$hostname"
+  else
+    printf "$HOSTNAME"
+  fi
+}
+
 if command -v fzf >& /dev/null; then
   bashrc_fzfver="$(fzf --version)"; bashrc_fzfver="${bashrc_fzfver#*.}"; bashrc_fzfver="${bashrc_fzfver%%[. ]*}"
   if [[ $bashrc_fzfver -ge 48 ]]; then
@@ -74,6 +86,10 @@ if [[ -r "$HOME/.bash_aliases" ]]; then
   . "$HOME/.bash_aliases"
 fi
 
+if [[ -n $WSLENV ]]; then
+  iswindows=1 # show (also) the Windows icon when under WSL
+fi
+
 case "$OSTYPE" in
   darwin*)
     ismac=1
@@ -99,6 +115,38 @@ case "$OSTYPE" in
       sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.Trash -prune -or -path "$HOME"/.vim/undo -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$LOCATE_PATH"
     fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.mac ~/.gitconfig; fi
+    ;;
+  msys*)
+    iswindows=1
+    if [[ -x /usr/bin/dircolors ]]; then
+      test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+      export GREP_COLORS='mt=1;3;34'
+      alias ls='ls --color=auto --hyperlink=auto'
+      alias dir='dir --color=auto --hyperlink=auto'
+      alias vdir='vdir --color=auto --hyperlink=auto'
+    fi
+    alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs'
+    alias st='systemctl status'
+    alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
+    alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
+    if command -v netstat > /dev/null; then
+      alias np='sudo netstat -plant'
+    else
+      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | grep -v -- "->"'
+    fi
+    alias ng='np | grep'
+    if [[ -r ~/.xmonad/xmonad.hs ]]; then
+      alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
+    fi
+    md5s() { md5sum "$@"; }
+    statm() { stat --printf %Y "$@"; }
+    export LOCATE_PATH=~/.local/var/locate/locatedb
+    if [[ ! -r "$LOCATE_PATH" ]]; then
+      mkdir -p "$(dirname "$LOCATE_PATH")"
+      # This should be put into cron as well
+      updatedb --localpaths="$HOME" --findoptions="-path $HOME/.cache -prune -or -path $HOME/.cabal -prune -or -path $HOME/.ghcup -prune -or -path $HOME/.vim/undo -prune -or -path $HOME/.local/share -prune -or -name .git -type d -prune" --output="$LOCATE_PATH"
+    fi
+    if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.linux ~/.gitconfig; fi
     ;;
   linux*)
     islinux=1
@@ -158,11 +206,11 @@ if [[ $UID -eq 0 ]]; then
 else
   usercol=6
 fi
-export PS1='${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;239m\]\[\e[48;5;239m\]${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;66m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;239m\]\[\e[m\]}\$ '
+export PS1='${iswindows:+\[\e[38;5;39m\]\[\e[m\] }${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;239m\]\[\e[48;5;239m\]${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;66m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;239m\]\[\e[m\]}\$ '
 unset usercol
 
 bashrc_term_title() {
-  local title="$(id -un)@$(hostname -s):${PWD/#$HOME/\~}"
+  local title="$(id -un)@$(bashrc_hostname):${PWD/#$HOME/\~}"
   # set terminal tab title
   printf "\e]1;$title\a"
   # set terminal window title
@@ -283,6 +331,12 @@ if command -v eza >& /dev/null; then
   alias ls='eza -B --git --icons=auto'
   alias ll='ls -al'
   alias lt='ll -snew'
+elif command -v exa >& /dev/null; then
+#   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
+  export EXA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
+  alias ls='exa -B --git --icons'
+  alias ll='ls -al'
+  alias lt='ll -snew'
 else
   alias ll='ls -al'
   alias lt='ll -tr'
@@ -381,9 +435,10 @@ bashrc_path_add() {
 }
 PATH=/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-bashrc_path_add "$HOME/.ghcup/bin"
+bashrc_path_add /c/appl/scoop/shims
 bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
 bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
+bashrc_path_add "$HOME/.ghcup/bin"
 # bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
 bashrc_path_add "$HOME/.cabal/bin" "$HOME/.cabal/sbin"
 bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"

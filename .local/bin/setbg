@@ -3,12 +3,25 @@
 case "$OSTYPE" in
   darwin*) md5s() { md5    "$@"; };;
   linux*)  md5s() { md5sum "$@"; };;
+  msys)    md5s() { md5sum "$@"; };;
 esac
+
+bashrc_hostname() {
+  local hostname
+
+  if hostname="$(hostname -s 2> /dev/null)"; then
+    printf "$hostname"
+  elif hostname="$(hostname 2> /dev/null)"; then
+    printf "$hostname"
+  else
+    printf "$HOSTNAME"
+  fi
+}
 
 bashrc_get_bgcolour() {
   # Set rgb in .bashrc_local for a fixed background colour
   local r g b gam="${1//[^0-9.]}" fixedrgb="${rgb//[^0-9a-fA-F]}"
-  local col="${fixedrgb:-$((hostname -s; printf "$debian_chroot") | md5s | cut -c 1-6 | tr a-f A-F)}"
+  local col="${fixedrgb:-$((bashrc_hostname; printf "$debian_chroot") | md5s | cut -c 1-6 | tr a-f A-F)}"
   [[ $gam =~ ^0*\.?0*$ ]] && gam=4
   r="$(cut -c 1-2 <<< "$col")"
   g="$(cut -c 3-4 <<< "$col")"
