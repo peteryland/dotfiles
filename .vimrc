@@ -257,7 +257,7 @@ hi WhiteRO cterm=bold ctermfg=231 ctermbg=23
 hi WhiteInactive cterm=bold ctermfg=231 ctermbg=237
 
 nnoremap <silent> <F12> :set invnumber invrelativenumber mouse=<CR>
-nnoremap <silent> <F10> :term git -P lola<CR>
+nnoremap <silent> <F10> :term git -P log --graph --decorate --abbrev-commit --all<CR>
 nnoremap <silent> gr :term ++close git rebase -i <cword><CR>
 nnoremap <silent> gs :term ++close ++kill=term git show <cword><CR>
 nnoremap <silent> gA :silent call system("git -C " . expand ("%:h") . " add -f " . expand("%:t"))<CR>:let b:git_status=system("git_status " . expand("%:p"))<CR>

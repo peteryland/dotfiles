@@ -15,9 +15,9 @@ if [ "$1" ]; then
   cd -- "$(dirname "$1")"
 fi
 
-unset bashrc_git_branch bashrc_git_ahead bashrc_git_behind
+unset git_branch git_ahead git_behind git_extrastatus
 
-bashrc_git_status=
+git_status=
 
 if ! type -p git > /dev/null; then
   return
@@ -38,14 +38,14 @@ if [[ -e "$(git rev-parse --git-dir 2>/dev/null)" ]]; then
   fi
   status="$(git status --porcelain=1 -b)"
   status1="$(head -1 <<< "$status")"
-  bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
-  if [[ $bashrc_git_branch =~ master|main ]]; then
-    bashrc_git_branch=
+  git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
+  if [[ $git_branch =~ master|main ]]; then
+    git_branch=
   fi
-  bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
-  bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-  bashrc_git_extrastatus=$(grep -q '^[AM]' <<< "$status" && echo -n S; grep -q ^.M <<< "$status" && echo -n M) #; grep -q ^\?\? <<< "$status" && echo -n U)
-  bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}$bashrc_git_extrastatus"
+  git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
+  git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
+  git_extrastatus=$(grep -q '^[AM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M) #; grep -q ^\?\? <<< "$status" && printf U)
+  git_status="$git_branch${git_ahead:+↑$git_ahead}${git_behind:+↓$git_behind}$git_extrastatus"
 fi
 
-echo -n "${bashrc_git_status:+%#GitBG#${bashrc_git_branch:+%#GitBlue#$bashrc_git_branch}${bashrc_git_ahead:+%#GitGreen#↑$bashrc_git_ahead}${bashrc_git_behind:+%#GitRed#↓$bashrc_git_behind}${bashrc_git_extrastatus:+%#GitYellow#$bashrc_git_extrastatus}%*%#GitBG#%#StatusLine# }"
+printf %s "${git_status:+%#GitBG#${git_branch:+%#GitBlue#$git_branch}${git_ahead:+%#GitGreen#↑$git_ahead}${git_behind:+%#GitRed#↓$git_behind}${git_extrastatus:+%#GitYellow#$git_extrastatus}%*%#GitBG#%#StatusLine# }"
