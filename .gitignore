@@ -35,6 +35,7 @@
 .lambdabot
 .local/lib
 .local/share
+.local/state
 .local/var
 .nix*
 .npm

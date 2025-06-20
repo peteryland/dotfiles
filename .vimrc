@@ -165,7 +165,7 @@ function MyStatusLine()
                \,"elm": "%#ElmBlue# %*"
                \}, getbufvar(l:buf, "&ft"), "")
   let l:sl.="%h%m%r"
-  let l:sl.="%=%1.20("
+  let l:sl.="%=%1.100("
   let l:sl.=getbufvar(l:buf, "git_status")
   let l:sl.="%)"
   let l:sl.="  %-8.(%l,%c%V%) %P "

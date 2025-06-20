@@ -17,7 +17,7 @@
   co   = checkout
   d    = diff
   ds   = diff --staged
-  f    = fetch
+  f    = fetch -ap
   fp   = format-patch
   hist = log HEAD^^^..
   la   = log --graph --decorate --abbrev-commit --all

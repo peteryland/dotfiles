@@ -1,10 +1,10 @@
-Config { font = "FiraCode Nerd Font Regular 8"
+Config { font = "FiraCode Nerd Font Regular 12"
        , borderColor = "black"
-       , border = TopB
+       , border = NoBorder
        , bgColor = "black"
        , fgColor = "grey"
        , alpha = 192
-       , position = Bottom
+       , position = Static { xpos = 0, ypos = 1422, width = 3440, height = 18 }
        , lowerOnStart = True
        , pickBroadest = False
        , persistent = False

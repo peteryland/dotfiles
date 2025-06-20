@@ -144,7 +144,7 @@ case "$OSTYPE" in
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
       # This should be put into cron as well
-      updatedb --localpaths="$HOME" --findoptions="-path $HOME/.cache -prune -or -path $HOME/.cabal -prune -or -path $HOME/.ghcup -prune -or -path $HOME/.vim/undo -prune -or -path $HOME/.local/share -prune -or -name .git -type d -prune" --output="$LOCATE_PATH"
+      updatedb --localpaths="$HOME" --findoptions="-path .cache -prune -or -path .cabal -prune -or -path .ghcup -prune -or -path .vim/undo -prune -or -path .local/share -prune -or -name .git -type d -prune -or -path go/pkg -prune" --output="$HOME"/.local/var/locate/locatedb
     fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.linux ~/.gitconfig; fi
     ;;
@@ -189,7 +189,7 @@ case "$OSTYPE" in
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
       # This should be put into cron as well
-      updatedb --localpaths="$HOME" --findoptions="-path $HOME/.cache -prune -or -path $HOME/.cabal -prune -or -path $HOME/.ghcup -prune -or -path $HOME/.vim/undo -prune -or -path $HOME/.local/share -prune -or -name .git -type d -prune" --output="$LOCATE_PATH"
+      updatedb --localpaths="$HOME" --findoptions="-path .cache -prune -or -path .cabal -prune -or -path .ghcup -prune -or -path .vim/undo -prune -or -path .local/share -prune -or -name .git -type d -prune -or -path go/pkg -prune" --output="$HOME"/.local/var/locate/locatedb
     fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.linux ~/.gitconfig; fi
     ;;
@@ -297,7 +297,7 @@ bashrc_check_repo() {
         GIT_TERMINAL_PROMPT=0 git fetch --quiet &> /dev/null & disown -a
       )
     fi
-    bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | grep '^ tag: ' | head -1 | cut -d\  -f3-)"
+    bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | grep '^ tag: ' | head -1 | sed 's/^.* tag: \([^)]*\))\?$/\1/')"
     status="$(git status --porcelain=1 -b)"
     status1="$(head -1 <<< "$status")"
     bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
@@ -306,7 +306,12 @@ bashrc_check_repo() {
     fi
     bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
     bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-    bashrc_git_extrastatus=$(grep -q '^[ADM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M) #; grep -q ^\?\? <<< "$status" && printf U)
+    if git stash list | grep . > /dev/null 2>&1; then
+      bashrc_git_hasstash='#'
+    else
+      bashrc_git_hasstash=
+    fi
+    bashrc_git_extrastatus="$(grep -q '^[ADM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M)$bashrc_git_hasstash" #; grep -q ^\?\? <<< "$status" && printf U)
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}${bashrc_git_tag:+ $bashrc_git_tag }$bashrc_git_extrastatus"
   fi
 }
@@ -319,7 +324,7 @@ pg() {
   fi
 }
 
-alias grep='grep --color=auto'
+alias grep='grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2} --color=auto'
 alias fgrep='grep -F --color=auto'
 alias egrep='grep -E --color=auto'
 alias rgrep='grep -r --color=auto'
@@ -475,9 +480,8 @@ scr() {
   fi
 }
 
-LOOKINGDIR="$HOME/src/looking"
+mkdir -p "${LOOKINGDIR:="$HOME/src/looking"}"
 l() {
-  mkdir -p "$LOOKINGDIR"
   local dir="${1#*/}"
   if [[ $1 ]]; then
     if [[ $1 == s-* ]]; then
@@ -513,6 +517,48 @@ _l() {
   COMPREPLY=(${compreply[@]#$LOOKINGDIR/})
 }
 complete -F _l l
+
+mkdir -p "${WORKDIR:="$HOME/src/work"}"
+wk() {
+  local dir="$1"
+  if [[ $dir ]]; then
+    if [[ -d $WORKDIR/$dir ]]; then
+      cd "$WORKDIR/$dir"
+    elif [[ $dir == ?*/?* ]]; then
+      if fetch_work_repos | grep -q "$dir"; then
+        mkdir -p "$WORKDIR/${1%/*}"
+        cd "$WORKDIR/${1%/*}"
+        git clone git@"$WORKGITLABHOST":"$1"
+      else
+        echo "wk: $1 not found" >&2
+        return 1
+      fi
+      cd "$WORKDIR/$dir"
+    else
+      echo "wk: Error parsing arguments" >&2
+      return 1
+    fi
+  else
+    cd "$WORKDIR"
+  fi
+}
+
+_wk() {
+  local i compreply=($(compgen -d -- "$WORKDIR/$2"))
+  COMPREPLY=($(
+    (
+      for i in "${compreply[@]}"; do
+        find "$i" -type d -name .git
+      done | while read i; do
+        i="${i#$WORKDIR/}"
+        echo "${i%/.git}"
+      done
+      fetch_work_repos
+#     ) | grep "^$2" | sed "s/^\(${2//\//\\\/}[^/]*\/\?\).*/\1/" | sort -u
+    ) | grep "^$2" | sort -u
+  ))
+}
+complete -F _wk wk
 
 n() {
   local f n
