@@ -375,13 +375,14 @@ au BufNewFile,BufRead,BufEnter * map <silent> - @='gI# <C-V><ESC>0j'<CR>
 au BufNewFile,BufRead,BufEnter * map <silent> _ :keeppatterns s/^\( *\)# \?/\1/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter .vimrc,*.vim map <silent> - @='gI" <C-V><ESC>0j'<CR>
 au BufNewFile,BufRead,BufEnter .vimrc,*.vim map <silent> _ :keeppatterns s/^\( *\)" \?/\1/e<CR>0j:noh<CR>
-au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> - @='gI// <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js map <silent> _ :keeppatterns s/^\( *\)\/\/ \?/\1/e<CR>0j:noh<CR>
-au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js vmap <buffer> - <C-C>`>a */<ESC>`<i/* <ESC>
+au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js,*.go map <silent> - @='gI// <C-V><ESC>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js,*.go map <silent> _ :keeppatterns s/^\( *\)\/\/ \?/\1/e<CR>0j:noh<CR>
+au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp,*.java,*.js,*.go vmap <buffer> - <C-C>`>a */<ESC>`<i/* <ESC>
 au BufNewFile,BufRead,BufEnter *.c,*.h,*.cpp setlocal makeprg=make
-au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config map <silent> - @='gI-- <C-V><ESC>0j'<CR>
-au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config map <silent> _ :keeppatterns s/^\( *\)-- \?/\1/e<CR>0j:noh<CR>
-au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
+au BufNewFile,BufRead,BufEnter *.go setlocal makeprg=go\ build
+au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config,*xmobar.config* map <silent> - @='gI-- <C-V><ESC>0j'<CR>
+au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config,*xmobar.config* map <silent> _ :keeppatterns s/^\( *\)-- \?/\1/e<CR>0j:noh<CR>
+au BufNewFile,BufRead,BufEnter *.elm,*.hs,.ghci*,*.cabal,**/.cabal/config,*xmobar.config* vmap <buffer> - <C-C>`>a -}<ESC>`<i{- <ESC>
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> - :keeppatterns s/^> /> -- /e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :keeppatterns s/^> -- /> /e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> - @='gI<!-- <C-V><ESC>A --><C-V><ESC>0j'<CR>

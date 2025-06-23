@@ -2,7 +2,7 @@
 # -*- python-mode -*-
 # -*- coding: UTF-8 -*-
 
-# Copyright (C) 2022 Pete Ryland
+# Copyright (C) 2025 Pete Ryland
 # Based on work that is:
 
 # Copyright (C) 2012-2013 Daniel Pavel
@@ -55,77 +55,77 @@ def init_paths():
 variant=0
 
 def myprintdevice(d):
-  from logitech_receiver.common import NamedInt as _NamedInt
+  from logitech_receiver.common import NamedInt
+  from logitech_receiver.common import BatteryStatus
   d.ping()
   level=None
   status=0
   if d.protocol:
     b = d.battery()
     if b is not None:
-      level, _, status, _ = b
+      level  = b.level
+      status = b.status
   if status is None:
-    status="discharging"
-  if isinstance(status, _NamedInt):
-    status=str(status)
-  if status != "recharging" and status != "discharging" and level is not None:
-    level='  %s' % status
+    status=BatteryStatus.DISCHARGING
+  if status != BatteryStatus.RECHARGING and status != BatteryStatus.DISCHARGING and level is not None:
+    level=' 󰂃 %s' % status
   else:
     if level is None:
-      if status == "recharging": level=' ﮣ' # 
+      if status == BatteryStatus.RECHARGING: level=' 󰚥' # 󰂄
       else: level=''
-    elif isinstance(level, _NamedInt):
+    elif isinstance(level, NamedInt):
       level=str(level)
     elif level > 90:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰂅'
+      else: level=' 󰁹'
     elif level > 80:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰂋'
+      else: level=' 󰂂'
     elif level > 70:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰂊'
+      else: level=' 󰂁'
     elif level > 60:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰢞'
+      else: level=' 󰂀'
     elif level > 50:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰂉'
+      else: level=' 󰁿'
     elif level > 40:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰢝'
+      else: level=' 󰁾'
     elif level > 30:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰂈'
+      else: level=' 󰁽'
     elif level > 20:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰂇'
+      else: level=' 󰁼'
     elif level > 10:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰂆'
+      else: level=' 󰁻'
     elif level > 0:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰢜'
+      else: level=' 󰁺'
     elif level == 0:
-      if status == "recharging": level=' '
-      else: level=' '
+      if status == BatteryStatus.RECHARGING: level=' 󰢟'
+      else: level=' 󰂎'
     else:
-      level=' '
+      level=' 󰂑'
   if d.kind == 'keyboard':
     if d.protocol:
-      if variant: icon=''
-      else: icon=''
+      if variant: icon='󰌓'
+      else: icon='󰌌'
     else:
-      if variant: icon=''
-      else: icon=''
+      if variant: icon='󰌐'
+      else: icon='󰌐'
   elif d.kind == 'mouse':
     if d.protocol:
-      if status == "recharging":
-        icon=''
-        if level == ' ﮣ':
+      if status == BatteryStatus.RECHARGING:
+        icon='󰍿'
+        if level == ' 󰚥':
           level=''
-      else: icon=''
+      else: icon='󰍽'
     else:
-      icon=''
+      icon='󰍾'
   print("%s%s" % (icon, level), end='')
 
 def main():
@@ -153,7 +153,7 @@ def main():
   first = True
   dev_num = 1
   for d in devices:
-    if isinstance(d, solaar.cli.show._receiver.Receiver):
+    if isinstance(d, solaar.cli.show.receiver.Receiver):
       count = d.count()
       if count:
         for dev in d:
