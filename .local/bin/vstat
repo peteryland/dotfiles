@@ -1,0 +1,46 @@
+#!/bin/bash
+
+shopt -s extglob
+
+s2hms() {
+  if [[ -z $1 ]]; then return 0; fi
+  frac="$(cut -d. -f2 <<< "$1")"
+  secs="$(cut -d. -f1 <<< "$1")"
+  if ((secs < 60)); then
+    printf "$secs.$frac"
+    return
+  fi
+  mins=$((secs/60))
+  secs=$((secs-mins*60))
+  if ((mins < 60)); then
+    printf "%d:%02d.%d" "$mins" "$secs" "$frac"
+    return
+  fi
+  hrs=$((mins/60))
+  mins=$((mins-hrs*60))
+  printf "%d:%02d:%02d.%s" "$hrs" "$mins" "$secs" "$frac"
+}
+
+for i in "$@"; do
+  mime="$(file -b --mime-type "$i")"
+  case "$mime" in
+    video/x-matroska)
+      out="$(mkvinfo "$i")"
+      duration="$(grep Duration <<< "$out" | cut -d\  -f4)"
+      duration=${duration##+(0)}
+      duration=${duration%%+(0)}
+      duration=${duration%%.}
+      printf "%-10s %-15s %s\n" "$(grep Pixel\ width <<< "$out" | cut -d\  -f7)x$(grep Pixel\ height <<< "$out" | cut -d\  -f7)" "$duration" "$i"
+      ;;
+    video/*)
+      json="$(ffprobe -v error -select_streams V:0 -show_entries stream=width,height -show_entries format=duration -of json "$i")"
+      res="$(jq -r '"\(.streams[0].width)x\(.streams[0].height)"' <<< "$json")"
+      duration="$(s2hms "$(jq -r '"\(.format.duration)"' <<< "$json")")"
+      duration=${duration%%+(0)}
+      duration=${duration%%.}
+      printf "%-10s %-15s %s\n" "$res" "$duration" "$i"
+      ;;
+    *)
+      printf "%-26s %s\n" "$mime" "$i"
+  esac
+done

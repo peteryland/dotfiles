@@ -4,9 +4,10 @@ case $- in
   *) return;;
 esac
 
-for i in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh; do
-  [[ -r $i ]] && . "$i"
+for bashrc_profile in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh "$HOME"/.bashrc_local "$HOME"/.bashrc_local.d/*; do
+  [[ -r $bashrc_profile ]] && . "$bashrc_profile"
 done
+unset bashrc_profile
 
 bashrc_hostname() {
   local hostname
@@ -24,6 +25,7 @@ if command -v fzf >& /dev/null; then
   bashrc_fzfver="$(fzf --version)"; bashrc_fzfver="${bashrc_fzfver#*.}"; bashrc_fzfver="${bashrc_fzfver%%[. ]*}"
   if [[ $bashrc_fzfver -ge 48 ]]; then
     eval "$(fzf --bash)"
+    bind \\C-r:reverse-search-history  # disable fzf ctrl-r for now (until I can fix its use with ctrl-o)
   fi
   unset bashrc_fzfver
 fi
@@ -106,8 +108,8 @@ case "$OSTYPE" in
       alias np='sudo lsof -nP -iudp -itcp -stcp:LISTEN | grep -v -- "->"'
     fi
     alias ng='np | grep'
-    md5s() { md5 "$@"; }
-    statm() { stat -f %m "$@"; }
+    md5s() { md5 -- "$@"; }
+    statm() { stat -f %m -- "$@"; }
     export LOCATE_PATH=~/.local/var/locate/locatedb
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
@@ -125,7 +127,7 @@ case "$OSTYPE" in
       alias dir='dir --color=auto --hyperlink=auto'
       alias vdir='vdir --color=auto --hyperlink=auto'
     fi
-    alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs'
+    alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs -x rootfs -x overlay -x 9p'
     alias st='systemctl status'
     alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
     alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
@@ -138,8 +140,8 @@ case "$OSTYPE" in
     if [[ -r ~/.xmonad/xmonad.hs ]]; then
       alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
     fi
-    md5s() { md5sum "$@"; }
-    statm() { stat --printf %Y "$@"; }
+    md5s() { md5sum -- "$@"; }
+    statm() { stat --printf %Y -- "$@"; }
     export LOCATE_PATH=~/.local/var/locate/locatedb
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
@@ -170,7 +172,7 @@ case "$OSTYPE" in
       alias dir='dir --color=auto --hyperlink=auto'
       alias vdir='vdir --color=auto --hyperlink=auto'
     fi
-    alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs'
+    alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs -x rootfs -x overlay -x 9p'
     alias st='systemctl status'
     alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
     alias ppsc='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,cgname:120,stime,tty=TTY,time,cmd'
@@ -183,8 +185,8 @@ case "$OSTYPE" in
     if [[ -r ~/.xmonad/xmonad.hs ]]; then
       alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
     fi
-    md5s() { md5sum "$@"; }
-    statm() { stat --printf %Y "$@"; }
+    md5s() { md5sum -- "$@"; }
+    statm() { stat --printf %Y -- "$@"; }
     export LOCATE_PATH=~/.local/var/locate/locatedb
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
@@ -206,7 +208,7 @@ if [[ $UID -eq 0 ]]; then
 else
   usercol=6
 fi
-export PS1='${iswindows:+\[\e[38;5;39m\]\[\e[m\] }${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;239m\]\[\e[48;5;239m\]${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;66m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;239m\]\[\e[m\]}\$ '
+export PS1="$platformlogo"'${iswindows:+\[\e[38;5;39m\]\[\e[m\] }${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }'"$applogo"'${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;239m\]\[\e[48;5;239m\]${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;66m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;239m\]\[\e[m\]}\$ '
 unset usercol
 
 bashrc_term_title() {
@@ -287,14 +289,16 @@ bashrc_check_repo() {
     return
   fi
 
+  [[ $(git rev-parse --is-inside-git-dir) != true ]] || return
+
   # if we're in a repo with a readable .git dir (but not in $HOME) # && $HOME != "$(git rev-parse --show-toplevel)"
-  if [[ -e "$(git rev-parse --git-dir 2>/dev/null)" && "$(git rev-parse --is-bare-repository)" != "true" ]]; then
+  if [[ -e $(git rev-parse --git-dir 2>/dev/null) && $(git rev-parse --is-bare-repository) != true ]]; then
     # get the repo dir
     repo=$(git rev-parse --show-toplevel)
     # do a fetch if we haven't done one for more than a minute
     if [[ ! ( -r "$repo"/.git/FETCH_HEAD ) || ( $(( $(date +%s) - $(statm "$repo"/.git/FETCH_HEAD) )) -gt 60 ) ]]; then
       (
-        GIT_TERMINAL_PROMPT=0 git fetch --quiet &> /dev/null & disown -a
+        GIT_TERMINAL_PROMPT=0 git fetch -ap --quiet &> /dev/null & disown -a
       )
     fi
     bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | grep '^ tag: ' | head -1 | sed 's/^.* tag: \([^)]*\))\?$/\1/')"
@@ -334,13 +338,13 @@ if command -v eza >& /dev/null; then
 #   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
   export EZA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
   alias ls='eza -B --git --icons=auto'
-  alias ll='ls -al'
+  alias ll='ls -aal'
   alias lt='ll -snew'
 elif command -v exa >& /dev/null; then
 #   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
   export EXA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
   alias ls='exa -B --git --icons'
-  alias ll='ls -al'
+  alias ll='ls -aal'
   alias lt='ll -snew'
 else
   alias ll='ls -al'
@@ -490,30 +494,31 @@ l() {
       echo "ls $opts $@" >&2
       ls "$opts" "$@"
     elif [[ -n $dir && -d "$LOOKINGDIR"/$dir ]]; then
-      cd "$LOOKINGDIR"/"$dir"
+      cd -- "$LOOKINGDIR"/"$dir"
     elif [[ $1 == ?*/?* ]]; then
+      # TODO: should use ls-remote instead (like in the wk function below)?
       if [[ $(curl -Ls -w '%{response_code}' -o/dev/null https://gitlab.com/"$1") == 200 ]]; then
-        cd "$LOOKINGDIR"
+        cd -- "$LOOKINGDIR"
         git clone https://gitlab.com/"$1"
       elif [[ $(curl -Ls -w '%{response_code}' -o/dev/null https://github.com/"$1") == 200 ]]; then
-        cd "$LOOKINGDIR"
+        cd -- "$LOOKINGDIR"
         git clone https://github.com/"$1"
       else
         echo "l: $1 not found" >&2
         return 1
       fi
-      cd "$dir"
+      cd -- "$dir"
     else
       echo "l: Error parsing arguments" >&2
       return 1
     fi
   else
-    cd "$LOOKINGDIR"
+    cd -- "$LOOKINGDIR"
   fi
 }
 
 _l() {
-  local compreply=($(compgen -d "$LOOKINGDIR"/ | grep "^$LOOKINGDIR/$2"))
+  local compreply=($(compgen -d -- "$LOOKINGDIR"/ | grep "^$LOOKINGDIR/$2"))
   COMPREPLY=(${compreply[@]#$LOOKINGDIR/})
 }
 complete -F _l l
@@ -523,23 +528,23 @@ wk() {
   local dir="$1"
   if [[ $dir ]]; then
     if [[ -d $WORKDIR/$dir ]]; then
-      cd "$WORKDIR/$dir"
+      cd -- "$WORKDIR/$dir"
     elif [[ $dir == ?*/?* ]]; then
-      if fetch_work_repos | grep -q "$dir"; then
-        mkdir -p "$WORKDIR/${1%/*}"
-        cd "$WORKDIR/${1%/*}"
+      if git ls-remote -qh git@"$WORKGITLABHOST":"$1" non-existant-repo-head-name\! >& /dev/null; then
+        mkdir -p -- "$WORKDIR/${1%/*}"
+        cd -- "$WORKDIR/${1%/*}"
         git clone git@"$WORKGITLABHOST":"$1"
       else
         echo "wk: $1 not found" >&2
         return 1
       fi
-      cd "$WORKDIR/$dir"
+      cd -- "$WORKDIR/$dir"
     else
       echo "wk: Error parsing arguments" >&2
       return 1
     fi
   else
-    cd "$WORKDIR"
+    cd -- "$WORKDIR"
   fi
 }
 
@@ -553,9 +558,8 @@ _wk() {
         i="${i#$WORKDIR/}"
         echo "${i%/.git}"
       done
-      fetch_work_repos
-#     ) | grep "^$2" | sed "s/^\(${2//\//\\\/}[^/]*\/\?\).*/\1/" | sort -u
-    ) | grep "^$2" | sort -u
+      fetch_work_repos | grep "^$2" # | sed "s/^\(${2//\//\\\/}[^/]*\/\?\).*/\1/"
+    ) | sort -u
   ))
 }
 complete -F _wk wk
@@ -640,7 +644,7 @@ sub() {
 
 fcd() {
   local t
-  for t in ~/src/*/"$1" ~/src/*/*/"$1" ~/src/*/*/*/"$1"; do
+  for t in ~/src/*/"$1" ~/src/*/*/"$1" ~/src/*/*/*/"$1" ~/src/*/*/*/*/"$1" ~/src/*/*/*/*/*/"$1" ~/src/*/*/*/*/*/*/"$1"; do
     if [[ -d "$t" ]]; then
       cd "$t"
       return
@@ -648,6 +652,12 @@ fcd() {
   done
   cd "$1"
 }
+_fcd() {
+  local t=($(find ~/src -maxdepth 8 -type d -name .git -print0 | xargs -0 -n 1 basename_dirname))
+  for i in "${!t[@]}"; do [[ ${t[i]} =~ ^$2 ]] || unset -v 't[$i]'; done
+  COMPREPLY=("${t[@]##*/}")
+}
+complete -F _fcd fcd
 
 fzf-d() {
   if ! command -v fzf-tmux > /dev/null; then echo 'Please install fzf-tmux' >&2; return 1; fi
@@ -672,7 +682,7 @@ fzf-d() {
   x+=(-false)
   (
     printf "\0"
-    find "$path" -type d -mindepth 1 -maxdepth "$maxdepth" -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
+    find "$path" -mindepth 1 -maxdepth "$maxdepth" -type d -not \( "${x[@]}" \) -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
       printf "${line#$path/}\0"
     done
   ) | fzf-tmux -0 -1 -p -q "$query" --reverse --read0 "${fzfopts[@]}" --bind backward-eof:abort --preview 'ls -al --color '"$path"'/{}'
@@ -687,7 +697,7 @@ fzf-r() {
   printf "$HOME"/
   (
     printf "\0"
-    find ~/src -type d -name .git -maxdepth 5 -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
+    find ~/src -maxdepth 8 -type d -name .git -print0 2> /dev/null | while IFS= read -r -d $'\0' line; do
       line="${line#~/}"
       printf "${line%/.git}\0"
     done
@@ -796,13 +806,11 @@ j latest
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
 # [[ -s "$HOME/.gvm/bin/gvm-init.sh" ]] && source "$HOME/.gvm/bin/gvm-init.sh"
 
-[[ -r $HOME/.bashrc_local ]] && . "$HOME/.bashrc_local"
-
 setbg() {
   bashrc_bgcolour="$("$HOME/.local/bin/setbg" "$@")"
 }
 
-setbg
+setbg "${bggamma}"
 
 # Set bashrc_cmd to 1 every time a new command is executed
 trap '[[ $BASH_COMMAND != $PROMPT_COMMAND ]] && bashrc_cmd=1' DEBUG
@@ -815,7 +823,7 @@ bashrc_prompt() {
     (( bashrc_col != 1 )) && bashrc_nonl=1
     if [[ $bashrc_nonl || $bashrc_exit_status ]]; then
       [[ $bashrc_nonl ]] || printf '\e[A'
-      printf "\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[31m\e[41m\e[30m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[31m\e[m\n"
+      printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[31m\e[41m\e[30m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[31m\e[m\e[u\n"
     fi
   fi
   unset bashrc_cmd
@@ -824,8 +832,6 @@ bashrc_prompt() {
   bashrc_term_title_and_colours
 }
 
-if [[ -r "$HOME/.bashrc_localafter" ]]; then
-  . "$HOME/.bashrc_localafter"
-fi
+[[ -r "$HOME/.bashrc_localafter" ]] && . "$HOME/.bashrc_localafter"
 
 PROMPT_COMMAND=bashrc_prompt

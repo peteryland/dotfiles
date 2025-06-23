@@ -10,6 +10,7 @@
   pretty = l
 [alias]
   b    = branch
+  bd   = !b=$(git branch --show-current) && git switch main && git pull -p && git branch -D "$b" && :
   ca   = commit --amend -q --no-edit
   can  = commit --amend -q --no-edit --date=now
   capf = !git commit --amend -q --no-edit && git push -q --force-with-lease && :
@@ -30,6 +31,7 @@
   su   = status
   sw   = switch
   w    = switch
+  wc   = switch -c
 [rerere]
   auto = true
 [color]

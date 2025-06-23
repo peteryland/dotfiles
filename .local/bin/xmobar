@@ -1,14 +1,19 @@
 #!/bin/bash
 
-# can use -C to add commands to xmobar
+# Note: one can use -C to add commands to xmobar, and -t to set the template
 
-while true; do
-  if res="$(xrandr 2> /dev/null | grep '^ *[0-9]*x[0-9]* *.*\*' | cut -d\  -f4)"; then
-    if [[ -r ~/.xmonad/xmobar.config.$res ]]; then
-      /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config."$res" &> ~/.xmonad/xmobar.errors
-    else
-      /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config &> ~/.xmonad/xmobar.errors
-    fi
-  fi
-  sleep 5
+((i=0))
+
+xprop -root -format _XMONAD_LOG 8s -set _XMONAD_LOG ''  # set initial message to empty string
+
+xrandr 2> /dev/null | grep '^ *[0-9]*x[0-9]* *.*\*' | cut -d\  -f4 | while read res; do
+  (while true; do
+    x=$(cut -dx -f1 <<< "$res")
+    y=$(cut -dx -f2 <<< "$res")
+    f=$((y/256+6))
+    h=$((2*f))
+    /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config -f "FiraCode Nerd Font Regular $f" -p "TopH $h" -x "$i" &> ~/.xmonad/xmobar."$i".errors
+    sleep 5
+  done) &
+  ((i++))
 done

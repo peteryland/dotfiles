@@ -116,8 +116,8 @@ sudo cp -i /usr/share/X11/xorg.conf.d/40-libinput.conf /etc/X11/xorg.conf.d/
 #         Option "Tapping" "on"
 #         Option "NaturalScrolling" "true"
 
-sudo apt install kitty xmonad xmobar moc picom hsetroot xplanet xdotool brightnessctl
-cabal install --lib xmonad xmonad-contrib X11 --overwrite-policy=always
+sudo apt install kitty xmonad xmobar moc picom hsetroot xplanet xdotool brightnessctl libasound2-dev
+cabal install --lib xmonad xmonad-contrib X11 containers filepath process --overwrite-policy=always
 
 ## Coding
 
@@ -134,3 +134,10 @@ curl -sSf https://get-ghcup.haskell.org | sh
 #?? nix-env -i cabal-install hlint goa lambdabot
 #?? ~/.nix-profile/bin/cabal update
 #?? ~/.nix-profile/bin/cabal install pretty-show hscolour hoogle hindent doctest --overwrite-policy=always
+
+## Cron
+
+# Can add the following to cron (linux version; for Mac, use the locate command from .bashrc):
+6 5 * * * "$HOME"/.local/bin/fetch_work_repos
+17 5 * * * updatedb --localpaths="$HOME" --findoptions="-path .cache -prune -or -path .cabal -prune -or -path .ghcup -prune -or -path .vim/undo -prune -or -path .local/share -prune -or -name .git -type d -prune -or -path go/pkg -prune" --output="$HOME"/.local/var/locate/locatedb
+52 5 * * * find "$HOME" -type d -name .git -exec git --git-dir={} fetch -qap \;
