@@ -46,10 +46,11 @@ Config { font = "FiraCode Nerd Font Regular 11"
 --                     , Run Com "systraypad" [] "traypad" 100
                     , Run Com "mocpstatus" [] "mocp" 20
                     , Run Com "solaarstatus" [] "hci" 100
+                    , Run Com "localstatus" [] "localstatus" 10
                     , Run Volume "default" "Master" ["-t","奔 <volumevbar>"] 20
                     , Run Battery [ "-t", "<acstatus>", "-L", "20", "--normal", "grey", "-l", "#ff9090", "--", "-o", "<left>% (<timeleft>)"] 60
                     ]
        , sepChar = "%"
        , alignSep = "}{"
-       , template = " %hci%%default:Master% | %mocp%%UnsafeXMonadLog% }{ %date% | %LFSB% | %LSZB% | %cpu% | %memory% | %battery% |  %uname% "
+       , template = " %hci%%localstatus%%default:Master% | %mocp%%UnsafeXMonadLog% }{ %date% | %LFSB% | %LSZB% | %cpu% | %memory% | %battery% |  %uname% "
        }
