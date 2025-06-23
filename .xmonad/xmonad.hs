@@ -146,7 +146,7 @@ main = do
           , className =? "Totem" --> doFullFloat
           , className =? "mpv" --> doFullFloat
           , className =? "Brave-browser" --> doShift (myworkspaces' !! 1)
-          , className =? "Kodi" --> doShift (last myworkspaces')
+          , className =? "Kodi" --> doFullFloat <+> doShift (last myworkspaces')
           , className =? "nheko" --> doShift (myworkspaces' !! 5)
           , manageHook def
           ]
