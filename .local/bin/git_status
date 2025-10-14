@@ -17,17 +17,21 @@ if [[ $1 ]]; then
   cd -- "$(dirname -- "$1")"
 fi
 
-while [[ $(git rev-parse --is-inside-git-dir) == true ]]; do
-  cd ..
-done
-
 unset git_branch git_ahead git_behind git_extrastatus
 
 git_status=
 
 if ! type -p git > /dev/null; then
-  return
+  exit
 fi
+
+while true; do
+  case "$(git rev-parse --is-inside-git-dir 2> /dev/null)" in
+    true)  cd ..;;
+    false) break;;
+    *)     exit;;
+  esac
+done
 
 # if we're in a repo with a readable .git dir (but not in $HOME) # && $HOME != "$(git rev-parse --show-toplevel)"
 if [[ -e $(git rev-parse --git-dir 2>/dev/null) ]]; then
@@ -50,7 +54,7 @@ if [[ -e $(git rev-parse --git-dir 2>/dev/null) ]]; then
   fi
   git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
   git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-  git_extrastatus="$(grep -q '^[AM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M)" #; grep -q ^\?\? <<< "$status" && printf U)"
+  git_extrastatus="$(grep -q '^[ACDMRT]' <<< "$status" && printf S; grep -q '^.[CDMRT]' <<< "$status" && printf M)" #; grep -q ^\?\? <<< "$status" && printf U)"
   git_status="$git_branch${git_ahead:+↑$git_ahead}${git_behind:+↓$git_behind}$git_extrastatus"
 fi
 

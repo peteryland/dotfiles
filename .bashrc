@@ -289,7 +289,7 @@ bashrc_check_repo() {
     return
   fi
 
-  [[ $(git rev-parse --is-inside-git-dir) != true ]] || return
+  [[ $(git rev-parse --is-inside-git-dir 2> /dev/null) != true ]] || return
 
   # if we're in a repo with a readable .git dir (but not in $HOME) # && $HOME != "$(git rev-parse --show-toplevel)"
   if [[ -e $(git rev-parse --git-dir 2>/dev/null) && $(git rev-parse --is-bare-repository) != true ]]; then
@@ -315,7 +315,7 @@ bashrc_check_repo() {
     else
       bashrc_git_hasstash=
     fi
-    bashrc_git_extrastatus="$(grep -q '^[ADM]' <<< "$status" && printf S; grep -q ^.M <<< "$status" && printf M)$bashrc_git_hasstash" #; grep -q ^\?\? <<< "$status" && printf U)
+    bashrc_git_extrastatus="$(grep -q '^[ACDMRT]' <<< "$status" && printf S; grep -q '^.[CDMRT]' <<< "$status" && printf M)$bashrc_git_hasstash" #; grep -q ^\?\? <<< "$status" && printf U)
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}${bashrc_git_tag:+ $bashrc_git_tag }$bashrc_git_extrastatus"
   fi
 }
@@ -338,13 +338,13 @@ if command -v eza >& /dev/null; then
 #   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
   export EZA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
   alias ls='eza -B --git --icons=auto'
-  alias ll='ls -aal'
+  alias ll='ls -aagl'
   alias lt='ll -snew'
 elif command -v exa >& /dev/null; then
 #   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
   export EXA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
   alias ls='exa -B --git --icons'
-  alias ll='ls -aal'
+  alias ll='ls -aagl'
   alias lt='ll -snew'
 else
   alias ll='ls -al'
@@ -486,13 +486,13 @@ scr() {
 
 mkdir -p "${LOOKINGDIR:="$HOME/src/looking"}"
 l() {
-  local dir="${1#*/}"
+  local opt dir="${1#*/}"
   if [[ $1 ]]; then
     if [[ $1 == s-* ]]; then
-      opts="${1/s}"
+      opt="${1/s}"
       shift
-      echo "ls $opts $@" >&2
-      ls "$opts" "$@"
+      echo "ls $opt $@" >&2
+      ls "$opt" "$@"
     elif [[ -n $dir && -d "$LOOKINGDIR"/$dir ]]; then
       cd -- "$LOOKINGDIR"/"$dir"
     elif [[ $1 == ?*/?* ]]; then
@@ -522,6 +522,16 @@ _l() {
   COMPREPLY=(${compreply[@]#$LOOKINGDIR/})
 }
 complete -F _l l
+
+gi() {
+  local opt
+  if [[ $1 == t* ]]; then
+    opt="${1/t}"
+    shift
+    echo "git $opt $@" >&2
+    git "$opt" "$@"
+  fi
+}
 
 mkdir -p "${WORKDIR:="$HOME/src/work"}"
 wk() {

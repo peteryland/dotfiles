@@ -69,4 +69,7 @@
 .viminfo
 .w3m
 .wget-hsts
+.wsl-config
 .Xauthority
+.xmonad/*.errors
+.yarnrc
