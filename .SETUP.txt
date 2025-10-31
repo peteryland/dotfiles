@@ -1,4 +1,11 @@
+# if you use an apt proxy like apt-cacher-ng:
+sudo vi /etc/apt/apt.conf.d/02proxy
+Acquire::http { Proxy "http://your_proxy_server_ip:3142"; };
+# Use http instead of https in apt sources, make sure these repos are mapped in the proxy
+
+# update and install git:
 sudo apt update; sudo apt upgrade; sudo apt autoremove --purge; sudo apt install git
+
 # install this repo
 git clone https://dev.piglet.ch/pdr/dotfiles.git
 mv -i dotfiles/.[a-zA-Z]* .
@@ -60,7 +67,7 @@ if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
   sudo apt purge vim-tiny nano
 
   # Build/Dev:
-  sudo apt install build-essential autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix
+  sudo apt install build-essential autoconf automake libtool flex bison gdb fonts-mathjax-extras fonts-stix xxd
 
   # Haskell Dev (can install tool-chain with apt, cabal or ghcup as needed):
   sudo apt install hlint happy cabal-install cabal-debian hscolour ppsh hindent doctest stylish-haskell libghc-ghc-paths-dev
@@ -135,9 +142,30 @@ curl -sSf https://get-ghcup.haskell.org | sh
 #?? ~/.nix-profile/bin/cabal update
 #?? ~/.nix-profile/bin/cabal install pretty-show hscolour hoogle hindent doctest --overwrite-policy=always
 
+## NFS
+
+# apt install nfs-common  # for clients
+# apt install nfs-kernel-server  # for servers
+
 ## Cron
 
 # Can add the following to cron (linux version; for Mac, use the locate command from .bashrc):
 6 5 * * * "$HOME"/.local/bin/fetch_work_repos
 17 5 * * * updatedb --localpaths="$HOME" --findoptions="-path .cache -prune -or -path .cabal -prune -or -path .ghcup -prune -or -path .vim/undo -prune -or -path .local/share -prune -or -name .git -type d -prune -or -path go/pkg -prune" --output="$HOME"/.local/var/locate/locatedb
 52 5 * * * find "$HOME" -type d -name .git -exec git --git-dir={} fetch -qap \;
+
+## Fix screen tearing issue on NVidia cards:
+
+# /etc/X11/xorg.conf.d/20-nvidia.conf
+
+Section "Device"
+  Identifier "NVidia Card"
+  Driver     "nvidia"
+EndSection
+
+Section "Screen"
+  Identifier "Screen0"
+  Option     "MetaModes" "nvidia-auto-select +0+0 {ForceFullCompositionPipeline=On}"
+#   Option     "AllowIndirectGLXProtocol" "off"  # one of these two options...
+#   Option     "TripleBuffer" "on"               # ...doesn't work well with LG TVs
+EndSection

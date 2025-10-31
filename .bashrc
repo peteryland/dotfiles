@@ -328,7 +328,7 @@ pg() {
   fi
 }
 
-alias grep='grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2} --color=auto'
+alias grep='grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2,dist-newstyle} --color=auto'
 alias fgrep='grep -F --color=auto'
 alias egrep='grep -E --color=auto'
 alias rgrep='grep -r --color=auto'

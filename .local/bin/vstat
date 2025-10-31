@@ -25,6 +25,10 @@ for i in "$@"; do
   mime="$(file -b --mime-type "$i")"
   case "$mime" in
     video/x-matroska)
+      if ! command -v mkvinfo >& /dev/null; then
+        >&2 echo No mkvinfo command found, please install mkvtoolnix
+        exit 1
+      fi
       out="$(mkvinfo "$i")"
       duration="$(grep Duration <<< "$out" | cut -d\  -f4)"
       duration=${duration##+(0)}
@@ -33,6 +37,10 @@ for i in "$@"; do
       printf "%-10s %-15s %s\n" "$(grep Pixel\ width <<< "$out" | cut -d\  -f7)x$(grep Pixel\ height <<< "$out" | cut -d\  -f7)" "$duration" "$i"
       ;;
     video/*)
+      if ! command -v ffprobe >& /dev/null; then
+        >&2 echo No ffprobe command found, please install ffmpeg
+        exit 1
+      fi
       json="$(ffprobe -v error -select_streams V:0 -show_entries stream=width,height -show_entries format=duration -of json "$i")"
       res="$(jq -r '"\(.streams[0].width)x\(.streams[0].height)"' <<< "$json")"
       duration="$(s2hms "$(jq -r '"\(.format.duration)"' <<< "$json")")"
