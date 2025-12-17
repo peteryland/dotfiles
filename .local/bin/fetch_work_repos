@@ -2,14 +2,16 @@
 
 . ~/.bashrc_local
 
+team="${1:-$WORKGITLABGROUP}"
+
 cachedir="$HOME"/.local/var/cache
 
 mkdir -p "$cachedir"
 
-if [[ ! -r $cachedir/work_repo_list ]] || (( $(date +%s) - $(date -r "$cachedir"/work_repo_list +%s) > 60 * 60 * 24 * 7)); then
+if [[ ! -r $cachedir/work_repo_list_$team ]] || (( $(date +%s) - $(date -r "$cachedir"/work_repo_list_"$team" +%s) > 60 * 60 * 24 * 7)); then
   if work_groups="$(curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
-                        -Ls https://"$WORKGITLABHOST"/api/v4/groups?per_page=100\&search="$WORKGITLABGROUP"\&active=true \
-                   | jq .[].id)" && [[ $work_groups ]]; then
+                        -Ls https://"$WORKGITLABHOST"/api/v4/groups?per_page=100\&search="$team"\&active=true \
+                   | jq '.[].id')" && [[ $work_groups ]]; then
   echo "$work_groups" | while read i; do
     curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
          -Ls https://"$WORKGITLABHOST"/api/v4/groups/"$i"/projects?per_page=100\&simple=true\&archived=false \
@@ -17,8 +19,8 @@ if [[ ! -r $cachedir/work_repo_list ]] || (( $(date +%s) - $(date -r "$cachedir"
     curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
          -Ls https://"$WORKGITLABHOST"/api/v4/groups/"$i"/projects/shared?per_page=100\&simple=true\&archived=false \
     | jq .[].path_with_namespace
-  done | sort | tr -d \" > "$cachedir"/work_repo_list
+  done | sort | tr -d \" | grep -v machbar/plattform-team/ | grep -v piaas/devdays/demo-project- | grep -v piaas/poc/ | grep -v piaas-testing/ > "$cachedir"/work_repo_list_"$team"
   fi
 fi
 
-cat "$cachedir"/work_repo_list
+cat "$cachedir"/work_repo_list_"$team"

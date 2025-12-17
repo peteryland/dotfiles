@@ -80,7 +80,7 @@ if [[ -x ~/.lessfilter ]]; then
   export LESSQUIET=1
 fi
 
-if [[ -z ${debian_chroot:-} ]] && [[ -r /etc/debian_chroot ]]; then
+if [[ -z ${debian_chroot:-} && -r /etc/debian_chroot ]]; then
   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
@@ -199,16 +199,21 @@ case "$OSTYPE" in
     statm() { return 0; }
 esac
 
-if [[ -r "$HOME"/.local/bin/color-dark ]]; then
-  . "$HOME"/.local/bin/color-dark
-fi
-
-if [[ $UID -eq 0 ]]; then
-  usercol=1
+if [[ $TERM = linux ]]; then
+  if [[ $UID -eq 0 ]]; then
+    usercol=1
+  else
+    usercol=6
+  fi
+  export PS1='${debian_chroot:+(\[\e[3em\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[90m\]<${bashrc_git_branch}${bashrc_git_ahead:+\[\e[31m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[32m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[32m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[90m\]>\[\e[m\]}\$ '
 else
-  usercol=6
+  if [[ $UID -eq 0 ]]; then
+    usercol=42
+  else
+    usercol=41
+  fi
+  export PS1="$platformlogo"'${iswindows:+\[\e[38;5;48m\]\[\e[m\] }${isrpi:+\[\e[38;5;49;1m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;50m\]\[\e[m\] }${ismac:+ }'"$applogo"'${debian_chroot:+(\[\e[38;5;40m\]$debian_chroot\[\e[m\]) }\[\e[38;5;'"$usercol"'m\]\u\[\e[m\]@\[\e[38;5;43m\]\h:\[\e[38;5;44m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;32m\]\[\e[48;5;32m\]${bashrc_git_branch:+\[\e[38;5;36m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[38;5;34m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[38;5;33m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;37m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[38;5;35m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;32m\]\[\e[m\]}\$ '
 fi
-export PS1="$platformlogo"'${iswindows:+\[\e[38;5;39m\]\[\e[m\] }${isrpi:+\[\e[38;5;125m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;162m\]\[\e[m\] }${ismac:+ }'"$applogo"'${debian_chroot:+(\[\e[38;5;66m\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;239m\]\[\e[48;5;239m\]${bashrc_git_branch:+\[\e[34m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[32m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[31m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;66m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;239m\]\[\e[m\]}\$ '
 unset usercol
 
 bashrc_term_title() {
@@ -235,10 +240,12 @@ case "$termprog" in
   iTerm*|xterm-color|*-256color)
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
     bashrc_term_title_and_colours() {
+      # set colour scheme
+      printf "$bashrc_theme"
       if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
         # set background colour
-        printf "\e]Ph${bashrc_bgcolour}\e\\"
+#         printf "\e]Ph${bashrc_bgcolour}\e\\"
         printf "\e]11;#${bashrc_bgcolour}\e\\"
       fi
     }
@@ -248,6 +255,8 @@ case "$termprog" in
     export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 #     export TERM=xterm-256color
     bashrc_term_title_and_colours() {
+      # set colour scheme
+      printf "$bashrc_theme"
       if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
         # set background colour
@@ -257,6 +266,8 @@ case "$termprog" in
     ;;
   Apple_Terminal)
     bashrc_term_title_and_colours() {
+      # set colour scheme
+      printf "$bashrc_theme"
       if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
         # set background colour
@@ -266,10 +277,12 @@ case "$termprog" in
     ;;
   linux)
     bashrc_term_title_and_colours() {
+      # set colour scheme
+      printf "$bashrc_theme"
       if [[ -z $VIM_TERMINAL ]]; then
         # set background colour
         printf "\e]P0${bashrc_bgcolour}"
-        # switch consoles and back to reset the colours for the whole screen
+        # you'll need to switch consoles and back to reset the colours for the whole screen
       fi
     }
     ;;
@@ -332,7 +345,7 @@ alias grep='grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2,
 alias fgrep='grep -F --color=auto'
 alias egrep='grep -E --color=auto'
 alias rgrep='grep -r --color=auto'
-alias glocate='locate -d :'
+alias glocate='locate -d ""'
 alias pj='pg java'
 if command -v eza >& /dev/null; then
 #   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
@@ -820,7 +833,27 @@ setbg() {
   bashrc_bgcolour="$("$HOME/.local/bin/setbg" "$@")"
 }
 
-setbg "${bggamma}"
+dark() {
+  if [[ $TERM = linux ]]; then
+    bashrc_bgcolour=000000
+  else
+    setbg "${bggamma}"
+  fi
+  unset bashrc_theme
+  if [[ -r $HOME/.local/bin/theme && -r $HOME/.config/themes/dark ]]; then
+    bashrc_theme="$(theme dark)"
+  fi
+}
+
+light() {
+  setbg 8
+  unset bashrc_theme
+  if [[ -r $HOME/.local/bin/theme && -r $HOME/.config/themes/light ]]; then
+    bashrc_theme="$(theme light)"
+  fi
+}
+
+[[ $devmachine ]] && dark || light
 
 # Set bashrc_cmd to 1 every time a new command is executed
 trap '[[ $BASH_COMMAND != $PROMPT_COMMAND ]] && bashrc_cmd=1' DEBUG
@@ -833,7 +866,11 @@ bashrc_prompt() {
     (( bashrc_col != 1 )) && bashrc_nonl=1
     if [[ $bashrc_nonl || $bashrc_exit_status ]]; then
       [[ $bashrc_nonl ]] || printf '\e[A'
-      printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[31m\e[41m\e[30m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[31m\e[m\e[u\n"
+      if [[ $TERM = linux ]]; then
+        printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[41;1m${bashrc_exit_status}${bashrc_nonl:+/}\e[m\e[u\n"
+      else
+        printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[38;5;45m\e[48;5;45m\e[38;5;46m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[38;5;45m\e[m\e[u\n"
+      fi
     fi
   fi
   unset bashrc_cmd

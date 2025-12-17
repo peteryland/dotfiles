@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# (c) 2022-2026 Pete Ryland
+
+kittyconf="$(mktemp -p "$HOME"/.config/kitty)"
+trap 'rm -f -- "$kittyconf"' EXIT
+
+esc_seq() { printf '\e]%s%s\e\\' "$1" "$2"; }
+set_rgb() { esc_seq "$1;rgb:" "$2"; }
+set_col() {
+  local col="$(tr -d / <<< "$2")"
+  if [[ $TERM = linux ]]; then
+    if (( $1 < 16 )); then
+      printf '\e]P%x%s' "$1" "$col"
+    fi
+  else
+    set_rgb "4;$1" "$2"
+  fi
+  echo "color$1 #$col" >> "$kittyconf"
+  case $1 in
+    0)
+      echo "background #$col" >> "$kittyconf"
+      echo "cursor_text_color #$col" >> "$kittyconf"
+      echo "inactive_border_color #$col" >> "$kittyconf"
+      echo "active_tab_background #$col" >> "$kittyconf"
+      echo "mark1_foreground #$col" >> "$kittyconf"
+      echo "mark2_foreground #$col" >> "$kittyconf"
+      echo "mark3_foreground #$col" >> "$kittyconf"
+#       [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Ph "$col" # background, we set this elsewhere
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pm "$col" # cursor foreground
+      ;;
+    2)
+      echo "mark3_background #$col" >> "$kittyconf"
+      ;;
+    3)
+      echo "url_color #$col" >> "$kittyconf"
+      echo "mark2_background #$col" >> "$kittyconf"
+      ;;
+    7)
+      echo "foreground #$col" >> "$kittyconf"
+      echo "selection_foreground #$col" >> "$kittyconf"
+      echo "cursor #$col" >> "$kittyconf"
+      echo "inactive_tab_foreground #$col" >> "$kittyconf"
+#       set_rgb 10 "$2" # explicitly set foreground colour, probably not necessary
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pg "$col" # foreground
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pk "$col" # selection foreground
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pl "$col" # cursor background
+      ;;
+    8)
+      echo "active_border_color #$col" >> "$kittyconf"
+      ;;
+    9)
+      echo "bell_border_color #$col" >> "$kittyconf"
+      ;;
+    10)
+      echo "selection_background #$col" >> "$kittyconf"
+      echo "wayland_titlebar_color #$col" >> "$kittyconf"
+      echo "macos_titlebar_color #$col" >> "$kittyconf"
+      echo "inactive_tab_background #$col" >> "$kittyconf"
+      echo "tab_bar_background #$col" >> "$kittyconf"
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pj "$col" # selection background
+      ;;
+    13)
+      echo "active_tab_foreground #$col" >> "$kittyconf"
+      echo "mark1_background #$col" >> "$kittyconf"
+      ;;
+  esac
+}
+
+if [[ -r $HOME/.config/themes/$1 ]]; then
+  . "$HOME/.config/themes/$1"
+
+  diff -q "$kittyconf" "$HOME"/.config/kitty/theme-colours.conf >& /dev/null || mv -f "$kittyconf" "$HOME"/.config/kitty/theme-colours.conf
+fi

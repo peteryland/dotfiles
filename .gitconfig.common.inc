@@ -5,6 +5,7 @@
   default = simple
   autoSetupRemote = true
 [pretty]
+  lf = format:%C(auto)%h%d %G? %Cgreen%aN <%ae> %Cblue%aD%Creset: %s
   l = format:%C(auto)%h%d %G? %Cgreen%aN <%ae> %Cblue%ar%Creset: %s
 [format]
   pretty = l
@@ -22,6 +23,7 @@
   fp   = format-patch
   hist = log HEAD^^^..
   la   = log --graph --decorate --abbrev-commit --all
+  lf   = log --graph --decorate --abbrev-commit --all --pretty=lf
   l    = log --graph --decorate --abbrev-commit
   pf   = push --force-with-lease
   rc   = rebase --continue
@@ -58,6 +60,7 @@
   sshCommand = ssh -o RemoteCommand=none -o RequestTTY=no
 [advice]
   skippedCherryPicks = false
+  detachedHead = false
 [fetch]
   writeCommitGraph = true
 

@@ -6,10 +6,16 @@ set title titlestring=%F
 " source the vimrc file after saving it
 autocmd! bufwritepost ~/.vimrc source $MYVIMRC
 
-" turn on syntax highlighting, with slate colorscheme
+" turn on syntax highlighting, with default colorscheme, plus some tweaks
 syntax enable
 colorscheme default
-highlight MatchParen ctermbg=darkgray
+highlight MatchParen ctermbg=240
+highlight Constant   ctermfg=16 cterm=NONE
+highlight Statement  ctermfg=17 cterm=NONE
+highlight Identifier ctermfg=18 cterm=NONE
+highlight Comment    ctermfg=19 cterm=italic
+highlight Type       ctermfg=20 cterm=NONE
+highlight Special    ctermfg=21 cterm=bold
 filetype plugin indent on
 
 " completion options
@@ -66,7 +72,8 @@ xnoremap <silent> <C-x> <ESC>:undojoin<CR>`.``gv""p``P
 xnoremap <silent> . :normal .<CR>
 
 " turn on folding
-set foldmethod=syntax foldlevelstart=4
+set foldmethod=syntax foldlevelstart=99
+highlight! Folded ctermbg=NONE
 
 " don't wrap lines when editing
 set formatoptions-=t
@@ -95,15 +102,30 @@ set smarttab smartindent autoindent softtabstop=2 tabstop=2 shiftwidth=2 expandt
 set t_Co=256
 " let &t_SI = "\<ESC>]50;CursorShape=1\x7"
 " let &t_EI = "\<ESC>]50;CursorShape=0\x7"
-set t_SI=[6\ q
-set t_SR=[4\ q
-set t_EI=[2\ q
-hi! CursorLine ctermbg=000
-hi! CursorColumn ctermbg=000
+let &t_SI="\e[6 q"
+let &t_SR="\e[4 q"
+let &t_EI="\e[2 q"
+highlight clear CursorLine
+highlight CursorLine term=bold cterm=bold
+highlight! link CursorLineNr CursorLine
+highlight! link LineNr NonText
+highlight clear CursorColumn
+highlight CursorColumn term=bold cterm=bold
+set cursorline cursorcolumn
+
+" configure undercurl, underdotted, underdashed, underdouble
+let &t_Ce="\e[4:0m"
+let &t_Us="\e[4:2m"
+let &t_Cs="\e[4:3m"
+let &t_ds="\e[4:4m"
+let &t_Ds="\e[4:5m"
 
 " search options
 set smartcase hlsearch incsearch
-hi Search ctermfg=white ctermbg=173 cterm=none guifg=#ffffff guibg=#e5786d gui=none
+highlight!    Search ctermfg=24 ctermbg=25 term=bold cterm=bold
+highlight! IncSearch ctermfg=26 ctermbg=25 term=bold cterm=bold
+nnoremap n nzz
+nnoremap N Nzz
 
 " backspace q to quit, bs bs to quit all, if possible
 nnoremap <silent> <BS><BS> :qa<CR>
@@ -176,85 +198,85 @@ set statusline=%!MyStatusLine()
 au BufNewFile,BufRead,BufEnter,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
 function ModifiedColor()
   if &mod == 1
-    hi StatusLine ctermfg=58 ctermbg=110
+    highlight StatusLine ctermfg=27 ctermbg=26
   else
     if &ro == 1
-      hi StatusLine ctermfg=23 ctermbg=110
+      highlight StatusLine ctermfg=28 ctermbg=26
     else
-      hi StatusLine ctermfg=24 ctermbg=110
+      highlight StatusLine ctermfg=29 ctermbg=26
     endif
   endif
 endfunction
 
-hi StatusLine ctermfg=24 ctermbg=110
-hi StatusLineNC ctermfg=237 ctermbg=110
-hi StatusLineTerm cterm=bold,reverse ctermfg=22 ctermbg=110
-hi StatusLineTermNC cterm=bold,reverse ctermfg=237 ctermbg=110
+highlight StatusLine ctermfg=29 ctermbg=26
+highlight StatusLineNC ctermfg=30 ctermbg=26
+highlight StatusLineTerm cterm=bold,reverse ctermfg=31 ctermbg=26
+highlight StatusLineTermNC cterm=bold,reverse ctermfg=30 ctermbg=26
 
-hi StatusLineOK ctermfg=110 ctermbg=24
-hi StatusLineMod ctermfg=110 ctermbg=58
-hi StatusLineRO ctermfg=110 ctermbg=23
-hi StatusLineInactive ctermfg=110 ctermbg=237
-" hi GitGreenOK ctermfg=040 ctermbg=24
-" hi GitGreenMod ctermfg=040 ctermbg=58
-" hi GitGreenRO ctermfg=040 ctermbg=23
-" hi GitGreenInactive ctermfg=040 ctermbg=237
-" hi GitBlueOK ctermfg=004 ctermbg=24
-" hi GitBlueMod ctermfg=004 ctermbg=58
-" hi GitBlueRO ctermfg=004 ctermbg=23
-" hi GitBlueInactive ctermfg=004 ctermbg=237
-" hi GitYellowOK cterm=bold ctermfg=440 ctermbg=24
-" hi GitYellowMod cterm=bold ctermfg=440 ctermbg=58
-" hi GitYellowRO cterm=bold ctermfg=440 ctermbg=23
-" hi GitYellowInactive cterm=bold ctermfg=440 ctermbg=237
-" hi GitRedOK ctermfg=400 ctermbg=24
-" hi GitRedMod ctermfg=400 ctermbg=58
-" hi GitRedRO ctermfg=400 ctermbg=23
-" hi GitRedInactive ctermfg=400 ctermbg=239
-hi GitGreenOK ctermfg=040 ctermbg=239
-hi GitGreenMod ctermfg=040 ctermbg=239
-hi GitGreenRO ctermfg=040 ctermbg=239
-hi GitGreenInactive ctermfg=040 ctermbg=239
-hi GitBlueOK ctermfg=004 ctermbg=239
-hi GitBlueMod ctermfg=004 ctermbg=239
-hi GitBlueRO ctermfg=004 ctermbg=239
-hi GitBlueInactive ctermfg=004 ctermbg=239
-hi GitYellowOK ctermfg=3 ctermbg=239
-hi GitYellowMod ctermfg=3 ctermbg=239
-hi GitYellowRO ctermfg=3 ctermbg=239
-hi GitYellowInactive ctermfg=3 ctermbg=239
-hi GitRedOK ctermfg=1 ctermbg=239
-hi GitRedMod ctermfg=1 ctermbg=239
-hi GitRedRO ctermfg=1 ctermbg=239
-hi GitRedInactive ctermfg=1 ctermbg=239
-hi GitBGOK ctermfg=239 ctermbg=24
-hi GitBGMod ctermfg=239 ctermbg=58
-hi GitBGRO ctermfg=239 ctermbg=23
-hi GitBGInactive ctermfg=239 ctermbg=237
-hi HaskellPurpleOK cterm=bold ctermfg=129 ctermbg=24
-hi HaskellPurpleMod cterm=bold ctermfg=129 ctermbg=58
-hi HaskellPurpleRO cterm=bold ctermfg=129 ctermbg=23
-hi HaskellPurpleInactive cterm=bold ctermfg=129 ctermbg=237
-hi JSYellowOK ctermfg=221 ctermbg=24
-hi JSYellowMod ctermfg=221 ctermbg=58
-hi JSYellowRO ctermfg=221 ctermbg=23
-hi JSYellowInactive ctermfg=221 ctermbg=237
-hi VimGreenOK ctermfg=040 ctermbg=24
-hi VimGreenMod ctermfg=040 ctermbg=58
-hi VimGreenRO ctermfg=040 ctermbg=23
-hi VimGreenInactive ctermfg=040 ctermbg=237
-hi HtmlOrangeOK ctermfg=166 ctermbg=24
-hi HtmlOrangeMod ctermfg=166 ctermbg=58
-hi HtmlOrangeRO ctermfg=166 ctermbg=23
-hi HtmlOrangeInactive ctermfg=166 ctermbg=237
-hi ElmBlueOK cterm=bold ctermfg=32 ctermbg=24
-hi ElmBlueMod cterm=bold ctermfg=32 ctermbg=58
-hi ElmBlueRO cterm=bold ctermfg=32 ctermbg=23
-hi ElmBlueInactive cterm=bold ctermfg=32 ctermbg=237
-hi WhiteOK cterm=bold ctermfg=231 ctermbg=24
-hi WhiteMod cterm=bold ctermfg=231 ctermbg=58
-hi WhiteRO cterm=bold ctermfg=231 ctermbg=23
-hi WhiteInactive cterm=bold ctermfg=231 ctermbg=237
+highlight StatusLineOK ctermfg=26 ctermbg=29
+highlight StatusLineMod ctermfg=26 ctermbg=27
+highlight StatusLineRO ctermfg=26 ctermbg=28
+highlight StatusLineInactive ctermfg=26 ctermbg=30
+" highlight GitGreenOK ctermfg=34 ctermbg=29
+" highlight GitGreenMod ctermfg=34 ctermbg=27
+" highlight GitGreenRO ctermfg=34 ctermbg=28
+" highlight GitGreenInactive ctermfg=34 ctermbg=30
+" highlight GitBlueOK ctermfg=36 ctermbg=29
+" highlight GitBlueMod ctermfg=36 ctermbg=27
+" highlight GitBlueRO ctermfg=36 ctermbg=28
+" highlight GitBlueInactive ctermfg=36 ctermbg=30
+" highlight GitYellowOK cterm=bold ctermfg=35 ctermbg=29
+" highlight GitYellowMod cterm=bold ctermfg=35 ctermbg=27
+" highlight GitYellowRO cterm=bold ctermfg=35 ctermbg=28
+" highlight GitYellowInactive cterm=bold ctermfg=35 ctermbg=30
+" highlight GitRedOK ctermfg=33 ctermbg=29
+" highlight GitRedMod ctermfg=33 ctermbg=27
+" highlight GitRedRO ctermfg=33 ctermbg=28
+" highlight GitRedInactive ctermfg=33 ctermbg=32
+highlight GitGreenOK ctermfg=34 ctermbg=32
+highlight GitGreenMod ctermfg=34 ctermbg=32
+highlight GitGreenRO ctermfg=34 ctermbg=32
+highlight GitGreenInactive ctermfg=34 ctermbg=32
+highlight GitBlueOK ctermfg=36 ctermbg=32
+highlight GitBlueMod ctermfg=36 ctermbg=32
+highlight GitBlueRO ctermfg=36 ctermbg=32
+highlight GitBlueInactive ctermfg=36 ctermbg=32
+highlight GitYellowOK ctermfg=35 ctermbg=32
+highlight GitYellowMod ctermfg=35 ctermbg=32
+highlight GitYellowRO ctermfg=35 ctermbg=32
+highlight GitYellowInactive ctermfg=35 ctermbg=32
+highlight GitRedOK ctermfg=33 ctermbg=32
+highlight GitRedMod ctermfg=33 ctermbg=32
+highlight GitRedRO ctermfg=33 ctermbg=32
+highlight GitRedInactive ctermfg=33 ctermbg=32
+highlight GitBGOK ctermfg=32 ctermbg=29
+highlight GitBGMod ctermfg=32 ctermbg=27
+highlight GitBGRO ctermfg=32 ctermbg=28
+highlight GitBGInactive ctermfg=32 ctermbg=30
+highlight HaskellPurpleOK cterm=bold ctermfg=52 ctermbg=29
+highlight HaskellPurpleMod cterm=bold ctermfg=52 ctermbg=27
+highlight HaskellPurpleRO cterm=bold ctermfg=52 ctermbg=28
+highlight HaskellPurpleInactive cterm=bold ctermfg=52 ctermbg=30
+highlight JSYellowOK ctermfg=53 ctermbg=29
+highlight JSYellowMod ctermfg=53 ctermbg=27
+highlight JSYellowRO ctermfg=53 ctermbg=28
+highlight JSYellowInactive ctermfg=53 ctermbg=30
+highlight VimGreenOK ctermfg=51 ctermbg=29
+highlight VimGreenMod ctermfg=51 ctermbg=27
+highlight VimGreenRO ctermfg=51 ctermbg=28
+highlight VimGreenInactive ctermfg=51 ctermbg=30
+highlight HtmlOrangeOK ctermfg=54 ctermbg=29
+highlight HtmlOrangeMod ctermfg=54 ctermbg=27
+highlight HtmlOrangeRO ctermfg=54 ctermbg=28
+highlight HtmlOrangeInactive ctermfg=54 ctermbg=30
+highlight ElmBlueOK cterm=bold ctermfg=55 ctermbg=29
+highlight ElmBlueMod cterm=bold ctermfg=55 ctermbg=27
+highlight ElmBlueRO cterm=bold ctermfg=55 ctermbg=28
+highlight ElmBlueInactive cterm=bold ctermfg=55 ctermbg=30
+highlight WhiteOK cterm=bold ctermfg=231 ctermbg=29
+highlight WhiteMod cterm=bold ctermfg=231 ctermbg=27
+highlight WhiteRO cterm=bold ctermfg=231 ctermbg=28
+highlight WhiteInactive cterm=bold ctermfg=231 ctermbg=30
 
 nnoremap <silent> <F12> :set invnumber invrelativenumber mouse=<CR>
 nnoremap <silent> <F10> :term git -P log --graph --decorate --abbrev-commit --all<CR>
@@ -301,15 +323,13 @@ map <silent> <C-k> :cp<CR>z.
 map <silent> <C-S-j> :cnf<CR>
 
 " turn on spell checker
-set spell spelllang=en_au
-hi clear SpellBad
-hi clear SpellCap
-hi clear SpellRare
-hi clear SpellLocal
-hi SpellBad cterm=underline
-hi SpellLocal cterm=underline
-hi SpellBad gui=undercurl
-hi SpellLocal gui=undercurl
+set spell spelllang=en_au,de_ch
+highlight! clear SpellBad
+highlight! clear SpellCap
+highlight! clear SpellRare
+highlight! clear SpellLocal
+highlight SpellBad cterm=undercurl gui=undercurl
+" highlight SpellLocal cterm=undercurl gui=undercurl
 
 " working with splits
 nnoremap <silent> <S-UP> :resize +2<CR>
@@ -333,11 +353,12 @@ nnoremap <silent> zL <C-W>L
 " number of lines to keep below cursor when scrolling
 set scrolloff=15
 
-" show trailing whitespace
+" show tabs and trailing whitespace
 set list
-if &listchars ==# 'eol:$'
-  set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
-endif
+set listchars=tab:┊\ ,trail:␣,nbsp:⍽,extends:>,precedes:<,eol:↵
+" set listchars=tab:·\ ,trail:␣,nbsp:⍽,extends:>,precedes:<,eol:↵
+highlight SpecialKey ctermfg=23
+highlight NonText ctermfg=24
 
 " change word under cursor and find next occurrence of that word
 nnoremap <silent> cn *``cgn
@@ -388,6 +409,8 @@ au BufNewFile,BufRead,BufEnter *.lhs map <silent> _ :keeppatterns s/^> -- /> /e<
 au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> - @='gI<!-- <C-V><ESC>A --><C-V><ESC>0j'<CR>
 au BufNewFile,BufRead,BufEnter *.html,*.st map <silent> _ :keeppatterns /--><CR>:keeppatterns ?<!--<CR>:keeppatterns s/^\( *\)\%(\(<\)!-- \?\(\/\?[^<]\+>\)\\|<!-- \?\)/\1\2\3/e<CR>:keeppatterns /--><CR>:keeppatterns s/\(<\/\?[a-zA-Z]\+\) \?--\(>\)\\| \?-->/\1\2/e<CR>0j:noh<CR>
 au BufNewFile,BufRead,BufEnter *.html,*.st vmap <buffer> - <C-C>`>a --<C-V>><ESC>`<i<!-- <ESC>
+au BufNewFile,BufRead,BufEnter *.html,*.st set foldlevelstart=4
+au BufNewFile,BufRead,BufEnter .gitconfig.* set filetype=gitconfig
 
 " other auto commands
 au InsertLeave * set nopaste
@@ -400,7 +423,7 @@ set keywordprg=:Man
 au BufNewFile,BufRead,BufEnter *.md,*.markdown syn region markdownCode matchgroup=markdownCodeDelimiter start="`" end="`" keepend contains=markdownLineStart concealends
 au BufNewFile,BufRead,BufEnter *.md,*.markdown syn region markdownCode matchgroup=markdownCodeDelimiter start="`` \=" end=" \=``" keepend contains=markdownLineStart concealends
 au BufNewFile,BufRead,BufEnter *.md,*.markdown syn region markdownCode matchgroup=markdownCodeDelimiter start="^\s*```.*$" end="^\s*```\ze\s*$" keepend concealends
-au BufNewFile,BufRead,BufEnter *.md,*.markdown hi markdownCode ctermfg=248 ctermbg=237
+au BufNewFile,BufRead,BufEnter *.md,*.markdown highlight markdownCode ctermfg=255 ctermbg=232
 au BufNewFile,BufRead,BufEnter *.md,*.markdown set cole=0
 au BufNewFile,BufRead,BufEnter *.md,*.markdown nnoremap <silent> <F1> :call ConcealToggle()<CR>
 function! ConcealToggle()
