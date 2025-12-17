@@ -16,6 +16,7 @@ import XMonad.Actions.CopyWindow
 import XMonad.Actions.MouseResize
 import XMonad.Config.Gnome
 import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.Place
@@ -130,7 +131,7 @@ main = do
     })
     safeSpawnProg $ homeDir </> ".xplanet/xplanet.sh"
     replace
-    xmonad . withSB sb $ gnomeConfig
+    xmonad . ewmhFullscreen . ewmh . withSB sb $ gnomeConfig
         { workspaces = myworkspaces'
         , terminal = homeDir </> ".local/bin/kitty"
         , manageHook = composeAll
@@ -145,6 +146,7 @@ main = do
           , className =? "MPlayer" --> doFullFloat
           , className =? "Totem" --> doFullFloat
           , className =? "mpv" --> doFullFloat
+          , className =? "perl" --> doFullFloat
           , className =? "Brave-browser" --> doShift (myworkspaces' !! 1)
           , className =? "Kodi" --> doFullFloat <+> doShift (last myworkspaces')
           , className =? "nheko" --> doShift (myworkspaces' !! 5)

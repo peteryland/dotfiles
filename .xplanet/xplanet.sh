@@ -11,9 +11,10 @@ if [[ $(pgrep -c xplanet.sh) -gt 1 ]]; then
   killall -eq -u "$USER" -o 2s xplanet.sh
 fi
 
-firstscreen="$(xrandr --current | grep current | head -1)"
-xres="$(sed 's/^.*current \([0-9]\+\) \?x.*$/\1/' <<< "$firstscreen")"
-yres="$(sed 's/^.*current [0-9]\+ \?x \?\([0-9]\+\),.*$/\1/' <<< "$firstscreen")"
+biggestscreen="$(xrandr | awk '/\*\+/ { split($1,arr,"x"); maxw=arr[1]>maxw?arr[1]:maxw; maxh=arr[2]>maxh?arr[2]:maxh; }; END {print maxw, maxh}')"
+xres="$(cut -d\  -f1 <<< "$biggestscreen")"
+yres="$(cut -d\  -f2 <<< "$biggestscreen")"
+echo $xres X $yres
 
 cd "$(dirname "$0")"
 

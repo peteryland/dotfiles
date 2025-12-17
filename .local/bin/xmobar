@@ -2,18 +2,33 @@
 
 # Note: one can use -C to add commands to xmobar, and -t to set the template
 
-((i=0))
-
-xprop -root -format _XMONAD_LOG 8s -set _XMONAD_LOG ''  # set initial message to empty string
-
-xrandr 2> /dev/null | grep '^ *[0-9]*x[0-9]* *.*\*' | cut -d\  -f4 | while read res; do
-  (while true; do
-    x=$(cut -dx -f1 <<< "$res")
-    y=$(cut -dx -f2 <<< "$res")
-    f=$((y/256+6))
-    h=$((2*f))
-    /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config -f "FiraCode Nerd Font Regular $f" -p "TopH $h" -x "$i" &> ~/.xmonad/xmobar."$i".errors
+lastxrandrout=
+while true; do
+  xrandrout="$(xrandr 2> /dev/null)"
+  if [[ $xrandrout != $lastxrandrout ]]; then
     sleep 5
-  done) &
-  ((i++))
-done
+    me="$BASHPID"
+    pids=($(pgrep xmobar | grep -v "^$me\$"))
+    unset pids[-1]
+    if (( ${#pids[@]} )); then
+      kill "${pids[@]}"
+    fi
+    ((i=0))
+
+    xprop -root -format _XMONAD_LOG 8s -set _XMONAD_LOG ''  # set initial message to empty string
+
+    grep '^ *[0-9]*x[0-9]* *.*\*' <<< "$xrandrout" | cut -d\  -f4 | while read res; do
+      (while true; do
+        x=$(cut -dx -f1 <<< "$res")
+        y=$(cut -dx -f2 <<< "$res")
+        f=$((y/256+6))
+        h=$((2*f))
+        /usr/bin/xmobar "$@" ~/.xmonad/xmobar.config -f "FiraCode Nerd Font Regular $f" -p "TopH $h" -x "$i" &> ~/.xmonad/xmobar."$i".errors
+        sleep 5
+      done) &
+      ((i++))
+    done
+  fi
+  lastxrandrout="$xrandrout"
+  sleep 5
+done &
