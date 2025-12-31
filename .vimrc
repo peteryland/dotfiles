@@ -10,12 +10,12 @@ autocmd! bufwritepost ~/.vimrc source $MYVIMRC
 syntax enable
 colorscheme default
 highlight MatchParen ctermbg=240
-highlight Constant   ctermfg=16 cterm=NONE
-highlight Statement  ctermfg=17 cterm=NONE
-highlight Identifier ctermfg=18 cterm=NONE
-highlight Comment    ctermfg=19 cterm=italic
-highlight Type       ctermfg=20 cterm=NONE
-highlight Special    ctermfg=21 cterm=bold
+highlight Constant   ctermfg=48 cterm=NONE
+highlight Statement  ctermfg=49 cterm=NONE
+highlight Identifier ctermfg=50 cterm=NONE
+highlight Comment    ctermfg=51 cterm=italic
+highlight Type       ctermfg=52 cterm=NONE
+highlight Special    ctermfg=53 cterm=bold
 filetype plugin indent on
 
 " completion options
@@ -122,8 +122,8 @@ let &t_Ds="\e[4:5m"
 
 " search options
 set smartcase hlsearch incsearch
-highlight!    Search ctermfg=24 ctermbg=25 term=bold cterm=bold
-highlight! IncSearch ctermfg=26 ctermbg=25 term=bold cterm=bold
+highlight!    Search ctermfg=81 ctermbg=82 term=bold cterm=bold
+highlight! IncSearch ctermfg=83 ctermbg=82 term=bold cterm=bold
 nnoremap n nzz
 nnoremap N Nzz
 
@@ -198,41 +198,41 @@ set statusline=%!MyStatusLine()
 au BufNewFile,BufRead,BufEnter,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
 function ModifiedColor()
   if &mod == 1
-    highlight StatusLine ctermfg=27 ctermbg=26
+    highlight StatusLine ctermfg=84 ctermbg=83
   else
     if &ro == 1
-      highlight StatusLine ctermfg=28 ctermbg=26
+      highlight StatusLine ctermfg=85 ctermbg=83
     else
-      highlight StatusLine ctermfg=29 ctermbg=26
+      highlight StatusLine ctermfg=86 ctermbg=83
     endif
   endif
 endfunction
 
-highlight StatusLine ctermfg=29 ctermbg=26
-highlight StatusLineNC ctermfg=30 ctermbg=26
-highlight StatusLineTerm cterm=bold,reverse ctermfg=31 ctermbg=26
-highlight StatusLineTermNC cterm=bold,reverse ctermfg=30 ctermbg=26
+highlight StatusLine ctermfg=86 ctermbg=83
+highlight StatusLineNC ctermfg=87 ctermbg=83
+highlight StatusLineTerm cterm=bold,reverse ctermfg=88 ctermbg=83
+highlight StatusLineTermNC cterm=bold,reverse ctermfg=87 ctermbg=83
 
-highlight StatusLineOK ctermfg=26 ctermbg=29
-highlight StatusLineMod ctermfg=26 ctermbg=27
-highlight StatusLineRO ctermfg=26 ctermbg=28
-highlight StatusLineInactive ctermfg=26 ctermbg=30
-" highlight GitGreenOK ctermfg=34 ctermbg=29
-" highlight GitGreenMod ctermfg=34 ctermbg=27
-" highlight GitGreenRO ctermfg=34 ctermbg=28
-" highlight GitGreenInactive ctermfg=34 ctermbg=30
-" highlight GitBlueOK ctermfg=36 ctermbg=29
-" highlight GitBlueMod ctermfg=36 ctermbg=27
-" highlight GitBlueRO ctermfg=36 ctermbg=28
-" highlight GitBlueInactive ctermfg=36 ctermbg=30
-" highlight GitYellowOK cterm=bold ctermfg=35 ctermbg=29
-" highlight GitYellowMod cterm=bold ctermfg=35 ctermbg=27
-" highlight GitYellowRO cterm=bold ctermfg=35 ctermbg=28
-" highlight GitYellowInactive cterm=bold ctermfg=35 ctermbg=30
-" highlight GitRedOK ctermfg=33 ctermbg=29
-" highlight GitRedMod ctermfg=33 ctermbg=27
-" highlight GitRedRO ctermfg=33 ctermbg=28
-" highlight GitRedInactive ctermfg=33 ctermbg=32
+highlight StatusLineOK ctermfg=83 ctermbg=86
+highlight StatusLineMod ctermfg=83 ctermbg=84
+highlight StatusLineRO ctermfg=83 ctermbg=85
+highlight StatusLineInactive ctermfg=83 ctermbg=87
+" highlight GitGreenOK ctermfg=34 ctermbg=86
+" highlight GitGreenMod ctermfg=34 ctermbg=84
+" highlight GitGreenRO ctermfg=34 ctermbg=85
+" highlight GitGreenInactive ctermfg=34 ctermbg=87
+" highlight GitBlueOK ctermfg=36 ctermbg=86
+" highlight GitBlueMod ctermfg=36 ctermbg=84
+" highlight GitBlueRO ctermfg=36 ctermbg=85
+" highlight GitBlueInactive ctermfg=36 ctermbg=87
+" highlight GitYellowOK cterm=bold ctermfg=35 ctermbg=86
+" highlight GitYellowMod cterm=bold ctermfg=35 ctermbg=84
+" highlight GitYellowRO cterm=bold ctermfg=35 ctermbg=85
+" highlight GitYellowInactive cterm=bold ctermfg=35 ctermbg=87
+" highlight GitRedOK ctermfg=33 ctermbg=86
+" highlight GitRedMod ctermfg=33 ctermbg=84
+" highlight GitRedRO ctermfg=33 ctermbg=85
+" highlight GitRedInactive ctermfg=33 ctermbg=89
 highlight GitGreenOK ctermfg=34 ctermbg=32
 highlight GitGreenMod ctermfg=34 ctermbg=32
 highlight GitGreenRO ctermfg=34 ctermbg=32
@@ -249,36 +249,36 @@ highlight GitRedOK ctermfg=33 ctermbg=32
 highlight GitRedMod ctermfg=33 ctermbg=32
 highlight GitRedRO ctermfg=33 ctermbg=32
 highlight GitRedInactive ctermfg=33 ctermbg=32
-highlight GitBGOK ctermfg=32 ctermbg=29
-highlight GitBGMod ctermfg=32 ctermbg=27
-highlight GitBGRO ctermfg=32 ctermbg=28
-highlight GitBGInactive ctermfg=32 ctermbg=30
-highlight HaskellPurpleOK cterm=bold ctermfg=52 ctermbg=29
-highlight HaskellPurpleMod cterm=bold ctermfg=52 ctermbg=27
-highlight HaskellPurpleRO cterm=bold ctermfg=52 ctermbg=28
-highlight HaskellPurpleInactive cterm=bold ctermfg=52 ctermbg=30
-highlight JSYellowOK ctermfg=53 ctermbg=29
-highlight JSYellowMod ctermfg=53 ctermbg=27
-highlight JSYellowRO ctermfg=53 ctermbg=28
-highlight JSYellowInactive ctermfg=53 ctermbg=30
-highlight VimGreenOK ctermfg=51 ctermbg=29
-highlight VimGreenMod ctermfg=51 ctermbg=27
-highlight VimGreenRO ctermfg=51 ctermbg=28
-highlight VimGreenInactive ctermfg=51 ctermbg=30
-highlight HtmlOrangeOK ctermfg=54 ctermbg=29
-highlight HtmlOrangeMod ctermfg=54 ctermbg=27
-highlight HtmlOrangeRO ctermfg=54 ctermbg=28
-highlight HtmlOrangeInactive ctermfg=54 ctermbg=30
-highlight ElmBlueOK cterm=bold ctermfg=55 ctermbg=29
-highlight ElmBlueMod cterm=bold ctermfg=55 ctermbg=27
-highlight ElmBlueRO cterm=bold ctermfg=55 ctermbg=28
-highlight ElmBlueInactive cterm=bold ctermfg=55 ctermbg=30
-highlight WhiteOK cterm=bold ctermfg=231 ctermbg=29
-highlight WhiteMod cterm=bold ctermfg=231 ctermbg=27
-highlight WhiteRO cterm=bold ctermfg=231 ctermbg=28
-highlight WhiteInactive cterm=bold ctermfg=231 ctermbg=30
+highlight GitBGOK ctermfg=32 ctermbg=86
+highlight GitBGMod ctermfg=32 ctermbg=84
+highlight GitBGRO ctermfg=32 ctermbg=85
+highlight GitBGInactive ctermfg=32 ctermbg=87
+highlight HaskellPurpleOK cterm=bold ctermfg=100 ctermbg=86
+highlight HaskellPurpleMod cterm=bold ctermfg=100 ctermbg=84
+highlight HaskellPurpleRO cterm=bold ctermfg=100 ctermbg=85
+highlight HaskellPurpleInactive cterm=bold ctermfg=100 ctermbg=87
+highlight JSYellowOK ctermfg=101 ctermbg=86
+highlight JSYellowMod ctermfg=101 ctermbg=84
+highlight JSYellowRO ctermfg=101 ctermbg=85
+highlight JSYellowInactive ctermfg=101 ctermbg=87
+highlight VimGreenOK ctermfg=99 ctermbg=86
+highlight VimGreenMod ctermfg=99 ctermbg=84
+highlight VimGreenRO ctermfg=99 ctermbg=85
+highlight VimGreenInactive ctermfg=99 ctermbg=87
+highlight HtmlOrangeOK ctermfg=102 ctermbg=86
+highlight HtmlOrangeMod ctermfg=102 ctermbg=84
+highlight HtmlOrangeRO ctermfg=102 ctermbg=85
+highlight HtmlOrangeInactive ctermfg=102 ctermbg=87
+highlight ElmBlueOK cterm=bold ctermfg=103 ctermbg=86
+highlight ElmBlueMod cterm=bold ctermfg=103 ctermbg=84
+highlight ElmBlueRO cterm=bold ctermfg=103 ctermbg=85
+highlight ElmBlueInactive cterm=bold ctermfg=103 ctermbg=87
+highlight WhiteOK cterm=bold ctermfg=231 ctermbg=86
+highlight WhiteMod cterm=bold ctermfg=231 ctermbg=84
+highlight WhiteRO cterm=bold ctermfg=231 ctermbg=85
+highlight WhiteInactive cterm=bold ctermfg=231 ctermbg=87
 
-nnoremap <silent> <F12> :set invnumber invrelativenumber mouse=<CR>
+nnoremap <silent> <F12> :set invnumber invrelativenumber mouse= listchars=<CR>
 nnoremap <silent> <F10> :term git -P log --graph --decorate --abbrev-commit --all<CR>
 nnoremap <silent> gr :term ++close git rebase -i <cword><CR>
 nnoremap <silent> gs :term ++close ++kill=term git show <cword><CR>
@@ -357,8 +357,8 @@ set scrolloff=15
 set list
 set listchars=tab:┊\ ,trail:␣,nbsp:⍽,extends:>,precedes:<,eol:↵
 " set listchars=tab:·\ ,trail:␣,nbsp:⍽,extends:>,precedes:<,eol:↵
-highlight SpecialKey ctermfg=23
-highlight NonText ctermfg=24
+highlight SpecialKey ctermfg=80
+highlight NonText ctermfg=81
 
 " change word under cursor and find next occurrence of that word
 nnoremap <silent> cn *``cgn

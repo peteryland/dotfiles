@@ -5,7 +5,7 @@
 kittyconf="$(mktemp -p "$HOME"/.config/kitty)"
 trap 'rm -f -- "$kittyconf"' EXIT
 
-esc_seq() { printf '\e]%s%s\e\\' "$1" "$2"; }
+esc_seq() { printf '\e]%s%s\a' "$1" "$2"; }
 set_rgb() { esc_seq "$1;rgb:" "$2"; }
 set_col() {
   local col="$(tr -d / <<< "$2")"
@@ -20,14 +20,25 @@ set_col() {
   case $1 in
     0)
       echo "background #$col" >> "$kittyconf"
-      echo "cursor_text_color #$col" >> "$kittyconf"
+      set_rgb 11 "$2" # text background colour
+      set_rgb "4;262" "$2" # default background colour (WSL Terminal)
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Ph "$col"
+
       echo "inactive_border_color #$col" >> "$kittyconf"
+
       echo "active_tab_background #$col" >> "$kittyconf"
+      set_rgb "4;264" "$2" # frame background colour (WSL Terminal - normally linked to background colour anyway)
+
       echo "mark1_foreground #$col" >> "$kittyconf"
       echo "mark2_foreground #$col" >> "$kittyconf"
       echo "mark3_foreground #$col" >> "$kittyconf"
-#       [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Ph "$col" # background, we set this elsewhere
-      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pm "$col" # cursor foreground
+
+      echo "selection_foreground #$col" >> "$kittyconf"
+      set_rgb 19 "$2" # highlight foreground colour
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pk "$col" # selection foreground
+
+      set_rgb 14 "$2" # pointer background colour
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pl "$col" # cursor background
       ;;
     2)
       echo "mark3_background #$col" >> "$kittyconf"
@@ -35,16 +46,27 @@ set_col() {
     3)
       echo "url_color #$col" >> "$kittyconf"
       echo "mark2_background #$col" >> "$kittyconf"
+      echo "selection_background #$col" >> "$kittyconf"
+      set_rgb 17 "$2" # highlight background colour
+      set_rgb "4;266" "$2" # selection background colour (WSL Terminal)
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pj "$col" # selection background
       ;;
     7)
-      echo "foreground #$col" >> "$kittyconf"
-      echo "selection_foreground #$col" >> "$kittyconf"
       echo "cursor #$col" >> "$kittyconf"
-      echo "inactive_tab_foreground #$col" >> "$kittyconf"
-#       set_rgb 10 "$2" # explicitly set foreground colour, probably not necessary
+      set_rgb 13 "$2" # pointer foreground colour
+
+      echo "foreground #$col" >> "$kittyconf"
+      set_rgb 10 "$2" # text foreground colour
+      set_rgb "4;261" "$2" # default foreground colour (WSL Terminal)
       [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pg "$col" # foreground
-      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pk "$col" # selection foreground
-      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pl "$col" # cursor background
+
+      echo "cursor_text_color #$col" >> "$kittyconf"
+      set_rgb 12 "$2" # text cursor colour
+#     esc_seq 12 ';7' # cursor (reverse)
+      set_rgb "4;265" "$2" # cursor colour (WSL Terminal)
+      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pm "$col" # cursor foreground
+
+      echo "inactive_tab_foreground #$col" >> "$kittyconf"
       ;;
     8)
       echo "active_border_color #$col" >> "$kittyconf"
@@ -53,12 +75,10 @@ set_col() {
       echo "bell_border_color #$col" >> "$kittyconf"
       ;;
     10)
-      echo "selection_background #$col" >> "$kittyconf"
       echo "wayland_titlebar_color #$col" >> "$kittyconf"
       echo "macos_titlebar_color #$col" >> "$kittyconf"
       echo "inactive_tab_background #$col" >> "$kittyconf"
       echo "tab_bar_background #$col" >> "$kittyconf"
-      [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && esc_seq Pj "$col" # selection background
       ;;
     13)
       echo "active_tab_foreground #$col" >> "$kittyconf"
@@ -67,8 +87,10 @@ set_col() {
   esac
 }
 
-if [[ -r $HOME/.config/themes/$1 ]]; then
-  . "$HOME/.config/themes/$1"
+if [[ -r $HOME/.config/themes/$2 ]]; then
+  . "$HOME/.config/themes/$2"
+
+  set_col 0 "$(printf "%s/%s/%s" "${1:0:2}" "${1:2:2}" "${1:4:2}")"
 
   diff -q "$kittyconf" "$HOME"/.config/kitty/theme-colours.conf >& /dev/null || mv -f "$kittyconf" "$HOME"/.config/kitty/theme-colours.conf
 fi

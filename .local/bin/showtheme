@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# (c) 2022-2026 Pete Ryland
+
+theme="${1:-dark}"
+
+set_col() {
+  local col="$(tr -d / <<< "$2")"
+  local r="$((16#${2%%/*}))" gb="${2#*/}"
+  local g="$((16#${gb%%/*}))" b="$((16#${gb##*/}))"
+
+#   local r="${2%%/*}" gb="${2#*/}"
+#   local g="${gb%%/*}" b="${gb##*/}"
+
+  case "$1" in
+    21|32)
+      printf "\e[48;2;$r;$g;${b}m"
+      ;;
+    22|37)
+      printf "\e[38;2;$r;$g;${b}m"
+      printf "%3d" "$1"
+      shift
+      printf " %s" "$@"
+      printf "\n\e[0m"
+      ;;
+    81|83)
+      printf "\e[38;2;$r;$g;${b}m"
+      ;;
+    84|85|86|87)
+      printf "\e[48;2;$r;$g;${b}m"
+      printf "%3d" "$1"
+      shift
+      printf " %s" "$@"
+      printf "\n"
+      ;;
+    82|88)
+      printf "\e[48;2;$r;$g;${b}m"
+      printf "%3d" "$1"
+      shift
+      printf " %s" "$@"
+      printf "\n\e[0m"
+      ;;
+    *)
+      printf "\e[38;2;$r;$g;${b}m"
+      printf "%3d" "$1"
+      shift
+      printf " %s" "$@"
+      printf "\n"
+      ;;
+  esac
+}
+
+if [[ -r $HOME/.config/themes/$theme ]]; then
+  . "$HOME/.config/themes/$theme"
+fi
+
+printf "\e[0m"
