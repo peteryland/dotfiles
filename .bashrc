@@ -9,6 +9,31 @@ for bashrc_profile in /etc/profile.d/*.sh /usr/local/etc/profile.d/*.sh "$HOME"/
 done
 unset bashrc_profile
 
+bashrc_path_add() {
+  local dir
+  while [[ $1 ]]; do
+    dir="$1"
+    if [[ -d $dir ]]; then
+      PATH="$dir:$PATH"
+    fi
+    shift
+  done
+}
+PATH=/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+bashrc_path_add /c/appl/scoop/shims
+bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
+bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
+bashrc_path_add "$HOME/.ghcup/bin"
+# bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
+bashrc_path_add "$HOME/.cabal/bin" "$HOME/.cabal/sbin"
+bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"
+bashrc_path_add "$HOME/local/bin" "$HOME/local/sbin"
+bashrc_path_add "$HOME/.bin" "$HOME/.sbin"
+bashrc_path_add "$HOME/bin" "$HOME/sbin"
+
+export PATH
+
 bashrc_hostname() {
   local hostname
 
@@ -74,7 +99,7 @@ export EDITOR=vim
 
 shopt -s checkwinsize
 
-export LESS="-R -F"
+export LESS=-RFS
 if [[ -x ~/.lessfilter ]]; then
   export LESSOPEN="|~/.lessfilter %s"
   export LESSQUIET=1
@@ -98,35 +123,26 @@ case "$OSTYPE" in
     stty discard undef # Give me my ctrl-o back!
     export CLICOLOR=1
     export LSCOLORS=ExFxBxDxCxegedabagacad
-    export GREP_COLOR='1;3;34'
-    alias ls='ls -G'
     alias dfh='df -h /System/Volumes/Data'
     alias pps='ps -ef'
     if command -v netstat > /dev/null; then
       alias np='sudo netstat -plant'
     else
-      alias np='sudo lsof -nP -iudp -itcp -stcp:LISTEN | grep -v -- "->"'
+      alias np='sudo lsof -nP -iudp -itcp -stcp:LISTEN | /usr/bin/grep -v -- "->"'
     fi
-    alias ng='np | grep'
+    alias ng='np | /usr/bin/grep'
     md5s() { md5 -- "$@"; }
     statm() { stat -f %m -- "$@"; }
     export LOCATE_PATH=~/.local/var/locate/locatedb
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
       # This should be put into cron as well
-      sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.Trash -prune -or -path "$HOME"/.vim/undo -prune -or -path "$HOME"/.local/share -prune -or -name .git -type d -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$LOCATE_PATH"
+      sudo -n find "$HOME" -path "$HOME"/Library -prune -or -path "$HOME"/.Trash -prune -or -path "$HOME"/.vim/undo -prune -or -path "$HOME"/.local/share -prune -or -name .cache -type d -prune -or -name .cabal -type d -prune -or -name .ghcup -type d -prune -or -name .git -type d -prune -or -path \*/go/pkg -prune -or -print 2> /dev/null | /usr/libexec/locate.mklocatedb > "$LOCATE_PATH"
     fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.mac ~/.gitconfig; fi
     ;;
   msys*)
     iswindows=1
-    if [[ -x /usr/bin/dircolors ]]; then
-      test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-      export GREP_COLORS='mt=1;3;34'
-      alias ls='ls --color=auto --hyperlink=auto'
-      alias dir='dir --color=auto --hyperlink=auto'
-      alias vdir='vdir --color=auto --hyperlink=auto'
-    fi
     alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs -x rootfs -x overlay -x 9p'
     alias st='systemctl status'
     alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
@@ -134,9 +150,9 @@ case "$OSTYPE" in
     if command -v netstat > /dev/null; then
       alias np='sudo netstat -plant'
     else
-      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | grep -v -- "->"'
+      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | /usr/bin/grep -v -- "->"'
     fi
-    alias ng='np | grep'
+    alias ng='np | /usr/bin/grep'
     if [[ -r ~/.xmonad/xmonad.hs ]]; then
       alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
     fi
@@ -146,7 +162,7 @@ case "$OSTYPE" in
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
       # This should be put into cron as well
-      updatedb --localpaths="$HOME" --findoptions="-path .cache -prune -or -path .cabal -prune -or -path .ghcup -prune -or -path .vim/undo -prune -or -path .local/share -prune -or -name .git -type d -prune -or -path go/pkg -prune" --output="$HOME"/.local/var/locate/locatedb
+      updatedb --localpaths="$HOME" --findoptions="-name .cache -type d -prune -or -name .cabal -type d -prune -or -name .ghcup -type d -prune -or -path */.vim/undo -prune -or -path */.local/share -prune -or -name .git -type d -prune -or -path */go/pkg -prune -or" --output="$HOME"/.local/var/locate/locatedb
     fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.linux ~/.gitconfig; fi
     ;;
@@ -165,13 +181,6 @@ case "$OSTYPE" in
         isdeb=
         ;;
     esac
-    if [[ -x /usr/bin/dircolors ]]; then
-      test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-      export GREP_COLORS='mt=1;3;34'
-      alias ls='ls --color=auto --hyperlink=auto'
-      alias dir='dir --color=auto --hyperlink=auto'
-      alias vdir='vdir --color=auto --hyperlink=auto'
-    fi
     alias dfh='df -lh -x tmpfs -x devtmpfs -x efivarfs -x rootfs -x overlay -x 9p'
     alias st='systemctl status'
     alias pps='ps --forest -N -p 2 --ppid 2 -o user:11,pid,ppid,c,stime,tty=TTY,time,cmd'
@@ -179,9 +188,9 @@ case "$OSTYPE" in
     if command -v netstat > /dev/null; then
       alias np='sudo netstat -plant'
     else
-      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | grep -v -- "->"'
+      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | /usr/bin/grep -v -- "->"'
     fi
-    alias ng='np | grep'
+    alias ng='np | /usr/bin/grep'
     if [[ -r ~/.xmonad/xmonad.hs ]]; then
       alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
     fi
@@ -191,7 +200,7 @@ case "$OSTYPE" in
     if [[ ! -r "$LOCATE_PATH" ]]; then
       mkdir -p "$(dirname "$LOCATE_PATH")"
       # This should be put into cron as well
-      updatedb --localpaths="$HOME" --findoptions="-path .cache -prune -or -path .cabal -prune -or -path .ghcup -prune -or -path .vim/undo -prune -or -path .local/share -prune -or -name .git -type d -prune -or -path go/pkg -prune" --output="$HOME"/.local/var/locate/locatedb
+      updatedb --localpaths="$HOME" --findoptions="-name .cache -type d -prune -or -name .cabal -type d -prune -or -name .ghcup -type d -prune -or -path */.vim/undo -prune -or -path */.local/share -prune -or -name .git -type d -prune -or -path */go/pkg -prune -or" --output="$HOME"/.local/var/locate/locatedb
     fi
     if [[ ! -r ~/.gitconfig ]]; then ln -nfs ~/.gitconfig.linux ~/.gitconfig; fi
     ;;
@@ -208,11 +217,11 @@ if [[ $TERM = linux ]]; then
   export PS1='${debian_chroot:+(\[\e[3em\]$debian_chroot\[\e[m\]) }\[\e[3'"$usercol"'m\]\u\[\e[m\]@\[\e[32m\]\h:\[\e[33m\]\w\[\e[m\]${bashrc_git_status:+\[\e[90m\]<${bashrc_git_branch}${bashrc_git_ahead:+\[\e[31m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[32m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[32m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[33m\]$bashrc_git_extrastatus}\[\e[m\e[90m\]>\[\e[m\]}\$ '
 else
   if [[ $UID -eq 0 ]]; then
-    usercol=42
+    usercol=17
   else
-    usercol=41
+    usercol=16
   fi
-  export PS1="$platformlogo"'${iswindows:+\[\e[38;5;48m\]\[\e[m\] }${isrpi:+\[\e[38;5;49;1m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;50m\]\[\e[m\] }${ismac:+ }'"$applogo"'${debian_chroot:+(\[\e[38;5;40m\]$debian_chroot\[\e[m\]) }\[\e[38;5;'"$usercol"'m\]\u\[\e[m\]@\[\e[38;5;43m\]\h:\[\e[38;5;44m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;32m\]\[\e[48;5;32m\]${bashrc_git_branch:+\[\e[38;5;36m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[38;5;34m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[38;5;33m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;37m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[38;5;35m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;32m\]\[\e[m\]}\$ '
+  export PS1="$platformlogo"'${iswindows:+\[\e[38;5;200m\]\[\e[m\] }${isrpi:+\[\e[38;5;201;1m\]\[\e[m\] }${islinux:+ }${isdeb:+\[\e[38;5;202m\]\[\e[m\] }${ismac:+ }'"$applogo"'${debian_chroot:+(\[\e[38;5;22m\]$debian_chroot\[\e[m\]) }\[\e[38;5;'"$usercol"'m\]\u\[\e[m\]@\[\e[38;5;23m\]\h\[\e[m\]:\[\e[38;5;25m\]\w\[\e[m\]${bashrc_git_status:+\[\e[38;5;43m\]\[\e[48;5;43m\]${bashrc_git_branch:+\[\e[38;5;48m\]$bashrc_git_branch}${bashrc_git_ahead:+\[\e[38;5;45m\]↑$bashrc_git_ahead}${bashrc_git_behind:+\[\e[38;5;44m\]↓$bashrc_git_behind}${bashrc_git_tag:+\[\e[38;5;47m\]$bashrc_git_tag}${bashrc_git_extrastatus:+\[\e[38;5;46m\]$bashrc_git_extrastatus}\[\e[m\e[38;5;43m\]\[\e[m\]}\$ '
 fi
 unset usercol
 
@@ -237,57 +246,37 @@ else
 fi
 
 case "$termprog" in
-  iTerm*|xterm-color|*-256color)
-    export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+  iTerm*)
     bashrc_term_title_and_colours() {
-      # set colour scheme
-      printf "$bashrc_theme"
+      # iterm is currently *very* slow to update the palette, so do it sparingly only
+#       printf "$bashrc_theme"
       if [[ -z $VIM_TERMINAL ]]; then
         bashrc_term_title
         # set background colour
-#         printf "\e]Ph${bashrc_bgcolour}\e\\"
-        printf "\e]11;#${bashrc_bgcolour}\e\\"
+        printf "\e]Ph${bashrc_bgcolour}\e\\"
+#         printf "\e]11;#${bashrc_bgcolour}\e\\"
       fi
     }
     ;;
-  xterm-kitty)
-    alias icat="kitty +kitten icat"
-    export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-#     export TERM=xterm-256color
+  *) # Tested with 256-colour xterm, kitty, linux console, Apple Terminal, WSL Terminal
+    if [[ $termprg == xterm-kitty ]]; then
+      alias icat="kitty +kitten icat"
+    fi
     bashrc_term_title_and_colours() {
       # set colour scheme
       printf "$bashrc_theme"
       if [[ -z $VIM_TERMINAL ]]; then
-        bashrc_term_title
-        # set background colour
-        printf "\e]11;#${bashrc_bgcolour}\e\\"
+        if [[ $termprg == linux ]]; then
+          # set background colour
+          printf "\e]P0${bashrc_bgcolour}"
+          # you'll need to switch consoles and back to reset the colours for the whole screen
+        else
+          bashrc_term_title
+          # set background colour
+          printf "\e]11;#${bashrc_bgcolour}\e\\"
+        fi
       fi
     }
-    ;;
-  Apple_Terminal)
-    bashrc_term_title_and_colours() {
-      # set colour scheme
-      printf "$bashrc_theme"
-      if [[ -z $VIM_TERMINAL ]]; then
-        bashrc_term_title
-        # set background colour
-        printf "\e]11;#${bashrc_bgcolour}\e\\"
-      fi
-    }
-    ;;
-  linux)
-    bashrc_term_title_and_colours() {
-      # set colour scheme
-      printf "$bashrc_theme"
-      if [[ -z $VIM_TERMINAL ]]; then
-        # set background colour
-        printf "\e]P0${bashrc_bgcolour}"
-        # you'll need to switch consoles and back to reset the colours for the whole screen
-      fi
-    }
-    ;;
-  *)
-    bashrc_term_title_and_colours() { return 0; }
     ;;
 esac
 unset termprog
@@ -314,25 +303,63 @@ bashrc_check_repo() {
         GIT_TERMINAL_PROMPT=0 git fetch -ap --quiet &> /dev/null & disown -a
       )
     fi
-    bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | grep '^ tag: ' | head -1 | sed 's/^.* tag: \([^)]*\))\?$/\1/')"
+    bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | /usr/bin/grep '^ tag: ' | head -1 | sed 's/^.* tag: \([^)]*\))\?$/\1/')"
     status="$(git status --porcelain=1 -b)"
     status1="$(head -1 <<< "$status")"
-    bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
+    bashrc_git_branch="$(cut -c4- <<< "$status1")"
+    bashrc_git_branch="${bashrc_git_branch%%\.\.\.*}"
     if [[ $bashrc_git_branch =~ ^(master|main)$ ]]; then
       bashrc_git_branch=
     fi
-    bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
-    bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-    if git stash list | grep . > /dev/null 2>&1; then
+    bashrc_git_ahead="$(/usr/bin/grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
+    bashrc_git_behind="$(/usr/bin/grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
+    if git stash list | /usr/bin/grep . > /dev/null 2>&1; then
       bashrc_git_hasstash='#'
     else
       bashrc_git_hasstash=
     fi
-    bashrc_git_extrastatus="$(grep -q '^[ACDMRT]' <<< "$status" && printf S; grep -q '^.[CDMRT]' <<< "$status" && printf M)$bashrc_git_hasstash" #; grep -q ^\?\? <<< "$status" && printf U)
+    bashrc_git_extrastatus="$(/usr/bin/grep -q '^[ACDMRT]' <<< "$status" && printf S; /usr/bin/grep -q '^.[CDMRT]' <<< "$status" && printf M)$bashrc_git_hasstash" #; /usr/bin/grep -q ^\?\? <<< "$status" && printf U)
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}${bashrc_git_tag:+ $bashrc_git_tag }$bashrc_git_extrastatus"
   fi
 }
 
+if [[ -x /usr/bin/dircolors ]]; then
+  test -r ~/.dir_colors && eval "$(dircolors -b ~/.dir_colors)" || eval "$(dircolors -b)"
+  alias dir='dir --color=auto --hyperlink=auto'
+  alias vdir='vdir --color=auto --hyperlink=auto'
+fi
+if command -v eza >& /dev/null; then
+  # unset LS_COLORS
+  export EZA_COLORS='di=38;5;24:ex=38;5;28:fi=38;5;26:pi=38;5;32:so=38;5;31:bd=38;5;34:cd=38;5;33:ln=38;5;29:or=38;5;30:sp=38;5;35:uu=38;5;16:uR=38;5;17:un=38;5;18:gu=38;5;19:gR=38;5;20:gn=38;5;21:oc=38;5;56:ur=38;5;56:uw=38;5;56:ux=38;5;56:ue=38;5;56:gr=38;5;56:gw=38;5;56:gx=38;5;56:ge=38;5;56:tr=38;5;56:tw=38;5;56:tx=38;5;56:te=38;5;56:su=38;5;56:sf=38;5;56:xa=38;5;56:ga=38;5;36:gm=38;5;37:gd=38;5;38:gv=38;5;39:gt=38;5;40:gi=38;5;41:gc=38;5;42:Gm=38;5;53:Go=38;5;48:Gc=38;5;54:Gd=38;5;55:nb=38;5;57:ub=38;5;57:nk=38;5;58:uk=38;5;58:nm=38;5;59:um=38;5;59:ng=38;5;60:ug=38;5;60:nt=38;5;61:ut=38;5;61:df=38;5;62:ds=38;5;63:lc=38;5;64:lm=38;5;65:da=38;5;66:in=38;5;67:bl=38;5;68:hd=4;38;5;69:lp=38;5;70:bO=38;5;71:mp=4;38;5;72:im=38;5;73:vi=38;5;74:mu=38;5;75:lo=38;5;76:cr=38;5;77:do=38;5;78:co=38;5;79:tm=38;5;80:cm=38;5;81:bu=38;5;82:sc=38;5;83:ic=38;5;84:Sn=38;5;85:Su=38;5;86:Sr=38;5;87:St=38;5;88:Sl=38;5;89:ff=38;5;90:cc=38;5;97:xx=38;5;96'
+  alias ls='eza --git --icons=auto'
+  alias ll='ls -gl'
+  alias la='ls -aagl'
+  alias lt='ll -snew'
+elif command -v exa >& /dev/null; then
+  export EXA_COLORS='di=38;5;24:ex=38;5;28:fi=38;5;26:pi=38;5;32:so=38;5;31:bd=38;5;34:cd=38;5;33:ln=38;5;29:or=38;5;30:uu=38;5;16:un=38;5;18:gu=38;5;19:gn=38;5;21:ur=38;5;56:uw=38;5;56:ux=38;5;56:ue=38;5;56:gr=38;5;56:gw=38;5;56:gx=38;5;56:tr=38;5;56:tw=38;5;56:tx=38;5;56:su=38;5;56:sf=38;5;56:xa=38;5;56:ga=38;5;36:gm=38;5;37:gd=38;5;38:gv=38;5;39:gt=38;5;40:nb=38;5;57:ub=38;5;57:nk=38;5;58:uk=38;5;58:nm=38;5;59:um=38;5;59:ng=38;5;60:ug=38;5;60:nt=38;5;61:ut=38;5;61:df=38;5;62:ds=38;5;63:lc=38;5;64:lm=38;5;65:da=38;5;66:in=38;5;67:bl=38;5;68:hd=4;38;5;69:lp=38;5;70:bO=38;5;71:cc=38;5;97:xx=38;5;96'
+  alias ls='exa --git --icons'
+  alias ll='ls -gl'
+  alias la='ls -aagl'
+  alias lt='ll -snew'
+else
+  if [[ $OSTYPE = darwin* ]]; then
+    alias ls='ls -G'
+  else
+    alias ls='ls --color=auto --hyperlink=auto'
+  fi
+  alias ll='ls -l'
+  alias la='ls -al'
+  alias lt='ll -tr'
+fi
+
+export GREP_COLORS='sl=38;5;100:cx=38;5;101:mt=1;38;5;102:fn=38;5;105:ln=38;5;96:bn=38;5;106:se=38;5;96'
+if [[ $(type -t grep) == alias ]]; then unalias grep; fi
+grep() {
+  /usr/bin/grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2,dist-newstyle} --color=always "$@"
+}
+alias fgrep='/usr/bin/grep -F --color=always'
+alias egrep='/usr/bin/grep -E --color=always'
+alias rgrep='/usr/bin/grep -r --color=always'
 if [[ $(type -t pg) == alias ]]; then unalias pg; fi
 pg() {
   pids=($(pgrep -f "$@"))
@@ -340,30 +367,22 @@ pg() {
     ps -fp "${pids[@]}"
   fi
 }
-
-alias grep='grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2,dist-newstyle} --color=auto'
-alias fgrep='grep -F --color=auto'
-alias egrep='grep -E --color=auto'
-alias rgrep='grep -r --color=auto'
-alias glocate='locate -d ""'
 alias pj='pg java'
-if command -v eza >& /dev/null; then
-#   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
-  export EZA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
-  alias ls='eza -B --git --icons=auto'
-  alias ll='ls -aagl'
-  alias lt='ll -snew'
-elif command -v exa >& /dev/null; then
-#   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
-  export EXA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
-  alias ls='exa -B --git --icons'
-  alias ll='ls -aagl'
-  alias lt='ll -snew'
-else
-  alias ll='ls -al'
-  alias lt='ll -tr'
+
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+alias glocate='locate -d ""'
+
+if diff --version | grep -q GNU; then
+  alias diff="/usr/bin/diff --color --palette='rs=0:hd=1:ad=38;5;36:de=38;5;38:ln=38;5;96'"
 fi
+
 alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
+
+ssh() {
+  command ssh "$@"
+  printf "$bashrc_theme"
+}
 
 # Git aliases and functions
 
@@ -381,6 +400,8 @@ alias gf='git f'
 alias gb='git b'
 alias gco='git co'
 alias gpu='git pull'
+alias gc='git wc'
+alias bd='git bd'
 
 _gitline_to_hash() {
   sed 's/^.* \([a-f0-9]\{7\}\) .*$/\1/' <<< "$1"
@@ -445,38 +466,13 @@ rm. () {
   rm -r "$dirname"
 }
 
-bashrc_path_add() {
-  local dir
-  while [[ $1 ]]; do
-    dir="$1"
-    if [[ -d $dir ]]; then
-      PATH="$dir:$PATH"
-    fi
-    shift
-  done
-}
-PATH=/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-bashrc_path_add /c/appl/scoop/shims
-bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
-bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
-bashrc_path_add "$HOME/.ghcup/bin"
-# bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
-bashrc_path_add "$HOME/.cabal/bin" "$HOME/.cabal/sbin"
-bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"
-bashrc_path_add "$HOME/local/bin" "$HOME/local/sbin"
-bashrc_path_add "$HOME/.bin" "$HOME/.sbin"
-bashrc_path_add "$HOME/bin" "$HOME/sbin"
-
-export PATH
-
 if [[ -r ~/.inputrc ]]; then
   export INPUTRC=~/.inputrc
 fi
 
 spf() {
   while [[ $1 ]]; do
-    host -t TXT "$1" | cut -d\" -f2 | grep --color=never '^v=spf'
+    host -t TXT "$1" | cut -d\" -f2 | /usr/bin/grep --color=never '^v=spf'
     shift
   done
 }
@@ -531,7 +527,7 @@ l() {
 }
 
 _l() {
-  local compreply=($(compgen -d -- "$LOOKINGDIR"/ | grep "^$LOOKINGDIR/$2"))
+  local compreply=($(compgen -d -- "$LOOKINGDIR"/ | /usr/bin/grep "^$LOOKINGDIR/$2"))
   COMPREPLY=(${compreply[@]#$LOOKINGDIR/})
 }
 complete -F _l l
@@ -581,7 +577,7 @@ _wk() {
         i="${i#$WORKDIR/}"
         echo "${i%/.git}"
       done
-      fetch_work_repos | grep "^$2" # | sed "s/^\(${2//\//\\\/}[^/]*\/\?\).*/\1/"
+      fetch_work_repos | /usr/bin/grep "^$2" # | sed "s/^\(${2//\//\\\/}[^/]*\/\?\).*/\1/"
     ) | sort -u
   ))
 }
@@ -811,7 +807,7 @@ j() {
   else
     ver="$1"
     if [[ $ver == latest ]]; then
-      ver="$(/usr/libexec/java_home -V 2>&1 | grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
+      ver="$(/usr/libexec/java_home -V 2>&1 | /usr/bin/grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
     fi
     export JAVA_HOME="$(/usr/libexec/java_home -v "$ver")"
     [[ $verbose ]] && echo "JAVA_HOME=$JAVA_HOME"
@@ -841,19 +837,46 @@ dark() {
   fi
   unset bashrc_theme
   if [[ -r $HOME/.local/bin/theme && -r $HOME/.config/themes/dark ]]; then
-    bashrc_theme="$(theme dark)"
+    bashrc_theme="$(theme "$bashrc_bgcolour" dark)"
   fi
 }
 
 light() {
-  setbg 8
+  setbg 13
   unset bashrc_theme
   if [[ -r $HOME/.local/bin/theme && -r $HOME/.config/themes/light ]]; then
-    bashrc_theme="$(theme light)"
+    bashrc_theme="$(theme "$bashrc_bgcolour" light)"
   fi
 }
 
 [[ $devmachine ]] && dark || light
+printf "$bashrc_theme"
+
+if command -v batcat >& /dev/null; then
+  if [[ $HOME/.config/bat/themes/universal.tmTheme -nt $HOME/.cache/bat/themes.bin ]]; then
+    batcat cache --build >& /dev/null
+  fi
+#   alias cat=/usr/bin/batcat
+  alias bat='batcat --paging=never --wrap=never --color=always'
+fi
+
+cd() {
+  builtin cd "$@"
+  if [[ -r README.md ]]; then
+    if command -v batcat >& /dev/null; then
+      if [[ $TERM = xterm-256color ]]; then
+        batcat --paging=never --wrap=never -r :30 README.md --color=always | sed 's/^\d27\[1;4;38;5;98m#\d27\[0m\d27\[1;4;38;5;98m \(.*\)$/\1\d27#3\n\1\d27#4/'
+      else
+        batcat --paging=never --wrap=never -r :30 README.md
+      fi
+    else
+      head -30 README.md
+    fi
+    IFS=\; read -sdR -p $'\e[6n' bashrc_row bashrc_col
+    bashrc_row="$(cut -c3- <<< "$bashrc_row")"
+    (( bashrc_col != 1 )) && printf '\n'
+  fi
+}
 
 # Set bashrc_cmd to 1 every time a new command is executed
 trap '[[ $BASH_COMMAND != $PROMPT_COMMAND ]] && bashrc_cmd=1' DEBUG
@@ -867,9 +890,9 @@ bashrc_prompt() {
     if [[ $bashrc_nonl || $bashrc_exit_status ]]; then
       [[ $bashrc_nonl ]] || printf '\e[A'
       if [[ $TERM = linux ]]; then
-        printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[41;1m${bashrc_exit_status}${bashrc_nonl:+/}\e[m\e[u\n"
+        printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[48;5;92m${bashrc_exit_status}${bashrc_nonl:+/}\e[m\e[u\n"
       else
-        printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[38;5;45m\e[48;5;45m\e[38;5;46m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[38;5;45m\e[m\e[u\n"
+        printf "\e[s\e[$((COLUMNS - bashrc_nonl - $(wc -c <<< "$bashrc_exit_status")))G\e[38;5;93m\e[48;5;93m\e[38;5;92m\e[1m${bashrc_exit_status}${bashrc_nonl:+}\e[m\e[38;5;93m\e[m\e[u\n"
       fi
     fi
   fi

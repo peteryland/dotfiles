@@ -1,74 +1,187 @@
 # Theme file, to be used with .local/bin/theme
 # (c) 2022-2026 Pete Ryland
 
-echo "font_family FiraCode Nerd Font Mono" > "$kittyconf"
+# echo "font_family FiraCode Nerd Font Mono SemiBold" > "$kittyconf"
 
-# Adjust the standard colours (used by standard tools like ls, grep, etc.)
+# Standard colours
 
-set_col  0 ff/ff/ff # black
-set_col  1 c8/28/29 # maroon
-set_col  2 71/8c/00 # green
-set_col  3 ea/b7/00 # olive
-set_col  4 42/71/ae # navy
-set_col  5 89/59/a8 # purple
-set_col  6 3e/99/9f # teal
-set_col  7 2d/2d/2d # silver
-set_col  8 8e/90/8c # grey
-set_col  9 c8/28/29 # red
-set_col 10 71/8c/00 # lime
-set_col 11 ea/b7/00 # yellow
-set_col 12 42/71/ae # blue
-set_col 13 89/59/a8 # fuchsia
-set_col 14 3e/99/9f # aqua
-set_col 15 1d/1f/21 # white
+color   0                              00/00/00             black
+color   1                              c8/28/29             red - maroon
+color   2                              71/8c/00             green
+color   3                              ea/b7/00             yellow - olive
+color   4                              42/71/ae             blue - navy
+color   5                              89/59/a8             purple
+color   6                              3e/99/9f             cyan - teal
+color   7                              2d/2d/2d             light grey - silver
+color   8                              80/80/80             light black - dark grey
+color   9                              c8/28/29             light red
+color  10                              71/8c/00             light green - lime
+color  11                              ea/b7/00             light yellow
+color  12                              42/71/ae             light blue
+color  13                              89/59/a8             light purple - fuchsia
+color  14                              3e/99/9f             light cyan - aqua
+color  15                              ff/ff/ff             white
 
+# Terminal (not part of the 256-colour palette and some settings may not work
+# with all terminal emulators)
 
-# Now steal from the usual 256-colour range for particular purposes
+color foreground                       $silver              default text foreground
+# color background                       00/00/00             default text background
+color terminal_active_border           $light_grey          terminal active border
+color terminal_inactive_border         $black               terminal inactive border
+color terminal_tab_bar_background      98/c3/79             terminal tab bar background
+color terminal_active_tab_foreground   c6/c8/dd             terminal active tab foreground
+# color terminal_active_tab_background   00/00/00             terminal active tab background
+color terminal_inactive_tab_foreground c0/c0/c0             terminal inactive tab foreground
+# color terminal_inactive_tab_background 98/c3/76             terminal inactive tab background
+color terminal_bell_border             $light_red           terminal bell border
+color terminal_titlebar                98/c3/79             terminal titlebar
+color kitty_mark1_foreground           00/00/00             kitty mark1 foreground
+color kitty_mark1_background           c6/c8/dd             kitty mark1 background
+color kitty_mark2_foreground           00/00/00             kitty mark2 foreground
+color kitty_mark2_background           e5/c0/7b             kitty mark2 background
+color kitty_mark3_foreground           00/00/00             kitty mark3 foreground
+color kitty_mark3_background           98/c3/79             kitty mark3 background
+color terminal_cursor_foreground       e0/e0/e0             terminal cursor foreground
+color terminal_cursor_background       00/00/00             terminal cursor background
+color terminal_pointer_foreground      c0/c0/c0             terminal pointer foreground
+color terminal_pointer_background      00/00/00             terminal pointer background
+# color terminal_search_foreground       00/00/00             terminal search foreground
+# color terminal_search_background       00/00/00             terminal search background
+color terminal_highlight_foreground    00/00/00             terminal selection/highlight foreground
+color terminal_highlight_background    e5/c0/7b             terminal selection/highlight background
+color terminal_url                     e5/c0/7b             terminal url
 
-# Vim Syntax Highlighting
-set_col 16 5f/87/5f # constant
-set_col 17 94/94/94 # statement
-set_col 18 70/50/70 # identifier
-set_col 19 08/10/50 # comment
-set_col 20 af/af/87 # type
-set_col 21 00/87/87 # special
+# The rest of the 256-colour palette has only vague de-facto standards (for
+# example the default settings in xterm), but we are certainly free to override
+# these for our own particular purposes.
 
-# Vim
-set_col 23 d7/00/af # special characters (escapes, tabs, trailing whitespace, etc.)
-set_col 24 40/40/40 # search foreground
-set_col 25 e0/ff/e0 # search background
-set_col 26 87/af/d7 # status foreground
-set_col 27 ff/ff/80 # modified status background
-set_col 28 00/5f/5f # read-only status background
-set_col 29 80/C0/ff # unmodified status background
-set_col 30 3a/3a/3a # inactive status background
-set_col 31 00/5f/00 # terminal status background
+color  16                              10/38/68             my username
+color  17                              e0/6c/75             root username
+color  18                              $silver              other username
 
-# Git status
-set_col 32 4e/4e/4e # background
-set_col 33 e0/6c/75 # behind
-set_col 34 98/c3/79 # ahead
-set_col 35 e5/c0/7b # flags
-set_col 36 48/83/b3 # branch
-set_col 37 5f/87/87 # tag
+color  19                              $my_username         my group
+color  20                              $root_username       root group
+color  21                              $other_username      other group
 
-# Bash
-set_col 40 5f/87/87 # chroot
-set_col 41 10/38/68 # user
-set_col 42 e0/6c/75 # root
-set_col 43 98/c3/79 # host
-set_col 44 e5/c0/7b # pwd
-set_col 45 e0/6c/75 # exit code background
-set_col 46 00/00/00 # exit code foreground
+color  22                              5f/87/87             container name
+color  23                              98/c3/79             hostname
 
-# Brands and file types
-set_col 48 00/af/ff # windows blue
-set_col 49 af/00/5f # raspberry pi red
-set_col 50 d7/00/87 # debian red
-set_col 51 00/d7/00 # Vim green
-set_col 52 af/00/ff # Haskell purple
-set_col 53 ff/d7/5f # JS yellow
-set_col 54 d7/5f/00 # HTML orange
-set_col 55 00/87/d7 # Elm blue
+color  24                              e5/c0/7b             directory
+color  25                              $directory           current working directory
+color  26                              c0/c0/c0             regular file
+color  27                              c0/c0/c0             current file
+color  28                              98/c3/79             executable file
+color  29                              56/b6/c2             symlink
+color  30                              e0/6c/75             symlink with no target
+color  31                              e0/6c/75             socket
+color  32                              e5/c0/7b             named pipe
+color  33                              e5/c0/7b             character device
+color  34                              e5/c0/7b             block device
+color  35                              e5/c0/7b             special file
+
+color  36                              98/c3/79             new/added
+color  37                              e5/c0/7b             modified
+color  38                              e0/6c/75             removed
+color  39                              e5/c0/7b             renamed
+color  40                              c6/c8/dd             modified metadata
+color  41                              50/50/50             ignored
+color  42                              e0/6c/75             conflicting
+
+color  43                              4e/4e/4e             version control status background
+color  44                              e0/6c/75             version control status behind
+color  45                              98/c3/79             version control status ahead
+color  46                              e5/c0/7b             version control status flags
+color  47                              5f/87/87             version control status tag
+color  48                              48/83/b3             version control status branch
+color  49                              48/83/b3             version control status current branch
+color  50                              48/83/b3             version control status local branch
+color  51                              48/83/b3             version control status remote branch
+color  52                              48/83/b3             version control status upstream branch
+color  53                              48/83/b3             version control status main branch
+color  54                              48/83/b3             version control status clean branch
+color  55                              48/83/b3             version control status dirty branch
+
+color  56                              c0/c0/c0             file permissions
+color  57                              60/60/60             file size 0 to 1k
+color  58                              80/80/80             file size 1k to 1M
+color  59                              a0/a0/a0             file size 1M to 1G
+color  60                              c0/c0/c0             file size 1G to 1T
+color  61                              e0/e0/e0             file size 1T or more
+color  62                              $lime                device major number
+color  63                              $green               device minor number
+color  64                              $silver              hard link count
+color  65                              $white               hard link count 2 or more
+color  66                              c0/c0/c0             last modified date
+color  67                              $purple              inode number
+color  68                              $teal                block count
+color  69                              $silver              table header row
+color  70                              $teal                symlink path
+color  71                              $red                 broken symlink path overlay style
+color  72                              $directory           mount point
+color  73                              $purple              image
+color  74                              $fuchsia             video
+color  75                              $teal                lossy audio
+color  76                              $aqua                lossless audio
+color  77                              $lime                cryptography
+color  78                              $green               document
+color  79                              $red                 archive
+color  80                              $dark_grey           temporary file
+color  81                              $olive               build artifact
+color  82                              $light_yellow        project/build specification
+color  83                              $light_yellow        source code
+color  84                              $silver              icon
+color  85                              $silver              no security context
+color  86                              $navy                SELinux user
+color  87                              $green               SELinux role
+color  88                              $olive               SELinux type
+color  89                              $teal                SELinux level
+color  90                              $silver              BSD file flags
+
+color  92                              $black               error text foreground
+color  93                              e0/6c/75             error text background
+color  94                              $black               warning text foreground
+color  95                              $olive               warning text background
+color  96                              50/50/50             line numbers, nontext
+color  97                              d7/00/af             special characters, e.g. vim listchars, escapes, etc
+color  98                              $black               heading - title
+
+color 100                              $silver              grep whole selected lines
+color 101                              80/80/80             grep whole context lines
+color 102                              $navy                grep matching text
+color 105                              $silver              grep file names
+color 106                              $silver              grep byte offsets
+
+# Syntax Highlighting (112 to 127)
+color 112                              80/80/80             syntax normal
+color 113                              5f/87/5f             syntax constant
+color 114                              94/94/94             syntax statement
+color 115                              70/50/70             syntax identifier
+color 116                              08/10/50             syntax comment
+color 117                              af/af/87             syntax type
+color 118                              00/87/87             syntax special
+
+# Vim (128 to 143)
+color 128                              40/40/40             vim search foreground
+color 129                              e0/ff/e0             vim search background
+color 130                              08/08/08             vim status foreground
+color 131                              ff/ff/00             vim modified status
+color 132                              00/5f/5f             vim readonly status
+color 133                              40/80/c0             vim unmodified status
+color 134                              3a/3a/3a             vim inactive status
+color 135                              00/5f/00             vim terminal status
+
+# 144 to 199 reserved for future use
+
+# Icons for brands and file types (200 to 230)
+color 200                              00/af/ff             icon  windows blue
+color 201                              af/00/5f             icon  raspberry pi red
+color 202                              d7/00/87             icon  debian red
+color 203                              00/d7/00             icon  Vim green
+color 204                              af/00/ff             icon  Haskell purple
+color 205                              ff/d7/5f             icon 󰌞 JS yellow
+color 206                              d7/5f/00             icon  HTML orange
+color 207                              00/87/d7             icon  Elm blue
 
 # Greyscale colours from 231 to 255 are explicitly left alone
+# vi:ft=sh

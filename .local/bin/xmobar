@@ -1,12 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Note: one can use -C to add commands to xmobar, and -t to set the template
 
 lastxrandrout=
 while true; do
   xrandrout="$(xrandr 2> /dev/null)"
-  if [[ $xrandrout != $lastxrandrout ]]; then
-    sleep 5
+  if [[ $xrandrout != $lastxrandrout ]]; then  # if display arrangement has changed
+    sleep 5  # time to settle after display change
+    . ~/.bashrc_local  # proxy changes possibly required when changing locations
     me="$BASHPID"
     pids=($(pgrep xmobar | grep -v "^$me\$"))
     unset pids[-1]

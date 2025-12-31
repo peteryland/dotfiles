@@ -11,15 +11,22 @@ case "$1" in
     type jq >& /dev/null && jq -C . "$1"
     ;;
   *)
-    # We don't handle this format.
+    # We don't handle this format specially
 
-    if [ -x /usr/local/bin/lesspipe.sh ]; then
+    if [[ -x /usr/local/bin/lesspipe.sh ]]; then
       # for Mac, chain to /usr/local
       /usr/local/bin/lesspipe.sh "$1"
       exit $?
     else
-      # for Linux, just return 1
-      exit 1
+      if [[ -f $1 && -r $1 ]]; then
+        if [[ -x /usr/bin/batcat ]]; then
+          /usr/bin/batcat --paging=never --wrap=never --color=always "$1"
+        elif [[ -x /usr/bin/bat ]]; then
+          /usr/bin/bat --paging=never --wrap=never --color=always "$1"
+        fi
+      else
+        exit 1
+      fi
     fi
 esac
 

@@ -5,8 +5,8 @@
   default = simple
   autoSetupRemote = true
 [pretty]
-  lf = format:%C(auto)%h%d %G? %Cgreen%aN <%ae> %Cblue%aD%Creset: %s
-  l = format:%C(auto)%h%d %G? %Cgreen%aN <%ae> %Cblue%ar%Creset: %s
+  lf = format:%C(auto)%h%d %G? %C(18)%aN <%ae> %C(66)%aD%Creset: %s
+  l = format:%C(auto)%h%d %G? %C(18)%aN <%ae> %C(66)%ar%Creset: %s
 [format]
   pretty = l
 [alias]
@@ -36,12 +36,11 @@
   wc   = switch -c
 [rerere]
   auto = true
-[color]
-  branch = auto
-  diff = auto
-  interactive = auto
-  status = auto
+[include]
+  path = ~/.gitconfig.colour.inc
+[column]
   ui = auto
+  branch = never
 [pull]
   rebase = true
 [rebase]
@@ -54,10 +53,11 @@
   whitespace = fix
 [diff]
   algorithm = histogram
-  indentHeuristic = true
-  tool = vimdiff
+  wsErrorHighlight = all
 [core]
+  whitespace = cr-at-eol,tab-in-indent,tabwidth=2
   sshCommand = ssh -o RemoteCommand=none -o RequestTTY=no
+  pager = "sed -e 's/\\t/┊ /g' -e 's/\\(..\\[.*m\\) \\(.\\[m\\)\\?$/\\1␣\\2/g' | ${PAGER:-/usr/bin/less -+S}"
 [advice]
   skippedCherryPicks = false
   detachedHead = false

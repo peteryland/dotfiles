@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Git Status for Vim
 
@@ -48,14 +48,20 @@ if [[ -e $(git rev-parse --git-dir 2>/dev/null) ]]; then
   fi
   status="$(git status --porcelain=1 -b)"
   status1="$(head -1 <<< "$status")"
-  git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
+  git_branch="$(cut -c4- <<< "$status1")"
+  git_branch="${bashrc_git_branch%%\.\.\.*}"
   if [[ $git_branch =~ master|main ]]; then
     git_branch=
   fi
-  git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
-  git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-  git_extrastatus="$(grep -q '^[ACDMRT]' <<< "$status" && printf S; grep -q '^.[CDMRT]' <<< "$status" && printf M)" #; grep -q ^\?\? <<< "$status" && printf U)"
+  git_ahead="$(/usr/bin/grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
+  git_behind="$(/usr/bin/grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
+  if git stash list | /usr/bin/grep . > /dev/null 2>&1; then
+    bashrc_git_hasstash='#'
+  else
+    bashrc_git_hasstash=
+  fi
+  git_extrastatus="$(/usr/bin/grep -q '^[ACDMRT]' <<< "$status" && printf S; /usr/bin/grep -q '^.[CDMRT]' <<< "$status" && printf M)$bashrc_git_hasstash" #; /usr/bin/grep -q ^\?\? <<< "$status" && printf U)"
   git_status="$git_branch${git_ahead:+↑$git_ahead}${git_behind:+↓$git_behind}$git_extrastatus"
 fi
 
-printf %s "${git_status:+%#GitBG#${git_branch:+%#GitBlue#$git_branch}${git_ahead:+%#GitGreen#↑$git_ahead}${git_behind:+%#GitRed#↓$git_behind}${git_extrastatus:+%#GitYellow#$git_extrastatus}%*%#GitBG#%#StatusLine# }"
+printf %s "${git_status:+%#GitBG#${git_branch:+%#GitBranch#$git_branch}${git_ahead:+%#GitAhead#↑$git_ahead}${git_behind:+%#GitBehind#↓$git_behind}${git_extrastatus:+%#GitFlags#$git_extrastatus}%*%#GitBG#%#StatusLine# }"

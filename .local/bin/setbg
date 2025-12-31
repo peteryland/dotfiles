@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 case "$OSTYPE" in
   darwin*) md5s() { md5    "$@"; };;
@@ -19,9 +19,8 @@ bashrc_hostname() {
 }
 
 bashrc_get_bgcolour() {
-  # Set rgb in .bashrc_local for a fixed background colour
-  local r g b gam="${1//[^0-9.]}" fixedrgb="${rgb//[^0-9a-fA-F]}"
-  local col="${fixedrgb:-$((bashrc_hostname; printf "$debian_chroot") | md5s | cut -c 1-6 | tr a-f A-F)}"
+  local r g b gam="${1//[^0-9.]}"
+  local col="$( (bashrc_hostname; printf "$debian_chroot") | md5s | cut -c 1-6 | tr a-f A-F)"
   [[ $gam =~ ^0*\.?0*$ ]] && gam=4
   r="$(cut -c 1-2 <<< "$col")"
   g="$(cut -c 3-4 <<< "$col")"
@@ -33,11 +32,15 @@ bashrc_get_bgcolour() {
 }
 
 setbg() {
-  local gam1="${1//[^0-9.]}"
-  local gam="${gam1:-2}"
-  # Set devmachine=1 in .bashrc_local for darker colours.  Prod machines (the default) will then have bright backgrounds.
-  [[ $devmachine ]] && gam="$(bc <<< "$gam * 2.5")"
-  printf "$(bashrc_get_bgcolour "${gam/%.0}")"
+  # Set rgb in .bashrc_local for a fixed background colour
+  if [[ $rgb ]]; then
+    printf "${rgb//[^0-9a-fA-F]}"
+  else
+    local gam1="${1//[^0-9.]}" gam="${gam1:-2}"
+    # Set devmachine=1 in .bashrc_local for darker colours.  Prod machines (the default) will then have bright backgrounds.
+    [[ $devmachine ]] && gam="$(bc <<< "$gam * 2.5")"
+    printf "$(bashrc_get_bgcolour "${gam/%.0}")"
+  fi
 }
 
 setbg "$@"

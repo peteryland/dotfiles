@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if ! hdmi="$(command wpctl status | tr -cs '[:alnum:]*\n' '[ *]')"; then
   echo "$0: Fatal: wpctl command not found"

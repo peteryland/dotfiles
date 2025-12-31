@@ -11,6 +11,37 @@ git clone https://dev.piglet.ch/pdr/dotfiles.git
 mv -i dotfiles/.[a-zA-Z]* .
 rmdir dotfiles
 
+## WSL specific:
+# if [[ -n $WSLENV ]]; then
+# Add to WSL Terminal settings.json (for example, from default dark theme, setting background to container's):
+#       "schemes":
+#     [
+#         {
+#             "background": "#00242B",
+#             "black": "#000000",
+#             "blue": "#4883B3",
+#             "brightBlack": "#606060",
+#             "brightBlue": "#4883B3",
+#             "brightCyan": "#56B6C2",
+#             "brightGreen": "#98C379",
+#             "brightPurple": "#C6C8DD",
+#             "brightRed": "#E06C75",
+#             "brightWhite": "#FFFFFF",
+#             "brightYellow": "#E5C07B",
+#             "cursorColor": "#FFFFFF",
+#             "cyan": "#56B6C2",
+#             "foreground": "#C0C0C0",
+#             "green": "#98C379",
+#             "name": "pdr-dark",
+#             "purple": "#C6C8DD",
+#             "red": "#E06C75",
+#             "selectionBackground": "#E5C07B",
+#             "white": "#C0C0C0",
+#             "yellow": "#E5C07B"
+#         }
+#     ],
+# fi
+
 ## Mac specific:
 if [ "$OSTYPE" = darwin18 ]; then
 
@@ -151,7 +182,7 @@ curl -sSf https://get-ghcup.haskell.org | sh
 
 # Can add the following to cron (linux version; for Mac, use the locate command from .bashrc):
 6 5 * * * "$HOME"/.local/bin/fetch_work_repos
-17 5 * * * updatedb --localpaths="$HOME" --findoptions="-path .cache -prune -or -path .cabal -prune -or -path .ghcup -prune -or -path .vim/undo -prune -or -path .local/share -prune -or -name .git -type d -prune -or -path go/pkg -prune" --output="$HOME"/.local/var/locate/locatedb
+17 5 * * * updatedb --localpaths="$HOME" --findoptions="-name .cache -type d -prune -or -name .cabal -type d -prune -or -name .ghcup -type d -prune -or -path */.vim/undo -prune -or -path */.local/share -prune -or -name .git -type d -prune -or -path */go/pkg -prune -or" --output="$HOME"/.local/var/locate/locatedb
 52 5 * * * find "$HOME" -type d -name .git -exec git --git-dir={} fetch -qap \;
 
 ## Fix screen tearing issue on NVidia cards:

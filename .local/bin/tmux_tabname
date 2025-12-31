@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ $1 == '-t' ]]; then
   is_title=1
@@ -9,6 +9,16 @@ tmux_loc="$1"
 tmux_dir="$2"
 local_info="$3"
 cmd="$4"
+tmux_flags="$5"
+
+shopt -s extglob
+
+tmux_flags="${tmux_flags//\*}"      # *: current window  flag removed
+tmux_flags="${tmux_flags//-/}"      # -: last window     flag removed
+tmux_flags="${tmux_flags//+(#)/⦁}"  # #: window activity flag replaced by (⦁)
+tmux_flags="${tmux_flags//+(~)/}"  # ~: window silenced flag replaced by ()
+tmux_flags="${tmux_flags//+(!)/}"   # !: window bell     flag removed
+tmux_flags="${tmux_flags//+(Z)/}"  # Z: window zoomed   flag replaced by ()
 
 local_loc="${local_info%:*}"
 local_info="${local_info#*:}"
@@ -26,7 +36,7 @@ case "$cmd" in
     if [[ $is_title ]]; then
       echo "$cmd"
     else
-      echo "󰭹 IRC"
+      echo -n "󰭹 IRC"
     fi
     ;;
   bash|zsh|sh|fish|tcsh|csh)
@@ -34,38 +44,44 @@ case "$cmd" in
     if [[ $is_title ]]; then
       echo "${myloc:-.}"
     else
-      echo "${myloc:+ $myloc}"
+      if [[ $tmux_dir == ~ ]]; then
+        echo -n "󰋜${myloc:+ $myloc}"
+      else
+        echo -n "󰝰${myloc:+ $myloc}"
+      fi
     fi
     ;;
   vi|vim|nvim)
     if [[ $is_title ]]; then
       echo "$local_info"
     else
-      echo "${local_info:+ $local_info}"
+      echo -n "${local_info:+ $local_info}"
     fi
     ;;
   cabal)
     if [[ $is_title ]]; then
       echo "$cmd${local_info:+ $local_info}"
     else
-      echo "${local_info:+ $local_info}"
+      echo -n "${local_info:+ $local_info}"
     fi
     ;;
   ghci)
     if [[ $is_title ]]; then
       echo "$cmd${local_info:+ $local_info}"
     else
-      echo "${local_info:+ $local_info}"
+      echo -n "${local_info:+ $local_info}"
     fi
     ;;
   make)
     if [[ $is_title ]]; then
       echo "Building${local_info:+ $local_info}..."
     else
-      echo "${local_info:+ $local_info} 󱑞"
+      echo -n "${local_info:+ $local_info} 󱑞"
     fi
     ;;
   *)
-    echo "$cmd"
+    echo -n "$cmd"
     ;;
 esac
+
+[[ $is_title ]] || echo " $tmux_flags"

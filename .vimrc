@@ -1,6 +1,39 @@
 set encoding=utf-8
 set fileencoding=utf-8
 
+let colSyntaxNormal=112
+let colSyntaxConstant=113
+let colSyntaxStatement=114
+let colSyntaxIdentifier=115
+let colSyntaxComment=116
+let colSyntaxType=117
+let colSyntaxSpecial=118
+let colSyntaxCodeFG=255
+let colSyntaxCodeBG=233
+
+let colNonText=96 " including, e.g. line numbers
+let colListChars=97
+let colSearchFG=128
+let colSearchBG=129
+let colStatusFG=130
+let colStatusDirty=131
+let colStatusRO=132
+let colStatusClean=133
+let colStatusInactive=134
+let colStatusTerminal=135
+
+let colGitBG=43
+let colGitBehind=44
+let colGitAhead=45
+let colGitFlags=46
+let colGitBranch=48
+
+let colVim=203
+let colHaskell=204
+let colJS=205
+let colHTML=206
+let colElm=207
+
 set title titlestring=%F
 
 " source the vimrc file after saving it
@@ -10,12 +43,13 @@ autocmd! bufwritepost ~/.vimrc source $MYVIMRC
 syntax enable
 colorscheme default
 highlight MatchParen ctermbg=240
-highlight Constant   ctermfg=16 cterm=NONE
-highlight Statement  ctermfg=17 cterm=NONE
-highlight Identifier ctermfg=18 cterm=NONE
-highlight Comment    ctermfg=19 cterm=italic
-highlight Type       ctermfg=20 cterm=NONE
-highlight Special    ctermfg=21 cterm=bold
+execute "highlight Normal     ctermfg=".colSyntaxNormal." cterm=NONE"
+execute "highlight Constant   ctermfg=".colSyntaxConstant." cterm=NONE"
+execute "highlight Statement  ctermfg=".colSyntaxStatement." cterm=NONE"
+execute "highlight Identifier ctermfg=".colSyntaxIdentifier." cterm=NONE"
+execute "highlight Comment    ctermfg=".colSyntaxComment." cterm=italic"
+execute "highlight Type       ctermfg=".colSyntaxType." cterm=NONE"
+execute "highlight Special    ctermfg=".colSyntaxSpecial." cterm=bold"
 filetype plugin indent on
 
 " completion options
@@ -96,7 +130,7 @@ if &term =~ 'screen\|tmux'
   let &t_fs="\<ESC>\\"
 endif
 
-set smarttab smartindent autoindent softtabstop=2 tabstop=2 shiftwidth=2 expandtab
+set smarttab smartindent autoindent softtabstop=2 tabstop=2 shiftwidth=2 expandtab modeline
 
 " change cursor to a vertical line when in editing mode
 set t_Co=256
@@ -111,6 +145,7 @@ highlight! link CursorLineNr CursorLine
 highlight! link LineNr NonText
 highlight clear CursorColumn
 highlight CursorColumn term=bold cterm=bold
+" highlight Cursor ctermbg=24 term=italic cterm=italic
 set cursorline cursorcolumn
 
 " configure undercurl, underdotted, underdashed, underdouble
@@ -122,8 +157,8 @@ let &t_Ds="\e[4:5m"
 
 " search options
 set smartcase hlsearch incsearch
-highlight!    Search ctermfg=24 ctermbg=25 term=bold cterm=bold
-highlight! IncSearch ctermfg=26 ctermbg=25 term=bold cterm=bold
+execute "highlight!    Search ctermfg=".colSearchFG." ctermbg=".colSearchBG." term=bold cterm=bold"
+execute "highlight! IncSearch ctermfg=".colSearchFG." ctermbg=".colSearchBG." term=bold cterm=bold"
 nnoremap n nzz
 nnoremap N Nzz
 
@@ -145,7 +180,7 @@ set splitbelow splitright
 
 augroup statusline
   autocmd!
-  autocmd BufEnter,BufWrite,BufWritePost <buffer> let b:git_status=system("git_status " . expand("%:p"))
+  autocmd BufEnter,BufWrite,BufWritePost <buffer> let b:git_status=system("git_status '" . expand("%:p") . "'")
 augroup end
 
 " status line
@@ -180,7 +215,7 @@ function MyStatusLine()
 " Filetype-specific glyphs (alternatives: ﬦ)
   let l:sl.=get({"vim": "%#VimGreen# %*"
                \,"haskell": "%#HaskellPurple# %*"
-               \,"javascript": "%#JSYellow# %*"
+               \,"javascript": "%#JSYellow#󰌞 %*"
                \,"make": "%#White# %*"
                \,"html": "%#HtmlOrange# %*"
                \,"python": "%#JSYellow# %*"
@@ -198,87 +233,87 @@ set statusline=%!MyStatusLine()
 au BufNewFile,BufRead,BufEnter,TextChanged,TextChangedI,TextChangedP,BufWritePost * call ModifiedColor()
 function ModifiedColor()
   if &mod == 1
-    highlight StatusLine ctermfg=27 ctermbg=26
+    execute "highlight StatusLine ctermfg=".g:colStatusDirty." ctermbg=".g:colStatusFG
   else
     if &ro == 1
-      highlight StatusLine ctermfg=28 ctermbg=26
+      execute "highlight StatusLine ctermfg=".g:colStatusRO." ctermbg=".g:colStatusFG
     else
-      highlight StatusLine ctermfg=29 ctermbg=26
+      execute "highlight StatusLine ctermfg=".g:colStatusClean." ctermbg=".g:colStatusFG
     endif
   endif
 endfunction
 
-highlight StatusLine ctermfg=29 ctermbg=26
-highlight StatusLineNC ctermfg=30 ctermbg=26
-highlight StatusLineTerm cterm=bold,reverse ctermfg=31 ctermbg=26
-highlight StatusLineTermNC cterm=bold,reverse ctermfg=30 ctermbg=26
+execute "highlight StatusLine ctermfg=".colStatusClean." ctermbg=".colStatusFG
+execute "highlight StatusLineNC ctermfg=".colStatusInactive." ctermbg=".colStatusFG
+execute "highlight StatusLineTerm cterm=bold,reverse ctermfg=".colStatusTerminal." ctermbg=".colStatusFG
+execute "highlight StatusLineTermNC cterm=bold,reverse ctermfg=".colStatusInactive." ctermbg=".colStatusFG
 
-highlight StatusLineOK ctermfg=26 ctermbg=29
-highlight StatusLineMod ctermfg=26 ctermbg=27
-highlight StatusLineRO ctermfg=26 ctermbg=28
-highlight StatusLineInactive ctermfg=26 ctermbg=30
-" highlight GitGreenOK ctermfg=34 ctermbg=29
-" highlight GitGreenMod ctermfg=34 ctermbg=27
-" highlight GitGreenRO ctermfg=34 ctermbg=28
-" highlight GitGreenInactive ctermfg=34 ctermbg=30
-" highlight GitBlueOK ctermfg=36 ctermbg=29
-" highlight GitBlueMod ctermfg=36 ctermbg=27
-" highlight GitBlueRO ctermfg=36 ctermbg=28
-" highlight GitBlueInactive ctermfg=36 ctermbg=30
-" highlight GitYellowOK cterm=bold ctermfg=35 ctermbg=29
-" highlight GitYellowMod cterm=bold ctermfg=35 ctermbg=27
-" highlight GitYellowRO cterm=bold ctermfg=35 ctermbg=28
-" highlight GitYellowInactive cterm=bold ctermfg=35 ctermbg=30
-" highlight GitRedOK ctermfg=33 ctermbg=29
-" highlight GitRedMod ctermfg=33 ctermbg=27
-" highlight GitRedRO ctermfg=33 ctermbg=28
-" highlight GitRedInactive ctermfg=33 ctermbg=32
-highlight GitGreenOK ctermfg=34 ctermbg=32
-highlight GitGreenMod ctermfg=34 ctermbg=32
-highlight GitGreenRO ctermfg=34 ctermbg=32
-highlight GitGreenInactive ctermfg=34 ctermbg=32
-highlight GitBlueOK ctermfg=36 ctermbg=32
-highlight GitBlueMod ctermfg=36 ctermbg=32
-highlight GitBlueRO ctermfg=36 ctermbg=32
-highlight GitBlueInactive ctermfg=36 ctermbg=32
-highlight GitYellowOK ctermfg=35 ctermbg=32
-highlight GitYellowMod ctermfg=35 ctermbg=32
-highlight GitYellowRO ctermfg=35 ctermbg=32
-highlight GitYellowInactive ctermfg=35 ctermbg=32
-highlight GitRedOK ctermfg=33 ctermbg=32
-highlight GitRedMod ctermfg=33 ctermbg=32
-highlight GitRedRO ctermfg=33 ctermbg=32
-highlight GitRedInactive ctermfg=33 ctermbg=32
-highlight GitBGOK ctermfg=32 ctermbg=29
-highlight GitBGMod ctermfg=32 ctermbg=27
-highlight GitBGRO ctermfg=32 ctermbg=28
-highlight GitBGInactive ctermfg=32 ctermbg=30
-highlight HaskellPurpleOK cterm=bold ctermfg=52 ctermbg=29
-highlight HaskellPurpleMod cterm=bold ctermfg=52 ctermbg=27
-highlight HaskellPurpleRO cterm=bold ctermfg=52 ctermbg=28
-highlight HaskellPurpleInactive cterm=bold ctermfg=52 ctermbg=30
-highlight JSYellowOK ctermfg=53 ctermbg=29
-highlight JSYellowMod ctermfg=53 ctermbg=27
-highlight JSYellowRO ctermfg=53 ctermbg=28
-highlight JSYellowInactive ctermfg=53 ctermbg=30
-highlight VimGreenOK ctermfg=51 ctermbg=29
-highlight VimGreenMod ctermfg=51 ctermbg=27
-highlight VimGreenRO ctermfg=51 ctermbg=28
-highlight VimGreenInactive ctermfg=51 ctermbg=30
-highlight HtmlOrangeOK ctermfg=54 ctermbg=29
-highlight HtmlOrangeMod ctermfg=54 ctermbg=27
-highlight HtmlOrangeRO ctermfg=54 ctermbg=28
-highlight HtmlOrangeInactive ctermfg=54 ctermbg=30
-highlight ElmBlueOK cterm=bold ctermfg=55 ctermbg=29
-highlight ElmBlueMod cterm=bold ctermfg=55 ctermbg=27
-highlight ElmBlueRO cterm=bold ctermfg=55 ctermbg=28
-highlight ElmBlueInactive cterm=bold ctermfg=55 ctermbg=30
-highlight WhiteOK cterm=bold ctermfg=231 ctermbg=29
-highlight WhiteMod cterm=bold ctermfg=231 ctermbg=27
-highlight WhiteRO cterm=bold ctermfg=231 ctermbg=28
-highlight WhiteInactive cterm=bold ctermfg=231 ctermbg=30
+execute "highlight StatusLineOK ctermfg=".colStatusFG." ctermbg=".colStatusClean
+execute "highlight StatusLineMod ctermfg=".colStatusFG." ctermbg=".colStatusDirty
+execute "highlight StatusLineRO ctermfg=".colStatusFG." ctermbg=".colStatusRO
+execute "highlight StatusLineInactive ctermfg=".colStatusFG." ctermbg=".colStatusInactive
+" execute "highlight GitAheadOK ctermfg=".colGitAhead." ctermbg=".colStatusClean
+" execute "highlight GitAheadMod ctermfg=".colGitAhead." ctermbg=".colStatusDirty
+" execute "highlight GitAheadRO ctermfg=".colGitAhead." ctermbg=".colStatusRO
+" execute "highlight GitAheadInactive ctermfg=".colGitAhead." ctermbg=".colStatusInactive
+" execute "highlight GitBranchOK ctermfg=".colGitBranch." ctermbg=".colStatusClean
+" execute "highlight GitBranchMod ctermfg=".colGitBranch." ctermbg=".colStatusDirty
+" execute "highlight GitBranchRO ctermfg=".colGitBranch." ctermbg=".colStatusRO
+" execute "highlight GitBranchInactive ctermfg=".colGitBranch." ctermbg=".colStatusInactive
+" execute "highlight GitFlagsOK cterm=bold ctermfg=".colGitFlags." ctermbg=".colStatusClean
+" execute "highlight GitFlagsMod cterm=bold ctermfg=".colGitFlags." ctermbg=".colStatusDirty
+" execute "highlight GitFlagsRO cterm=bold ctermfg=".colGitFlags." ctermbg=".colStatusRO
+" execute "highlight GitFlagsInactive cterm=bold ctermfg=".colGitFlags." ctermbg=".colStatusInactive
+" execute "highlight GitBehindOK ctermfg=".colGitBehind." ctermbg=".colStatusClean
+" execute "highlight GitBehindMod ctermfg=".colGitBehind." ctermbg=".colStatusDirty
+" execute "highlight GitBehindRO ctermfg=".colGitBehind." ctermbg=".colStatusRO
+" execute "highlight GitBehindInactive ctermfg=".colGitBehind." ctermbg=".colStatusInactive
+execute "highlight GitAheadOK ctermfg=".colGitAhead." ctermbg=".colGitBG
+execute "highlight GitAheadMod ctermfg=".colGitAhead." ctermbg=".colGitBG
+execute "highlight GitAheadRO ctermfg=".colGitAhead." ctermbg=".colGitBG
+execute "highlight GitAheadInactive ctermfg=".colGitAhead." ctermbg=".colGitBG
+execute "highlight GitBranchOK ctermfg=".colGitBranch." ctermbg=".colGitBG
+execute "highlight GitBranchMod ctermfg=".colGitBranch." ctermbg=".colGitBG
+execute "highlight GitBranchRO ctermfg=".colGitBranch." ctermbg=".colGitBG
+execute "highlight GitBranchInactive ctermfg=".colGitBranch." ctermbg=".colGitBG
+execute "highlight GitFlagsOK ctermfg=".colGitFlags." ctermbg=".colGitBG
+execute "highlight GitFlagsMod ctermfg=".colGitFlags." ctermbg=".colGitBG
+execute "highlight GitFlagsRO ctermfg=".colGitFlags." ctermbg=".colGitBG
+execute "highlight GitFlagsInactive ctermfg=".colGitFlags." ctermbg=".colGitBG
+execute "highlight GitBehindOK ctermfg=".colGitBehind." ctermbg=".colGitBG
+execute "highlight GitBehindMod ctermfg=".colGitBehind." ctermbg=".colGitBG
+execute "highlight GitBehindRO ctermfg=".colGitBehind." ctermbg=".colGitBG
+execute "highlight GitBehindInactive ctermfg=".colGitBehind." ctermbg=".colGitBG
+execute "highlight GitBGOK ctermfg=".colGitBG." ctermbg=".colStatusClean
+execute "highlight GitBGMod ctermfg=".colGitBG." ctermbg=".colStatusDirty
+execute "highlight GitBGRO ctermfg=".colGitBG." ctermbg=".colStatusRO
+execute "highlight GitBGInactive ctermfg=".colGitBG." ctermbg=".colStatusInactive
+execute "highlight HaskellPurpleOK cterm=bold ctermfg=".colHaskell." ctermbg=".colStatusClean
+execute "highlight HaskellPurpleMod cterm=bold ctermfg=".colHaskell." ctermbg=".colStatusDirty
+execute "highlight HaskellPurpleRO cterm=bold ctermfg=".colHaskell." ctermbg=".colStatusRO
+execute "highlight HaskellPurpleInactive cterm=bold ctermfg=".colHaskell." ctermbg=".colStatusInactive
+execute "highlight JSYellowOK ctermfg=".colJS." ctermbg=".colStatusClean
+execute "highlight JSYellowMod ctermfg=".colJS." ctermbg=".colStatusDirty
+execute "highlight JSYellowRO ctermfg=".colJS." ctermbg=".colStatusRO
+execute "highlight JSYellowInactive ctermfg=".colJS." ctermbg=".colStatusInactive
+execute "highlight VimGreenOK ctermfg=".colVim." ctermbg=".colStatusClean
+execute "highlight VimGreenMod ctermfg=".colVim." ctermbg=".colStatusDirty
+execute "highlight VimGreenRO ctermfg=".colVim." ctermbg=".colStatusRO
+execute "highlight VimGreenInactive ctermfg=".colVim." ctermbg=".colStatusInactive
+execute "highlight HtmlOrangeOK ctermfg=".colHTML." ctermbg=".colStatusClean
+execute "highlight HtmlOrangeMod ctermfg=".colHTML." ctermbg=".colStatusDirty
+execute "highlight HtmlOrangeRO ctermfg=".colHTML." ctermbg=".colStatusRO
+execute "highlight HtmlOrangeInactive ctermfg=".colHTML." ctermbg=".colStatusInactive
+execute "highlight ElmBlueOK cterm=bold ctermfg=".colElm." ctermbg=".colStatusClean
+execute "highlight ElmBlueMod cterm=bold ctermfg=".colElm." ctermbg=".colStatusDirty
+execute "highlight ElmBlueRO cterm=bold ctermfg=".colElm." ctermbg=".colStatusRO
+execute "highlight ElmBlueInactive cterm=bold ctermfg=".colElm." ctermbg=".colStatusInactive
+execute "highlight WhiteOK cterm=bold ctermfg=231 ctermbg=".colStatusClean
+execute "highlight WhiteMod cterm=bold ctermfg=231 ctermbg=".colStatusDirty
+execute "highlight WhiteRO cterm=bold ctermfg=231 ctermbg=".colStatusRO
+execute "highlight WhiteInactive cterm=bold ctermfg=231 ctermbg=".colStatusInactive
 
-nnoremap <silent> <F12> :set invnumber invrelativenumber mouse=<CR>
+nnoremap <silent> <F12> :set invnumber invrelativenumber mouse= listchars=<CR>
 nnoremap <silent> <F10> :term git -P log --graph --decorate --abbrev-commit --all<CR>
 nnoremap <silent> gr :term ++close git rebase -i <cword><CR>
 nnoremap <silent> gs :term ++close ++kill=term git show <cword><CR>
@@ -357,8 +392,8 @@ set scrolloff=15
 set list
 set listchars=tab:┊\ ,trail:␣,nbsp:⍽,extends:>,precedes:<,eol:↵
 " set listchars=tab:·\ ,trail:␣,nbsp:⍽,extends:>,precedes:<,eol:↵
-highlight SpecialKey ctermfg=23
-highlight NonText ctermfg=24
+execute "highlight SpecialKey ctermfg=".colListChars
+execute "highlight NonText ctermfg=".colNonText
 
 " change word under cursor and find next occurrence of that word
 nnoremap <silent> cn *``cgn
@@ -423,7 +458,7 @@ set keywordprg=:Man
 au BufNewFile,BufRead,BufEnter *.md,*.markdown syn region markdownCode matchgroup=markdownCodeDelimiter start="`" end="`" keepend contains=markdownLineStart concealends
 au BufNewFile,BufRead,BufEnter *.md,*.markdown syn region markdownCode matchgroup=markdownCodeDelimiter start="`` \=" end=" \=``" keepend contains=markdownLineStart concealends
 au BufNewFile,BufRead,BufEnter *.md,*.markdown syn region markdownCode matchgroup=markdownCodeDelimiter start="^\s*```.*$" end="^\s*```\ze\s*$" keepend concealends
-au BufNewFile,BufRead,BufEnter *.md,*.markdown highlight markdownCode ctermfg=255 ctermbg=232
+au BufNewFile,BufRead,BufEnter *.md,*.markdown execute "highlight markdownCode ctermfg=".colSyntaxCodeFG." ctermbg=".colSyntaxCodeBG
 au BufNewFile,BufRead,BufEnter *.md,*.markdown set cole=0
 au BufNewFile,BufRead,BufEnter *.md,*.markdown nnoremap <silent> <F1> :call ConcealToggle()<CR>
 function! ConcealToggle()
@@ -501,6 +536,7 @@ au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab iTP import Text.Parsec
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* ab denum deriving (Show, Eq, Read, Ord, Bounded, Enum)
 au BufNewFile,BufRead,BufEnter *.lhs,*.hs,.ghci* nnoremap <buffer> <silent> gs ^yiWO<ESC>pA<SPACE>::<SPACE>
 au BufReadPost .ghci* set syntax=haskell
+au BufNewFile,BufRead,BufEnter /tmp/qmv* set tabstop=8
 
 function! RestoreSearch()
   call histdel("search", -1)

@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+# (c) 2022-2026 Pete Ryland
+
+theme="${1:-dark}"
+
+color() {
+  local n="$1" c="$2" col="${2//\//}"
+  shift
+  local all="$*"
+  shift
+  local comment="$*"
+  mapfile -td- comment <<< "$comment"
+  comment=("${comment[@]%[[:space:]]}")
+  comment=("${comment[@]#[[:space:]]}")
+  comment=("${comment[@]//[^a-zA-Z0-9]/_}")
+  for colname in "${comment[@]}"; do
+    [[ $comment ]] && declare -g "$colname"="$c"
+  done
+
+  local r="$((16#${c%%/*}))" gb="${c#*/}"
+  local g="$((16#${gb%%/*}))" b="$((16#${gb##*/}))"
+
+  if [[ $n =~ ^[0-9]+$ ]]; then
+    declare -g c"$n"="$c"
+  else
+    declare -g "$n"="$c"
+  fi
+
+  case "$n" in
+    43)
+      bg="48;2;$r;$g;${b}"
+      ;;
+    51)
+      printf "\e[$bg;38;2;$r;$g;${b}m%3d %s\e[m\n" "$n" "$all"
+      unset bg
+      ;;
+    92|94|128|130)
+      printf "\e[38;2;$r;$g;${b}m"
+      ;;
+    131|132|133|134)
+      printf "\e[48;2;$r;$g;${b}m%3d %s\e[49m\n" "$n" "$all"
+      ;;
+    93|95|129|135)
+      printf "\e[48;2;$r;$g;${b}m%3d %s\e[m\n" "$n" "${all% background}"
+      ;;
+    *_foreground)
+      printf "\e[38;2;$r;$g;${b}m"
+      ;;
+    *_background)
+      all="$*"
+      printf "    \e[48;2;$r;$g;${b}m%s\e[m\n" "${all% background}"
+      ;;
+    *)
+      printf "\e[$bg;38;2;$r;$g;${b}m"
+      if [[ $n =~ ^[0-9]+$ ]]; then
+        printf "%3d %s\e[m\n" "$n" "$all"
+      else
+        printf "    %s\e[m\n" "$all"
+      fi
+      ;;
+  esac
+}
+
+if [[ -r $HOME/.config/themes/$theme ]]; then
+  . "$HOME/.config/themes/$theme"
+fi
+
+printf "\e[m"
