@@ -278,7 +278,7 @@ highlight WhiteMod cterm=bold ctermfg=231 ctermbg=27
 highlight WhiteRO cterm=bold ctermfg=231 ctermbg=28
 highlight WhiteInactive cterm=bold ctermfg=231 ctermbg=30
 
-nnoremap <silent> <F12> :set invnumber invrelativenumber mouse=<CR>
+nnoremap <silent> <F12> :set invnumber invrelativenumber mouse= listchars=<CR>
 nnoremap <silent> <F10> :term git -P log --graph --decorate --abbrev-commit --all<CR>
 nnoremap <silent> gr :term ++close git rebase -i <cword><CR>
 nnoremap <silent> gs :term ++close ++kill=term git show <cword><CR>

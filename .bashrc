@@ -74,7 +74,7 @@ export EDITOR=vim
 
 shopt -s checkwinsize
 
-export LESS="-R -F"
+export LESS=-RFS
 if [[ -x ~/.lessfilter ]]; then
   export LESSOPEN="|~/.lessfilter %s"
   export LESSQUIET=1
@@ -105,9 +105,9 @@ case "$OSTYPE" in
     if command -v netstat > /dev/null; then
       alias np='sudo netstat -plant'
     else
-      alias np='sudo lsof -nP -iudp -itcp -stcp:LISTEN | grep -v -- "->"'
+      alias np='sudo lsof -nP -iudp -itcp -stcp:LISTEN | /usr/bin/grep -v -- "->"'
     fi
-    alias ng='np | grep'
+    alias ng='np | /usr/bin/grep'
     md5s() { md5 -- "$@"; }
     statm() { stat -f %m -- "$@"; }
     export LOCATE_PATH=~/.local/var/locate/locatedb
@@ -134,9 +134,9 @@ case "$OSTYPE" in
     if command -v netstat > /dev/null; then
       alias np='sudo netstat -plant'
     else
-      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | grep -v -- "->"'
+      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | /usr/bin/grep -v -- "->"'
     fi
-    alias ng='np | grep'
+    alias ng='np | /usr/bin/grep'
     if [[ -r ~/.xmonad/xmonad.hs ]]; then
       alias xme='"$EDITOR" ~/.xmonad/xmonad.hs'
     fi
@@ -179,7 +179,7 @@ case "$OSTYPE" in
     if command -v netstat > /dev/null; then
       alias np='sudo netstat -plant'
     else
-      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | grep -v -- "->"'
+      alias np='sudo lsof -nP -iudp -itcp -stcp:^CLOSED,^ESTABLISHED,^SYN_SENT,^CLOSE_WAIT,^FIN_WAIT1,^CLOSING,^LAST_ACK,^TIME_WAIT | /usr/bin/grep -v -- "->"'
     fi
     alias ng='np | grep'
     if [[ -r ~/.xmonad/xmonad.hs ]]; then
@@ -314,21 +314,21 @@ bashrc_check_repo() {
         GIT_TERMINAL_PROMPT=0 git fetch -ap --quiet &> /dev/null & disown -a
       )
     fi
-    bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | grep '^ tag: ' | head -1 | sed 's/^.* tag: \([^)]*\))\?$/\1/')"
+    bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | /usr/bin/grep '^ tag: ' | head -1 | sed 's/^.* tag: \([^)]*\))\?$/\1/')"
     status="$(git status --porcelain=1 -b)"
     status1="$(head -1 <<< "$status")"
     bashrc_git_branch="$(cut -c4- <<< "$status1" | cut -d\. -f1)"
     if [[ $bashrc_git_branch =~ ^(master|main)$ ]]; then
       bashrc_git_branch=
     fi
-    bashrc_git_ahead="$(grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
-    bashrc_git_behind="$(grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
-    if git stash list | grep . > /dev/null 2>&1; then
+    bashrc_git_ahead="$(/usr/bin/grep ahead <<< "$status1" | sed 's/.*ahead \([0-9]*\).*/\1/')"
+    bashrc_git_behind="$(/usr/bin/grep behind <<< "$status1" | sed 's/.*behind \([0-9]*\).*/\1/')"
+    if git stash list | /usr/bin/grep . > /dev/null 2>&1; then
       bashrc_git_hasstash='#'
     else
       bashrc_git_hasstash=
     fi
-    bashrc_git_extrastatus="$(grep -q '^[ACDMRT]' <<< "$status" && printf S; grep -q '^.[CDMRT]' <<< "$status" && printf M)$bashrc_git_hasstash" #; grep -q ^\?\? <<< "$status" && printf U)
+    bashrc_git_extrastatus="$(/usr/bin/grep -q '^[ACDMRT]' <<< "$status" && printf S; /usr/bin/grep -q '^.[CDMRT]' <<< "$status" && printf M)$bashrc_git_hasstash" #; /usr/bin/grep -q ^\?\? <<< "$status" && printf U)
     bashrc_git_status="$bashrc_git_branch${bashrc_git_ahead:+↑$bashrc_git_ahead}${bashrc_git_behind:+↓$bashrc_git_behind}${bashrc_git_tag:+ $bashrc_git_tag }$bashrc_git_extrastatus"
   fi
 }
@@ -341,26 +341,32 @@ pg() {
   fi
 }
 
-alias grep='grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2,dist-newstyle} --color=auto'
-alias fgrep='grep -F --color=auto'
-alias egrep='grep -E --color=auto'
-alias rgrep='grep -r --color=auto'
+if [[ $(type -t grep) == alias ]]; then unalias grep; fi
+grep() {
+  /usr/bin/grep --exclude-dir={.Trash,.cache,.git,.cabal,.ghcup,.idea,undo,.m2,dist-newstyle} --color=always "$@" | less
+}
+alias fgrep='/usr/bin/grep -F --color=always'
+alias egrep='/usr/bin/grep -E --color=always'
+alias rgrep='/usr/bin/grep -r --color=always'
 alias glocate='locate -d ""'
 alias pj='pg java'
 if command -v eza >& /dev/null; then
 #   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
   export EZA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
   alias ls='eza -B --git --icons=auto'
-  alias ll='ls -aagl'
+  alias ll='ls -gl'
+  alias la='ls -aagl'
   alias lt='ll -snew'
 elif command -v exa >& /dev/null; then
 #   export EZA_COLORS='ur=38;5;100:gr=38;5;100:tr=38;5;100'
   export EXA_COLORS='ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:ge=0:tr=0:tw=0:tx=0:te=0:uu=0:gu=0:da=0'
   alias ls='exa -B --git --icons'
-  alias ll='ls -aagl'
+  alias ll='ls -gl'
+  alias la='ls -aagl'
   alias lt='ll -snew'
 else
-  alias ll='ls -al'
+  alias ll='ls -l'
+  alias la='ls -al'
   alias lt='ll -tr'
 fi
 alias ghci='ghci -v0 -ignore-dot-ghci -ghci-script ~/.ghci.standalone'
@@ -381,6 +387,8 @@ alias gf='git f'
 alias gb='git b'
 alias gco='git co'
 alias gpu='git pull'
+alias gc='git wc'
+alias bd='git bd'
 
 _gitline_to_hash() {
   sed 's/^.* \([a-f0-9]\{7\}\) .*$/\1/' <<< "$1"
@@ -476,7 +484,7 @@ fi
 
 spf() {
   while [[ $1 ]]; do
-    host -t TXT "$1" | cut -d\" -f2 | grep --color=never '^v=spf'
+    host -t TXT "$1" | cut -d\" -f2 | /usr/bin/grep --color=never '^v=spf'
     shift
   done
 }
@@ -531,7 +539,7 @@ l() {
 }
 
 _l() {
-  local compreply=($(compgen -d -- "$LOOKINGDIR"/ | grep "^$LOOKINGDIR/$2"))
+  local compreply=($(compgen -d -- "$LOOKINGDIR"/ | /usr/bin/grep "^$LOOKINGDIR/$2"))
   COMPREPLY=(${compreply[@]#$LOOKINGDIR/})
 }
 complete -F _l l
@@ -581,7 +589,7 @@ _wk() {
         i="${i#$WORKDIR/}"
         echo "${i%/.git}"
       done
-      fetch_work_repos | grep "^$2" # | sed "s/^\(${2//\//\\\/}[^/]*\/\?\).*/\1/"
+      fetch_work_repos | /usr/bin/grep "^$2" # | sed "s/^\(${2//\//\\\/}[^/]*\/\?\).*/\1/"
     ) | sort -u
   ))
 }
@@ -811,7 +819,7 @@ j() {
   else
     ver="$1"
     if [[ $ver == latest ]]; then
-      ver="$(/usr/libexec/java_home -V 2>&1 | grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
+      ver="$(/usr/libexec/java_home -V 2>&1 | /usr/bin/grep -A1 ^Match | tail -1 | sed 's/^ *\([^,]*\),.*$/\1/')"
     fi
     export JAVA_HOME="$(/usr/libexec/java_home -v "$ver")"
     [[ $verbose ]] && echo "JAVA_HOME=$JAVA_HOME"
@@ -841,15 +849,15 @@ dark() {
   fi
   unset bashrc_theme
   if [[ -r $HOME/.local/bin/theme && -r $HOME/.config/themes/dark ]]; then
-    bashrc_theme="$(theme dark)"
+    bashrc_theme="$(theme "$bashrc_bgcolour" dark)"
   fi
 }
 
 light() {
-  setbg 8
+  setbg 10
   unset bashrc_theme
   if [[ -r $HOME/.local/bin/theme && -r $HOME/.config/themes/light ]]; then
-    bashrc_theme="$(theme light)"
+    bashrc_theme="$(theme "$bashrc_bgcolour" light)"
   fi
 }
 
