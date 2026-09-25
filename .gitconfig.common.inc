@@ -7,6 +7,7 @@
 [pretty]
   lf = format:%C(auto)%h%d %G? %C(18)%aN <%ae> %C(66)%aD%Creset: %s
   l = format:%C(auto)%h%d %G? %C(18)%aN <%ae> %C(66)%ar%Creset: %s
+  lc = format:%C(auto)%h %C(66)%as %C(18)%aL%Creset %s %C(auto)%d
 [format]
   pretty = l
 [alias]
@@ -50,7 +51,7 @@
 [init]
   defaultBranch = main
 [apply]
-  whitespace = fix
+  whitespace = warn
 [diff]
   algorithm = histogram
   wsErrorHighlight = all
@@ -63,6 +64,8 @@
   detachedHead = false
 [fetch]
   writeCommitGraph = true
+[gpg "ssh"]
+  allowedSignersFile = ~/.ssh/allowed_signers
 
 [includeIf "gitdir:~/src/debian/"]
   path = ~/src/debian/.gitconfig

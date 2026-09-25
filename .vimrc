@@ -218,7 +218,7 @@ function MyStatusLine()
                \,"javascript": "%#JSYellow#󰌞 %*"
                \,"make": "%#White# %*"
                \,"html": "%#HtmlOrange# %*"
-               \,"python": "%#JSYellow# %*"
+               \,"python": "%#JSYellow#󰌠 %*"
                \,"elm": "%#ElmBlue# %*"
                \}, getbufvar(l:buf, "&ft"), "")
   let l:sl.="%h%m%r"
@@ -324,7 +324,8 @@ if system('uname -s') == "Darwin\n"
   let &t_ZH="\e[3m"
   let &t_ZR="\e[23m"
 else
-  set clipboard=unnamedplus,autoselect "Linux
+"   set clipboard=unnamedplus,autoselect "Linux
+  set clipboard=unnamed,unnamedplus "Linux
 endif
 
 " search into subfolders and with wildcards for better tab-completion

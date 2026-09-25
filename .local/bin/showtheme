@@ -48,7 +48,6 @@ color() {
       printf "\e[38;2;$r;$g;${b}m"
       ;;
     *_background)
-      all="$*"
       printf "    \e[48;2;$r;$g;${b}m%s\e[m\n" "${all% background}"
       ;;
     *)

@@ -88,13 +88,15 @@ fi
 
 ## Debian
 if [ "$OSTYPE" = linux-gnu -a "$HOSTTYPE" = x86_64 ]; then
-  # apt install sudo  ## ensure pdr in sudo group, add NOPASSWD to that rule with visudo
+  # apt install sudo
+  # adduser "$USER" sudo
+  printf '# Allow members of group sudo to execute any command.\n%sudo ALL=(ALL:ALL) NOPASSWD: ALL\n' | sudo tee /etc/sudoers.d/zz_group_sudo > /dev/null
   sudo vi /etc/locale.gen ## Should contain:
   # de_CH.UTF-8 UTF-8
   # en_AU.UTF-8 UTF-8
   # en_US.UTF-8 UTF-8  # for container instances
   sudo locale-gen
-  sudo apt install bc locate vim-nox curl eza bat fswatch pkg-config jq tldr fzf kitty-terminfo bash-completion mtr-tiny tmux htop renameutils
+  sudo apt install bc locate vim-nox curl eza bat fswatch pkg-config jq tldr-py fzf kitty-terminfo bash-completion mtr-tiny tmux htop renameutils
   sudo apt purge vim-tiny nano
 
   # Build/Dev:
@@ -185,12 +187,12 @@ curl -sSf https://get-ghcup.haskell.org | sh
 17 5 * * * updatedb --localpaths="$HOME" --findoptions="-name .cache -type d -prune -or -name .cabal -type d -prune -or -name .ghcup -type d -prune -or -path */.vim/undo -prune -or -path */.local/share -prune -or -name .git -type d -prune -or -path */go/pkg -prune -or" --output="$HOME"/.local/var/locate/locatedb
 52 5 * * * find "$HOME" -type d -name .git -exec git --git-dir={} fetch -qap \;
 
-## Fix screen tearing issue on NVidia cards:
+## Fix screen tearing issue on Nvidia cards:
 
 # /etc/X11/xorg.conf.d/20-nvidia.conf
 
 Section "Device"
-  Identifier "NVidia Card"
+  Identifier "Nvidia Card"
   Driver     "nvidia"
 EndSection
 
@@ -200,3 +202,9 @@ Section "Screen"
 #   Option     "AllowIndirectGLXProtocol" "off"  # one of these two options...
 #   Option     "TripleBuffer" "on"               # ...doesn't work well with LG TVs
 EndSection
+
+## Fix blank screen issue with Nvidia card connected to LG TV via HDMI:
+
+# Turn off QuickStart+ in TV settings
+
+sudo systemctl enable nvidia-persistenced

@@ -5,8 +5,8 @@
 kittyconf="$(mktemp -p "$HOME"/.config/kitty)"
 trap 'rm -f -- "$kittyconf"' EXIT
 
-esc_seq() { printf '\e]%s%s\a' "$1" "$2"; }
-set_rgb() { esc_seq "$1;rgb:" "$2"; }
+set_rgb() { printf '\e]%s;rgb:%s\a' "$1" "$2"; }
+
 color() {
   local n="$1" c="$2" col="${2//\//}"
   shift; shift
@@ -93,8 +93,9 @@ color() {
       terminal_cursor_foreground)
         echo "cursor #$col" >> "$kittyconf"
         set_rgb 12 "$c" # text cursor
-        # esc_seq 12 ';7' # cursor (reverse)
+        # printf '\e]12;7\a' # cursor (reverse)
         set_rgb "4;265" "$c" # cursor (WSL Terminal)
+        printf "\e[2 q" # set cursor shape to solid block
         [[ $ITERM_SESSION_ID || $TERM_PROGRAM = iTerm.app ]] && printf "\e]Pl$col" # cursor foreground
         ;;
       terminal_cursor_background)

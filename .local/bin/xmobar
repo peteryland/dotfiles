@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 # Note: one can use -C to add commands to xmobar, and -t to set the template
 
@@ -9,10 +9,12 @@ while true; do
     sleep 5  # time to settle after display change
     . ~/.bashrc_local  # proxy changes possibly required when changing locations
     me="$BASHPID"
-    pids=($(pgrep xmobar | grep -v "^$me\$"))
-    unset pids[-1]
+    pids=($(pgrep -f '/bin/xmobar\>' | grep -v "^$me\$"))
     if (( ${#pids[@]} )); then
-      kill "${pids[@]}"
+      unset 'pids[-1]'
+      if (( ${#pids[@]} )); then
+        kill "${pids[@]}"
+      fi
     fi
     ((i=0))
 

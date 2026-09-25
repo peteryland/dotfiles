@@ -21,10 +21,10 @@ bashrc_path_add() {
 }
 PATH=/usr/games:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-bashrc_path_add /c/appl/scoop/shims
+bashrc_path_add /c/appl/scoop/shims "$HOME/.devcontainers/bin"
 bashrc_path_add /usr/local/texlive/2017/bin/x86_64-darwin
 bashrc_path_add /usr/local/go/bin "$HOME/Library/Haskell/bin"
-bashrc_path_add "$HOME/.ghcup/bin"
+bashrc_path_add "$HOME/.ghcup/bin" "$HOME/go/bin"
 # bashrc_path_add "$HOME/.nix-profile/bin" "$HOME/.nix-profile/sbin"
 bashrc_path_add "$HOME/.cabal/bin" "$HOME/.cabal/sbin"
 bashrc_path_add "$HOME/.local/bin" "$HOME/.local/sbin"
@@ -300,7 +300,7 @@ bashrc_check_repo() {
     # do a fetch if we haven't done one for more than a minute
     if [[ ! ( -r "$repo"/.git/FETCH_HEAD ) || ( $(( $(date +%s) - $(statm "$repo"/.git/FETCH_HEAD) )) -gt 60 ) ]]; then
       (
-        GIT_TERMINAL_PROMPT=0 git fetch -ap --quiet &> /dev/null & disown -a
+        GIT_SSH_COMMAND="ssh -o BatchMode=yes" GIT_TERMINAL_PROMPT=0 git fetch -ap --quiet &> /dev/null & disown -a
       )
     fi
     bashrc_git_tag="$(git log --pretty=%d -1 2> /dev/null | tr , \\n | /usr/bin/grep '^ tag: ' | head -1 | sed 's/^.* tag: \([^)]*\))\?$/\1/')"
@@ -402,6 +402,7 @@ alias gco='git co'
 alias gpu='git pull'
 alias gc='git wc'
 alias bd='git bd'
+alias sw='git sw'
 
 _gitline_to_hash() {
   sed 's/^.* \([a-f0-9]\{7\}\) .*$/\1/' <<< "$1"
@@ -409,7 +410,7 @@ _gitline_to_hash() {
 
 ggl() {
   local h
-  if h="$(gl --format='%C(auto)%h %Cgreen%aL %Cblue%as%Creset: %s%C(auto)%d' --color | \
+  if h="$(gl --pretty=lc --color | \
           fzf --ansi --reverse --preview "git show --color \"\$(sed 's/^.* \\([a-f0-9]\\{7,9\\}\\) .*\$/\\1/' <<< {})\"")"; then
     h="$(_gitline_to_hash "$h")"
     printf "$h"

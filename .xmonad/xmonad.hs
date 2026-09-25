@@ -54,7 +54,7 @@ import XMonadLocal
 myLayoutHook res = avoidStruts $ mouseResize $ windowArrange $ toggleLayouts floats
                $ mkToggle (NBFULL ?? NOBORDERS ?? EOT) myDefaultLayout
   where
-    spacing          = if res == Res2160 then 15 else 5
+    spacing          = if res == Res2160 then 15 else 2
     mySpacing  i     = spacingRaw False (Border i i i i) True (Border i i i i) True
     mySpacing' i     = spacingRaw True  (Border i i i i) True (Border i i i i) True
     mySpacing''      = mySpacing' spacing
